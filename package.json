@@ -1,0 +1,23 @@
+{
+  "name": "leetcode-spaced-repetition-extension",
+  "version": "0.1.0",
+  "private": true,
+  "description": "LeetCode spaced repetition Chrome extension",
+  "scripts": {
+    "build": "node build.cjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "chrome-extension",
+    "leetcode",
+    "spaced-repetition"
+  ],
+  "author": "",
+  "license": "MIT",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/chrome": "^0.1.36",
+    "esbuild": "^0.27.3",
+    "typescript": "^5.9.3"
+  }
+}
