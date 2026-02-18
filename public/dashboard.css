@@ -28,6 +28,12 @@ body {
   gap: 10px;
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .topbar h1 {
   margin: 0;
   font-size: 22px;
@@ -222,5 +228,13 @@ ul {
   .topbar {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .topbar-actions {
+    width: 100%;
+  }
+
+  .topbar-actions button {
+    flex: 1;
   }
 }
