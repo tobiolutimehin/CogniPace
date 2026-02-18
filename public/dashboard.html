@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LeetCode Spaced Repetition Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css" />
+  </head>
+  <body>
+    <main class="dashboard">
+      <header class="topbar">
+        <h1>LeetCode Spaced Repetition Dashboard</h1>
+        <button id="refresh-btn" class="secondary">Refresh</button>
+      </header>
+
+      <div id="status" class="status"></div>
+
+      <section class="metrics-grid">
+        <article><h2>Streak</h2><p id="metric-streak">0</p></article>
+        <article><h2>Total Reviews</h2><p id="metric-total-reviews">0</p></article>
+        <article><h2>Mastered</h2><p id="metric-mastered">0</p></article>
+        <article><h2>Retention (14d)</h2><p id="metric-retention">0%</p></article>
+      </section>
+
+      <section class="queue-summary" id="queue-summary"></section>
+
+      <section class="panel">
+        <h2>Import / Export</h2>
+        <div class="import-grid">
+          <div>
+            <label>Curated set</label>
+            <div class="row">
+              <select id="curated-select"></select>
+              <button id="curated-import-btn">Import curated</button>
+            </div>
+          </div>
+
+          <div>
+            <label>Custom set name</label>
+            <input id="custom-set-name" placeholder="Custom (optional)" />
+            <label>Custom set JSON array</label>
+            <textarea id="custom-set-json" rows="6" placeholder='["two-sum", {"slug":"contains-duplicate"}]'></textarea>
+            <button id="custom-import-btn">Import custom</button>
+          </div>
+
+          <div>
+            <label>Full backup</label>
+            <div class="row">
+              <button id="export-btn">Export JSON</button>
+              <input id="full-import-file" type="file" accept="application/json" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Settings</h2>
+        <div>
+          <h3>Enabled Sets</h3>
+          <div id="sets-enabled" class="sets-enabled"></div>
+        </div>
+        <div class="settings-grid">
+          <label>Daily new limit <input id="settings-daily-new" type="number" min="0" /></label>
+          <label>Daily review limit <input id="settings-daily-review" type="number" min="0" /></label>
+          <label>Review order
+            <select id="settings-order">
+              <option value="dueFirst">Due first</option>
+              <option value="weakestFirst">Weakest first</option>
+              <option value="mixByDifficulty">Mix by difficulty</option>
+            </select>
+          </label>
+          <label>Schedule intensity
+            <select id="settings-intensity">
+              <option value="chill">Chill</option>
+              <option value="normal">Normal</option>
+              <option value="aggressive">Aggressive</option>
+            </select>
+          </label>
+          <label><input id="settings-require-time" type="checkbox" /> Require solve time for rating</label>
+          <label><input id="settings-autodetect" type="checkbox" /> Auto-detect solved</label>
+          <label><input id="settings-notifications" type="checkbox" /> Notifications</label>
+          <label><input id="settings-slow-downgrade" type="checkbox" /> Downgrade slow solves</label>
+          <label>Slow threshold (minutes) <input id="settings-slow-threshold" type="number" min="1" /></label>
+          <label>Quiet start (0-23) <input id="settings-quiet-start" type="number" min="0" max="23" /></label>
+          <label>Quiet end (0-23) <input id="settings-quiet-end" type="number" min="0" max="23" /></label>
+        </div>
+        <button id="save-settings-btn">Save settings</button>
+      </section>
+
+      <section class="panel">
+        <h2>Analytics details</h2>
+        <div class="analytics-grid">
+          <div>
+            <h3>Weakest problems</h3>
+            <ul id="weakest-list"></ul>
+          </div>
+          <div>
+            <h3>Due by day (14 days)</h3>
+            <ul id="due-by-day-list"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Problem Database <span id="table-count">0</span></h2>
+        <div class="filters-grid">
+          <input id="filter-query" placeholder="Search title or slug" />
+          <input id="filter-topic" placeholder="Topic/tag" />
+          <select id="filter-set"><option value="all">All sets</option></select>
+          <select id="filter-difficulty">
+            <option value="all">All difficulty</option>
+            <option value="Easy">Easy</option>
+            <option value="Medium">Medium</option>
+            <option value="Hard">Hard</option>
+            <option value="Unknown">Unknown</option>
+          </select>
+          <select id="filter-due">
+            <option value="all">All status</option>
+            <option value="due">Due now</option>
+            <option value="new">New</option>
+            <option value="learning">Learning</option>
+            <option value="reviewing">Reviewing</option>
+            <option value="mastered">Mastered</option>
+            <option value="suspended">Suspended</option>
+          </select>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Problem</th>
+                <th>Difficulty</th>
+                <th>Sets</th>
+                <th>Status</th>
+                <th>Next Review</th>
+                <th>Lapses</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="problems-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="dashboard.js"></script>
+  </body>
+</html>

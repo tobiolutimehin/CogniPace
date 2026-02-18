@@ -1,0 +1,42 @@
+# LeetCode Spaced Repetition Chrome Extension
+
+Chrome extension (Manifest V3) for mastering LeetCode with curated sets and spaced repetition.
+
+## Features
+
+- LeetCode page overlay with rating buttons: `Again`, `Hard`, `Good`, `Easy`
+- SM-2 style scheduler with status progression (`NEW` → `LEARNING` → `REVIEWING` → `MASTERED`)
+- Popup daily queue with due/new filters and quick add actions
+- Dashboard for imports, settings, analytics, suspend/reset actions, and export/import backup
+- Built-in curated sets: `Blind75`, `NeetCode150`, `Grind75`, `LeetCode75`
+- Local-first storage with `chrome.storage.local`
+
+## Development
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Build extension:
+
+```bash
+npm run build
+```
+
+Load extension in Chrome:
+
+1. Open `chrome://extensions`
+2. Turn on **Developer mode**
+3. Click **Load unpacked**
+4. Select the `dist` folder
+
+## Data export format
+
+Export JSON includes:
+
+- `problems[]`
+- `studyStatesBySlug{}`
+- `settings{}`
+
