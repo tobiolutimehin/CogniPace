@@ -1,5 +1,10 @@
 import { summarizeAnalytics } from "./shared/analytics";
-import { getCuratedSet, getCurriculumRecommendations, listCuratedSetNames } from "./shared/curatedSets";
+import {
+  getCuratedSet,
+  getCurriculumRecommendations,
+  listCuratedSetNames,
+  listStudyPlans
+} from "./shared/curatedSets";
 import { buildTodayQueue } from "./shared/queue";
 import {
   ensureProblem,
@@ -211,7 +216,8 @@ async function getQueue(): Promise<RuntimeResponse> {
 async function getDashboardData(): Promise<RuntimeResponse> {
   const data = await getAppData();
   const queue = buildTodayQueue(data);
-  const curriculum = getCurriculumRecommendations(data, 3);
+  const curriculum = getCurriculumRecommendations(data, data.settings.activeStudyPlanId, 1);
+  const studyPlans = listStudyPlans();
   const analytics = summarizeAnalytics(data);
   const problems = Object.values(data.problemsBySlug)
     .map((problem) => ({
@@ -224,6 +230,9 @@ async function getDashboardData(): Promise<RuntimeResponse> {
     problems,
     queue,
     curriculum: {
+      planId: curriculum.planId,
+      planName: curriculum.planName,
+      sourceSet: curriculum.sourceSet,
       topic: curriculum.topic,
       completed: curriculum.completed,
       items: curriculum.items.map((item) => ({
@@ -231,6 +240,7 @@ async function getDashboardData(): Promise<RuntimeResponse> {
         isInLibrary: !!data.problemsBySlug[item.slug]
       }))
     },
+    studyPlans,
     analytics,
     settings: data.settings,
     curatedSetNames: listCuratedSetNames()

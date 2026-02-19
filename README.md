@@ -6,7 +6,8 @@ Chrome extension (Manifest V3) for mastering LeetCode with curated sets and spac
 
 - LeetCode page overlay with rating buttons: `Again`, `Hard`, `Good`, `Easy`
 - SM-2 style scheduler with status progression (`NEW` → `LEARNING` → `REVIEWING` → `MASTERED`)
-- Popup daily queue with due/new filters and quick add actions
+- Popup daily queue with `Freestyle` or `Study plan` mode
+- Topic-by-topic guided plans (Blind 75, LeetCode 75, Grind 75, NeetCode 150)
 - Dashboard for imports, settings, analytics, suspend/reset actions, and export/import backup
 - Built-in curated sets: `Blind75`, `NeetCode150`, `Grind75`, `LeetCode75`
 - Local-first storage with `chrome.storage.local`
@@ -39,4 +40,3 @@ Export JSON includes:
 - `problems[]`
 - `studyStatesBySlug{}`
 - `settings{}`
-

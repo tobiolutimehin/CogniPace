@@ -57,6 +57,19 @@ body {
   color: #cbd5e1;
 }
 
+.mode-panel {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+.mode-panel label {
+  display: grid;
+  gap: 4px;
+  font-size: 11px;
+  color: #cbd5e1;
+}
+
 .focus-panel {
   border: 1px solid #1e293b;
   border-radius: 10px;

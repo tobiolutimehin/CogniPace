@@ -11,15 +11,19 @@ export type ScheduleIntensity = "chill" | "normal" | "aggressive";
 
 export type ReviewOrder = "dueFirst" | "mixByDifficulty" | "weakestFirst";
 
+export type StudyMode = "freestyle" | "studyPlan";
+
 export type Rating = 0 | 1 | 2 | 3;
 
 export type ReviewMode = "RECALL" | "FULL_SOLVE";
 
 export type SourceSet =
   | "Blind75"
-  | "NeetCode150"
-  | "Grind75"
+  | "LeetCode150"
   | "LeetCode75"
+  | "NeetCode150"
+  | "NeetCode250"
+  | "Grind75"
   | "Custom";
 
 export interface Problem {
@@ -69,6 +73,8 @@ export interface UserSettings {
   dailyNewLimit: number;
   dailyReviewLimit: number;
   reviewOrder: ReviewOrder;
+  studyMode: StudyMode;
+  activeStudyPlanId: string;
   setsEnabled: Record<string, boolean>;
   scheduleIntensity: ScheduleIntensity;
   requireSolveTime: boolean;

@@ -1,6 +1,15 @@
 import { sendMessage } from "../shared/runtime";
 import { UserSettings } from "../shared/types";
 
+interface StudyPlanSummary {
+  id: string;
+  name: string;
+  description: string;
+  sourceSet: string;
+  topicCount: number;
+  problemCount: number;
+}
+
 interface DashboardPayload {
   queue: {
     dueCount: number;
@@ -17,10 +26,12 @@ interface DashboardPayload {
     dueByDay: Array<{ date: string; count: number }>;
   };
   settings: UserSettings;
+  studyPlans: StudyPlanSummary[];
   curatedSetNames: string[];
 }
 
 let settings: UserSettings;
+let studyPlans: StudyPlanSummary[] = [];
 
 function byId<T extends HTMLElement>(id: string): T {
   const node = document.getElementById(id);
@@ -79,7 +90,28 @@ function populateCuratedSetOptions(payload: DashboardPayload): void {
   }
 }
 
-function populateSettingsForm(current: UserSettings): void {
+function populateStudyPlanOptions(current: UserSettings, plans: StudyPlanSummary[]): void {
+  const select = byId<HTMLSelectElement>("settings-active-plan");
+  select.innerHTML = "";
+
+  for (const plan of plans) {
+    const option = document.createElement("option");
+    option.value = plan.id;
+    option.textContent = `${plan.name} (${plan.problemCount})`;
+    select.appendChild(option);
+  }
+
+  if (plans.length === 0) {
+    select.disabled = true;
+    return;
+  }
+
+  const activeExists = plans.some((plan) => plan.id === current.activeStudyPlanId);
+  select.value = activeExists ? current.activeStudyPlanId : plans[0].id;
+  select.disabled = current.studyMode !== "studyPlan";
+}
+
+function populateSettingsForm(current: UserSettings, plans: StudyPlanSummary[]): void {
   const setsContainer = byId<HTMLDivElement>("sets-enabled");
   setsContainer.innerHTML = "";
   for (const [setName, enabled] of Object.entries(current.setsEnabled)) {
@@ -92,6 +124,7 @@ function populateSettingsForm(current: UserSettings): void {
 
   byId<HTMLInputElement>("settings-daily-new").value = String(current.dailyNewLimit);
   byId<HTMLInputElement>("settings-daily-review").value = String(current.dailyReviewLimit);
+  byId<HTMLSelectElement>("settings-study-mode").value = current.studyMode;
   byId<HTMLSelectElement>("settings-order").value = current.reviewOrder;
   byId<HTMLSelectElement>("settings-intensity").value = current.scheduleIntensity;
   byId<HTMLInputElement>("settings-require-time").checked = current.requireSolveTime;
@@ -104,6 +137,8 @@ function populateSettingsForm(current: UserSettings): void {
 
   byId<HTMLInputElement>("settings-quiet-start").value = String(current.quietHours.startHour);
   byId<HTMLInputElement>("settings-quiet-end").value = String(current.quietHours.endHour);
+
+  populateStudyPlanOptions(current, plans);
 }
 
 async function importCuratedSet(): Promise<void> {
@@ -227,6 +262,8 @@ async function saveSettings(): Promise<void> {
   const payload = {
     dailyNewLimit: Number(byId<HTMLInputElement>("settings-daily-new").value) || 0,
     dailyReviewLimit: Number(byId<HTMLInputElement>("settings-daily-review").value) || 0,
+    studyMode: byId<HTMLSelectElement>("settings-study-mode").value,
+    activeStudyPlanId: byId<HTMLSelectElement>("settings-active-plan").value,
     reviewOrder: byId<HTMLSelectElement>("settings-order").value,
     scheduleIntensity: byId<HTMLSelectElement>("settings-intensity").value,
     requireSolveTime: byId<HTMLInputElement>("settings-require-time").checked,
@@ -261,9 +298,10 @@ async function loadDashboard(): Promise<void> {
 
   const payload = response.data as DashboardPayload;
   settings = payload.settings;
+  studyPlans = payload.studyPlans ?? [];
 
   populateCuratedSetOptions(payload);
-  populateSettingsForm(settings);
+  populateSettingsForm(settings, studyPlans);
   renderAnalytics(payload);
 
   byId<HTMLElement>("queue-summary").textContent =
@@ -296,6 +334,12 @@ function bindEvents(): void {
   byId<HTMLButtonElement>("save-settings-btn").onclick = () => {
     void saveSettings();
   };
+
+  byId<HTMLSelectElement>("settings-study-mode").addEventListener("change", (event) => {
+    const mode = (event.target as HTMLSelectElement).value;
+    const planSelect = byId<HTMLSelectElement>("settings-active-plan");
+    planSelect.disabled = mode !== "studyPlan" || studyPlans.length === 0;
+  });
 
   byId<HTMLButtonElement>("refresh-btn").onclick = () => {
     void loadDashboard();

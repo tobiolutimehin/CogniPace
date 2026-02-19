@@ -1,10 +1,22 @@
 import { sendMessage } from "../shared/runtime";
-import { QueueItem } from "../shared/types";
+import { QueueItem, UserSettings } from "../shared/types";
 import { isProblemPage } from "../shared/utils";
 
 const MAX_FOCUS_ITEMS = 3;
 
+interface StudyPlanSummary {
+  id: string;
+  name: string;
+  description: string;
+  sourceSet: string;
+  topicCount: number;
+  problemCount: number;
+}
+
 interface CurriculumItem {
+  planId: string;
+  planName: string;
+  sourceSet: string;
   topic: string;
   slug: string;
   title: string;
@@ -22,7 +34,12 @@ interface DashboardData {
   analytics: {
     streakDays: number;
   };
+  settings: UserSettings;
+  studyPlans: StudyPlanSummary[];
   curriculum: {
+    planId: string;
+    planName: string;
+    sourceSet: string;
     topic: string | null;
     completed: boolean;
     items: CurriculumItem[];
@@ -32,9 +49,15 @@ interface DashboardData {
 let dueCandidates: QueueItem[] = [];
 let focusItems: QueueItem[] = [];
 let focusTopic: string | null = null;
+
 let curriculumItems: CurriculumItem[] = [];
 let curriculumTopic: string | null = null;
 let curriculumCompleted = false;
+let curriculumPlanName: string | null = null;
+
+let studyMode: UserSettings["studyMode"] = "studyPlan";
+let activeStudyPlanId = "Blind75";
+let availableStudyPlans: StudyPlanSummary[] = [];
 
 function byId<T extends HTMLElement>(id: string): T {
   const node = document.getElementById(id);
@@ -97,6 +120,46 @@ function regenerateFocusItems(): void {
   focusTopic = selection.topic;
 }
 
+function renderStudyControls(): void {
+  const modeSelect = byId<HTMLSelectElement>("study-mode-select");
+  const planSelect = byId<HTMLSelectElement>("study-plan-select");
+
+  modeSelect.value = studyMode;
+
+  const previousPlan = activeStudyPlanId;
+  planSelect.innerHTML = "";
+
+  for (const plan of availableStudyPlans) {
+    const option = document.createElement("option");
+    option.value = plan.id;
+    option.textContent = `${plan.name} (${plan.problemCount})`;
+    planSelect.appendChild(option);
+  }
+
+  if (availableStudyPlans.length === 0) {
+    planSelect.disabled = true;
+    return;
+  }
+
+  const hasCurrentPlan = availableStudyPlans.some((plan) => plan.id === previousPlan);
+  if (!hasCurrentPlan) {
+    activeStudyPlanId = availableStudyPlans[0].id;
+  }
+
+  planSelect.value = activeStudyPlanId;
+  planSelect.disabled = studyMode !== "studyPlan";
+}
+
+async function saveStudyPreferences(patch: Partial<UserSettings>): Promise<void> {
+  const response = await sendMessage("UPDATE_SETTINGS", patch as never);
+  if (!response.ok) {
+    byId<HTMLElement>("error").textContent = response.error ?? "Failed to save study preferences.";
+    return;
+  }
+
+  await refresh();
+}
+
 async function openProblemFromExtension(url: string, slug: string): Promise<void> {
   await sendMessage("QUEUE_AUTO_TIMER_START", { slug });
   chrome.tabs.create({ url });
@@ -105,9 +168,8 @@ async function openProblemFromExtension(url: string, slug: string): Promise<void
 async function startCurriculumProblem(item: CurriculumItem): Promise<void> {
   const response = await sendMessage("ADD_PROBLEM_BY_INPUT", {
     input: item.slug,
-    sourceSet: "Blind75",
-    topics: [item.topic],
-    markAsStarted: true
+    sourceSet: item.sourceSet,
+    topics: [item.topic]
   });
 
   if (!response.ok) {
@@ -129,10 +191,10 @@ function renderFocusList(): void {
   if (dueCandidates.length === 0) {
     shuffleButton.disabled = true;
 
-    if (curriculumItems.length > 0) {
+    if (studyMode === "studyPlan" && curriculumItems.length > 0) {
       caption.textContent = curriculumTopic
-        ? `Path mode: ${curriculumTopic}. Work these in order.`
-        : "Path mode: work these in order.";
+        ? `${curriculumPlanName ?? "Study plan"}: ${curriculumTopic}. Do this next problem before moving on.`
+        : `${curriculumPlanName ?? "Study plan"}: do this next problem before moving on.`;
 
       for (const item of curriculumItems) {
         const li = document.createElement("li");
@@ -156,17 +218,20 @@ function renderFocusList(): void {
       return;
     }
 
-    if (curriculumCompleted) {
-      caption.textContent = "Curriculum complete. No due or overdue problems right now.";
+    if (studyMode === "studyPlan" && curriculumCompleted) {
+      caption.textContent = `${curriculumPlanName ?? "Study plan"} complete. No due reviews right now.`;
+    } else if (studyMode === "studyPlan") {
+      caption.textContent = "No due items. Import the selected plan set or switch to freestyle.";
     } else {
-      caption.textContent = "No due or overdue problems right now.";
+      caption.textContent = "Freestyle mode: no due or overdue problems right now.";
     }
 
     const empty = document.createElement("li");
     empty.className = "queue-empty";
-    empty.textContent = curriculumCompleted
-      ? "You completed the starter path. Keep reviewing to maintain mastery."
-      : "You are clear. New problems will appear here once reviews are due.";
+    empty.textContent =
+      studyMode === "studyPlan" && curriculumCompleted
+        ? "Plan completed. Keep reviewing previously solved problems for retention."
+        : "You are clear. New reviews will appear here when they are due.";
     list.appendChild(empty);
     return;
   }
@@ -175,6 +240,11 @@ function renderFocusList(): void {
   caption.textContent = focusTopic
     ? `Topic focus: ${focusTopic}. Random due picks (up to ${MAX_FOCUS_ITEMS}).`
     : `Random due picks (up to ${MAX_FOCUS_ITEMS}).`;
+
+  if (studyMode === "studyPlan" && curriculumItems.length > 0) {
+    const next = curriculumItems[0];
+    caption.textContent += ` Next in ${next.planName}: ${next.title}.`;
+  }
 
   for (const item of focusItems) {
     const li = document.createElement("li");
@@ -207,10 +277,15 @@ async function refresh(): Promise<void> {
   byId<HTMLElement>("error").textContent = "";
   const data = response.data as DashboardData;
 
+  studyMode = data.settings.studyMode;
+  activeStudyPlanId = data.settings.activeStudyPlanId;
+  availableStudyPlans = data.studyPlans ?? [];
+
   dueCandidates = data.queue.items.filter((item) => item.category === "due");
   curriculumItems = data.curriculum?.items ?? [];
   curriculumTopic = data.curriculum?.topic ?? null;
   curriculumCompleted = data.curriculum?.completed ?? false;
+  curriculumPlanName = data.curriculum?.planName ?? null;
 
   byId<HTMLElement>("due-count").textContent = String(data.queue.dueCount);
   byId<HTMLElement>("streak-count").textContent = String(data.analytics.streakDays);
@@ -220,6 +295,7 @@ async function refresh(): Promise<void> {
     ? formatNextReview(nextDue.studyState.nextReviewAt)
     : "-";
 
+  renderStudyControls();
   regenerateFocusItems();
   renderFocusList();
 }
@@ -283,6 +359,25 @@ function bindEvents(): void {
     regenerateFocusItems();
     renderFocusList();
   };
+
+  byId<HTMLSelectElement>("study-mode-select").addEventListener("change", (event) => {
+    const nextMode = (event.target as HTMLSelectElement).value;
+    if (nextMode !== "freestyle" && nextMode !== "studyPlan") {
+      return;
+    }
+
+    void saveStudyPreferences({
+      studyMode: nextMode,
+      activeStudyPlanId
+    });
+  });
+
+  byId<HTMLSelectElement>("study-plan-select").addEventListener("change", (event) => {
+    const nextPlanId = (event.target as HTMLSelectElement).value;
+    void saveStudyPreferences({
+      activeStudyPlanId: nextPlanId
+    });
+  });
 
   byId<HTMLInputElement>("manual-input").addEventListener("keydown", (event) => {
     if (event.key === "Enter") {

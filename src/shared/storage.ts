@@ -23,6 +23,14 @@ function normalizeSettings(input?: Partial<UserSettings>): UserSettings {
     }
   };
 
+  if (merged.studyMode !== "freestyle" && merged.studyMode !== "studyPlan") {
+    merged.studyMode = DEFAULT_SETTINGS.studyMode;
+  }
+
+  if (typeof merged.activeStudyPlanId !== "string" || !merged.activeStudyPlanId.trim()) {
+    merged.activeStudyPlanId = DEFAULT_SETTINGS.activeStudyPlanId;
+  }
+
   for (const setName of BUILT_IN_SETS) {
     if (typeof merged.setsEnabled[setName] !== "boolean") {
       merged.setsEnabled[setName] = true;
