@@ -642,6 +642,61 @@ function analyticsForecast(): string {
   `;
 }
 
+/**
+ * FSRS Stats Panel
+ * =================
+ * Displays key FSRS (Free Spaced Repetition Scheduler) metrics.
+ * Hover over the (?) icon for explanations.
+ */
+function fsrsVisualization(): string {
+  const analytics = state.payload?.analytics;
+  if (!analytics) return '<div class="kt-empty">No FSRS data available.</div>';
+
+  // Retention Rate: % of reviews rated "Good" or "Easy". Target: 85-90%.
+  const retentionPercent = Math.round((analytics.retentionProxy ?? 0) * 100);
+
+  // Difficulty Spread: FSRS difficulty (1-10) for hardest problems
+  const weakest = analytics.weakestProblems ?? [];
+
+  return `
+    <div class="kt-fsrs-viz">
+      <div class="kt-fsrs-section">
+        <div class="kt-fsrs-header">
+          <h3 class="kt-fsrs-title">Average Retention Rate
+            <span class="kt-hint" data-hint="Percentage of reviews you rated Good or Easy. Target is 85-90%. Lower means you're forgetting too often.">ⓘ</span>
+          </h3>
+        </div>
+        <div class="kt-retention-ring">
+          <svg viewBox="0 0 36 36" class="kt-circular-chart">
+            <path class="kt-circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+            <path class="kt-circle-fg" stroke-dasharray="${retentionPercent}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+            <text x="18" y="20.5" class="kt-circle-text">${retentionPercent}%</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="kt-fsrs-section">
+        <div class="kt-fsrs-header">
+          <h3 class="kt-fsrs-title">Difficulty Spread
+            <span class="kt-hint" data-hint="FSRS calculates difficulty (1-10) based on how often you forget each problem. Higher = harder to remember.">ⓘ</span>
+          </h3>
+        </div>
+        <div class="kt-difficulty-bars">
+          ${weakest.slice(0, 5).map(p => `
+            <div class="kt-diff-row">
+              <span class="kt-diff-label">${escapeHtml(p.title.slice(0, 20))}${p.title.length > 20 ? '...' : ''}</span>
+              <div class="kt-diff-bar">
+                <span style="width:${(p.difficulty / 10) * 100}%"></span>
+              </div>
+              <span class="kt-diff-value">${p.difficulty.toFixed(1)}</span>
+            </div>
+          `).join("") || '<p class="kt-fsrs-note">No problem data yet</p>'}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function analyticsView(): string {
   const payload = state.payload;
   return `
@@ -665,6 +720,7 @@ function analyticsView(): string {
               <span class="kt-metric-copy">Recent ratings at Good or Easy.</span>
             </article>
           </div>
+          ${fsrsVisualization()}
         </div>
       </section>
 
@@ -1190,6 +1246,13 @@ async function importData(): Promise<void> {
 }
 
 async function loadShellData(): Promise<void> {
+  // Check if running outside Chrome extension context (local dev)
+  if (typeof chrome === "undefined" || !chrome.runtime?.id) {
+    state.payload = getMockData();
+    render();
+    return;
+  }
+
   const response = await sendMessage("GET_APP_SHELL_DATA", {});
   if (!response.ok) {
     state.status = response.error ?? "Failed to load app shell.";
@@ -1200,6 +1263,31 @@ async function loadShellData(): Promise<void> {
 
   state.payload = response.data as AppShellPayload;
   render();
+}
+
+function getMockData(): AppShellPayload {
+  return {
+    popup: { recommended: null },
+    activeCourse: null,
+    queue: { dueCount: 5, items: [] },
+    analytics: {
+      streakDays: 7,
+      totalReviews: 42,
+      retentionProxy: 0.85,
+      phaseCounts: { New: 10, Learning: 5, Review: 20 },
+      dueByDay: [
+        { date: "2026-03-29", count: 3 },
+        { date: "2026-03-30", count: 5 },
+        { date: "2026-03-31", count: 2 },
+      ],
+      weakestProblems: [
+        { title: "Two Sum", lapses: 3, difficulty: 0.7 },
+        { title: "Valid Parentheses", lapses: 2, difficulty: 0.5 },
+      ],
+    },
+    courses: [],
+    settings: { studyMode: "studyPlan" as StudyMode, reviewOrder: "dueFirst" as ReviewOrder },
+  };
 }
 
 function afterRender(): void {
