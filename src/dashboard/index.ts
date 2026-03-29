@@ -1195,18 +1195,19 @@ function populateCourseChapters(): void {
 
 async function openProblem(target: {
   slug: string;
-  url: string;
   courseId?: string;
   chapterId?: string;
 }): Promise<void> {
-  if (target.courseId || target.chapterId) {
-    await sendMessage("TRACK_COURSE_QUESTION_LAUNCH", {
-      slug: target.slug,
-      courseId: target.courseId,
-      chapterId: target.chapterId,
-    });
+  const response = await sendMessage("OPEN_PROBLEM_PAGE", {
+    slug: target.slug,
+    courseId: target.courseId,
+    chapterId: target.chapterId,
+  });
+  if (!response.ok) {
+    state.status = response.error ?? "Failed to open problem.";
+    state.statusIsError = true;
+    render();
   }
-  chrome.tabs.create({ url: target.url });
 }
 
 async function saveSettings(): Promise<void> {
@@ -1457,12 +1458,10 @@ app.addEventListener("click", (event) => {
   }
   if (
     action === "open-problem" &&
-    actionButton.dataset.slug &&
-    actionButton.dataset.url
+    actionButton.dataset.slug
   ) {
     void openProblem({
       slug: actionButton.dataset.slug,
-      url: actionButton.dataset.url,
       courseId: actionButton.dataset.courseId,
       chapterId: actionButton.dataset.chapterId,
     });

@@ -374,6 +374,11 @@ export interface MessageRequestMap {
   OPEN_EXTENSION_PAGE: {
     path: string;
   };
+  OPEN_PROBLEM_PAGE: {
+    slug: string;
+    courseId?: string;
+    chapterId?: string;
+  };
   UPDATE_NOTES: {
     slug: string;
     notes: string;
@@ -437,3 +442,20 @@ export interface RuntimeMessage<T extends MessageType = MessageType> {
   type: T;
   payload: MessageRequestMap[T];
 }
+
+export type MessageResponseMap = {
+  [K in MessageType]: unknown;
+} & {
+  GET_APP_SHELL_DATA: AppShellPayload;
+  GET_DASHBOARD_DATA: AppShellPayload;
+  EXPORT_DATA: ExportPayload;
+  IMPORT_DATA: {
+    imported: true;
+  };
+  OPEN_EXTENSION_PAGE: {
+    opened: true;
+  };
+  OPEN_PROBLEM_PAGE: {
+    opened: true;
+  };
+};

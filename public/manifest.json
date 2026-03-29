@@ -3,7 +3,7 @@
   "name": "LeetCode Spaced Repetition",
   "description": "Master LeetCode with spaced repetition and curated paths.",
   "version": "0.1.0",
-  "permissions": ["storage", "alarms", "notifications", "tabs", "activeTab"],
+  "permissions": ["storage", "alarms", "notifications", "tabs"],
   "host_permissions": ["https://leetcode.com/*", "https://www.leetcode.com/*"],
   "background": {
     "service_worker": "background.js"
@@ -20,12 +20,6 @@
       ],
       "js": ["content.js"],
       "run_at": "document_idle"
-    }
-  ],
-  "web_accessible_resources": [
-    {
-      "resources": ["dashboard.html", "dashboard.css"],
-      "matches": ["<all_urls>"]
     }
   ],
   "icons": {

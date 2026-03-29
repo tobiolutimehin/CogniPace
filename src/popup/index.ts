@@ -264,17 +264,19 @@ async function loadPayload(resetRecommendation = false): Promise<void> {
 }
 
 async function openProblem(
-  target: { slug: string; url: string },
+  target: { slug: string },
   courseContext?: { courseId?: string; chapterId?: string }
 ): Promise<void> {
-  if (courseContext?.courseId || courseContext?.chapterId) {
-    await sendMessage("TRACK_COURSE_QUESTION_LAUNCH", {
-      slug: target.slug,
-      courseId: courseContext.courseId,
-      chapterId: courseContext.chapterId,
-    });
+  const response = await sendMessage("OPEN_PROBLEM_PAGE", {
+    slug: target.slug,
+    courseId: courseContext?.courseId,
+    chapterId: courseContext?.chapterId,
+  });
+  if (!response.ok) {
+    statusMessage = response.error ?? "Failed to open problem.";
+    statusIsError = true;
+    render();
   }
-  chrome.tabs.create({ url: target.url });
 }
 
 async function toggleStudyMode(): Promise<void> {

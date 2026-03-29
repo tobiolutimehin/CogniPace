@@ -42,7 +42,7 @@ type FsrsGrade =
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_EASE = 2.5;
-const scheduler = fsrs(generatorParameters({ enable_short_term: false }));
+const scheduler = fsrs(generatorParameters());
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
@@ -334,12 +334,12 @@ export function normalizeStudyState(
 ): StudyState {
   const attemptHistory = normalizeAttemptHistory(input?.attemptHistory);
   const normalizedFsrsCard =
-    attemptHistory.length > 0
-      ? rebuildFsrsCardFromHistory(attemptHistory)
-      : (deserializeFsrsCard(input?.fsrsCard) ??
-        (hasLegacyScheduleData(input)
-          ? buildLegacyFsrsCard(input ?? {}, now)
-          : null));
+    deserializeFsrsCard(input?.fsrsCard) ??
+    (hasLegacyScheduleData(input)
+      ? buildLegacyFsrsCard(input ?? {}, now)
+      : attemptHistory.length > 0
+        ? rebuildFsrsCardFromHistory(attemptHistory)
+        : null);
 
   return {
     suspended: input?.suspended === true || input?.status === "SUSPENDED",

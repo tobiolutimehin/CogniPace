@@ -1,4 +1,9 @@
-import { MessageRequestMap, MessageType, RuntimeMessage } from "./types";
+import {
+  MessageRequestMap,
+  MessageResponseMap,
+  MessageType,
+  RuntimeMessage,
+} from "./types";
 
 export interface RuntimeResponse<T = unknown> {
   ok: boolean;
@@ -6,7 +11,7 @@ export interface RuntimeResponse<T = unknown> {
   error?: string;
 }
 
-export function sendMessage<T extends MessageType, R = unknown>(
+export function sendMessage<T extends MessageType, R = MessageResponseMap[T]>(
   type: T,
   payload: MessageRequestMap[T]
 ): Promise<RuntimeResponse<R>> {

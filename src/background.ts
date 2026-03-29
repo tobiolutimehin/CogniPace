@@ -1,4 +1,6 @@
 import { summarizeAnalytics } from "./shared/analytics";
+import { sanitizeImportPayload } from "./shared/backup";
+import { CURRENT_STORAGE_SCHEMA_VERSION } from "./shared/constants";
 import {
   buildActiveCourseView,
   buildCourseCards,
@@ -22,6 +24,12 @@ import {
   parseProblemInput,
 } from "./shared/repository";
 import { RuntimeResponse } from "./shared/runtime";
+import {
+  assertAuthorizedRuntimeMessage,
+  canonicalProblemUrlForOpen,
+  validateExtensionPagePath,
+  validateRuntimeMessage,
+} from "./shared/runtimeValidation";
 import { applyReview, resetSchedule } from "./shared/scheduler";
 import { getAppData, mergeSettings, mutateAppData } from "./shared/storage";
 import { getStudyStateSummary, normalizeStudyState } from "./shared/studyState";
@@ -101,12 +109,31 @@ async function getAppShellData(): Promise<RuntimeResponse<AppShellPayload>> {
 async function openExtensionPage(payload: {
   path: string;
 }): Promise<RuntimeResponse> {
-  const path = typeof payload.path === "string" ? payload.path.trim() : "";
-  if (!path) {
-    throw new Error("Missing extension path.");
-  }
+  const path = validateExtensionPagePath(payload.path);
 
   await chrome.tabs.create({ url: chrome.runtime.getURL(path) });
+  return ok({ opened: true });
+}
+
+async function openProblemPage(payload: {
+  slug: string;
+  courseId?: string;
+  chapterId?: string;
+}): Promise<RuntimeResponse<{ opened: true }>> {
+  const slug = normalizeSlug(payload.slug);
+  if (!slug) {
+    throw new Error("Invalid slug.");
+  }
+
+  if (payload.courseId || payload.chapterId) {
+    await trackCourseQuestionLaunch({
+      slug,
+      courseId: payload.courseId,
+      chapterId: payload.chapterId,
+    });
+  }
+
+  await chrome.tabs.create({ url: canonicalProblemUrlForOpen(slug) });
   return ok({ opened: true });
 }
 
@@ -354,7 +381,7 @@ async function importCustom(payload: {
 async function exportData(): Promise<RuntimeResponse<ExportPayload>> {
   const data = await getAppData();
   return ok({
-    version: 3,
+    version: CURRENT_STORAGE_SCHEMA_VERSION,
     problems: Object.values(data.problemsBySlug),
     studyStatesBySlug: data.studyStatesBySlug,
     settings: data.settings,
@@ -365,18 +392,16 @@ async function exportData(): Promise<RuntimeResponse<ExportPayload>> {
 }
 
 async function importData(payload: ExportPayload): Promise<RuntimeResponse> {
-  if (!Array.isArray(payload.problems)) {
-    throw new Error("Invalid import format: problems must be an array.");
-  }
+  const sanitized = sanitizeImportPayload(payload);
 
   await mutateAppData((data) => {
     data.problemsBySlug = {};
     data.studyStatesBySlug = {};
-    data.coursesById = payload.coursesById ?? {};
-    data.courseOrder = payload.courseOrder ?? [];
-    data.courseProgressById = payload.courseProgressById ?? {};
+    data.coursesById = sanitized.coursesById ?? {};
+    data.courseOrder = sanitized.courseOrder ?? [];
+    data.courseProgressById = sanitized.courseProgressById ?? {};
 
-    for (const problem of payload.problems) {
+    for (const problem of sanitized.problems) {
       const slug = normalizeSlug(problem.leetcodeSlug);
       if (!slug) {
         continue;
@@ -389,7 +414,7 @@ async function importData(payload: ExportPayload): Promise<RuntimeResponse> {
         leetcodeId: problem.leetcodeId,
         title: problem.title?.trim() || slugToTitle(slug),
         difficulty: problem.difficulty ?? "Unknown",
-        url: problem.url || slugToUrl(slug),
+        url: slugToUrl(slug),
         topics: uniqueStrings(problem.topics ?? []),
         sourceSet: uniqueStrings(problem.sourceSet ?? []),
         createdAt: problem.createdAt || now,
@@ -398,14 +423,18 @@ async function importData(payload: ExportPayload): Promise<RuntimeResponse> {
     }
 
     for (const [slug, state] of Object.entries(
-      payload.studyStatesBySlug ?? {}
+      sanitized.studyStatesBySlug ?? {}
     )) {
-      data.studyStatesBySlug[slug.toLowerCase()] = normalizeStudyState(
+      const normalizedSlug = normalizeSlug(slug);
+      if (!normalizedSlug) {
+        continue;
+      }
+      data.studyStatesBySlug[normalizedSlug] = normalizeStudyState(
         state as StudyState
       );
     }
 
-    data.settings = mergeSettings(data.settings, payload.settings ?? {});
+    data.settings = mergeSettings(data.settings, sanitized.settings ?? {});
     ensureCourseData(data);
     syncCourseProgress(data);
     return data;
@@ -632,6 +661,10 @@ async function handleMessage(
       return openExtensionPage(
         message.payload as Parameters<typeof openExtensionPage>[0]
       );
+    case "OPEN_PROBLEM_PAGE":
+      return openProblemPage(
+        message.payload as Parameters<typeof openProblemPage>[0]
+      );
     case "UPDATE_NOTES":
       return updateNotes(message.payload as Parameters<typeof updateNotes>[0]);
     case "UPDATE_TAGS":
@@ -754,8 +787,18 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 });
 
 chrome.runtime.onMessage.addListener(
-  (message: RuntimeMessage, _sender, sendResponse) => {
-    void handleMessage(message)
+  (message: unknown, sender, sendResponse) => {
+    void Promise.resolve()
+      .then(() => {
+        const validatedMessage = validateRuntimeMessage(message);
+        assertAuthorizedRuntimeMessage(
+          validatedMessage,
+          sender,
+          chrome.runtime.id,
+          chrome.runtime.getURL("")
+        );
+        return handleMessage(validatedMessage);
+      })
       .then((response) => sendResponse(response))
       .catch((error) => sendResponse(fail(error)));
     return true;

@@ -224,6 +224,8 @@ Related ADRs:
 ## Canonicality Notes
 
 - This document is the technical source of truth for current structure.
+- Planned architectural changes live in `docs/architecture-roadmap.md`, which is a working plan rather than a replacement for this document.
 - ADRs under `docs/decisions/` record why major current constraints exist.
 - `docs/stitch-design-doc.md` is not an architecture document.
+- If `docs/architecture-roadmap.md` conflicts with this file, this file wins until the implementation lands and the canonical docs are updated in the same PR.
 - If runtime interfaces, message contracts, or persisted data shapes change, this file should be updated in the same PR.
