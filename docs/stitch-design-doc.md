@@ -1,5 +1,20 @@
 # Stitch Design Doc: MVP Chrome Extension
 
+> This file is a supporting design-generation artifact, not the canonical product or architecture spec.
+>
+> Read these first for source-of-truth context:
+>
+> - `docs/product.md`
+> - `docs/features.md`
+> - `docs/architecture.md`
+> - `docs/DESIGN_GUIDELINES.md`
+>
+> Scope note:
+>
+> - The popup is the primary Stitch target for this doc.
+> - The dashboard and LeetCode overlay are current product surfaces, but they are not the main prompt target here.
+> - If this file conflicts with the canonical docs above, the canonical docs win.
+
 ## 1. MVP Direction
 
 This is a Chrome extension MVP.
@@ -42,17 +57,18 @@ The popup should make both visible at the same time:
 - what should I review now
 - what is the next course question
 
-## 3. Primary Surface
+## 3. Primary Stitch Target
 
-The primary surface is the extension popup.
+The primary Stitch target is the extension popup.
 
-This is the only screen that must be designed first for MVP.
+This document is optimized for generating the popup first because it is the narrowest and highest-signal design target.
 
-Optional secondary surface:
+Other current product surfaces exist:
 
-- lightweight full-page extension dashboard later
+- LeetCode page overlay
+- full-page extension dashboard
 
-But the popup is the product.
+They are documented in the canonical product docs and can receive separate design work, but they should not dominate this popup-oriented prompt.
 
 ## 4. MVP Functional Requirements
 
@@ -136,7 +152,7 @@ Use:
 
 ## 7. Popup Screen Spec
 
-## Screen 1: Extension Popup - MVP
+### Screen 1: Extension Popup - MVP
 
 Surface:
 
@@ -259,9 +275,9 @@ and less like:
 
 - a consumer mobile product
 
-## 10. Optional Future Surfaces
+## 10. Other Current Surfaces
 
-These are not required for the MVP popup design, but can exist later:
+These are not the main target of this prompt, but they are part of the current product:
 
 1. Full-page dashboard
    - analytics
@@ -273,7 +289,7 @@ These are not required for the MVP popup design, but can exist later:
    - review buttons
    - notes
 
-Do not let these future screens dominate the MVP prompt.
+Do not let these surfaces dominate the popup prompt.
 
 ## 11. Exact Prompt Summary For Stitch
 

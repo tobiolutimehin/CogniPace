@@ -1,0 +1,507 @@
+# Features And Scope
+
+## Scope Model
+
+This document defines current feature behavior and current scope boundaries.
+
+Interpretation rules:
+
+- `Current behavior` describes what the product does today
+- `In scope` describes directionally acceptable work when explicitly requested and reviewed
+- `Out of scope` describes work that should not be implemented without explicit human approval
+- `Future candidates` belong in product conversations, not implementation by default
+
+This document is not an auto-generated backlog. A feature being listed as `In scope` does not authorize self-starting work by humans or agents.
+
+## Popup Recommendation Flow
+
+### Purpose
+
+Give the user the fastest possible answer to what to do next.
+
+### User Flow
+
+1. User opens the extension popup
+2. Popup shows summary metrics
+3. Popup shows the recommended problem for the current moment
+4. Popup also shows the next problem in the active course
+5. User opens a problem or shuffles the recommendation
+
+### Current Behavior
+
+- Shows due count and streak
+- Shows one current recommendation plus a pool of recommendation candidates
+- Supports shuffle without changing course-next state
+- Supports opening the dashboard
+- Supports toggling study mode between `studyPlan` and `freestyle`
+
+### Key States And Edge Cases
+
+- no due recommendation exists
+- no active course exists
+- active course is fully traversed
+- recommended problem is also the next course problem
+
+### In Scope
+
+- better explanation of why a problem is recommended
+- better empty states
+- clearer course progress cues
+- tighter popup hierarchy and usability
+
+### Out Of Scope
+
+- turning the popup into a large multi-panel app
+- marketing or landing-page behavior
+- auth or cloud state
+
+### Acceptance Criteria
+
+- the user can tell what to review now
+- the user can tell what is next in the active course
+- shuffle changes only the recommendation
+- popup remains compact and extension-appropriate
+
+## Course Progression
+
+### Purpose
+
+Provide guided traversal through curated learning paths without losing review awareness.
+
+### User Flow
+
+1. User selects or inherits an active course
+2. Product tracks current chapter and question progression
+3. Popup and dashboard show the next course question
+4. Launching questions updates course progress context
+
+### Current Behavior
+
+- supports curated courses and chapters
+- tracks active course and active chapter
+- computes next question and course completion data
+- shows course progress in popup and dashboard
+
+### Key States And Edge Cases
+
+- no active course
+- missing or invalid course ID
+- course complete
+- question exists in course but not yet in library
+
+### In Scope
+
+- clearer chapter progression cues
+- better course switching and ingestion ergonomics
+- better visibility into course completion state
+
+### Out Of Scope
+
+- collaborative or shared courses
+- server-backed course sync
+- full authoring platform for courses
+
+### Acceptance Criteria
+
+- an active course always resolves to a stable next-question view or explicit empty state
+- chapter and next-question context are visible where relevant
+
+## LeetCode Page Overlay
+
+### Purpose
+
+Let users review and log progress directly on the LeetCode problem page.
+
+### User Flow
+
+1. User opens a LeetCode problem page
+2. Overlay appears in collapsed or expanded state
+3. User starts the timer, solves, takes notes, and records a review result
+
+### Current Behavior
+
+- collapsed and expanded overlay states
+- rating controls
+- timer controls
+- notes field
+- quick-submit path
+- open settings shortcut
+
+### Key States And Edge Cases
+
+- user opens a page with no stored review state
+- timer is not used
+- review is first solve versus repeat review
+- overlay is collapsed but user still needs quick context
+
+### In Scope
+
+- better overlay ergonomics
+- safer DOM rendering later
+- clearer quick-submit explanation
+- better notes/save affordances
+
+### Out Of Scope
+
+- replacing the LeetCode page experience wholesale
+- turning the overlay into a full dashboard
+
+### Acceptance Criteria
+
+- a user can log a review result from the problem page
+- timer and rating behaviors are understandable
+- notes persist with the associated problem state
+
+## Solve Timer And Quick Submit
+
+### Purpose
+
+Give users lightweight solve-time awareness and a fast logging path.
+
+### User Flow
+
+1. User starts a timer while solving or reviewing a problem
+2. Product compares elapsed time with the difficulty-based target
+3. User either quick-submits or opens the explicit save flow
+4. Review state updates based on rating, timing, and mode
+
+### Current Behavior
+
+- timer goal is derived from problem difficulty
+- user can start, pause, and reset the timer
+- quick submit defaults to a conservative rating path
+- full save path supports explicit override
+
+### Key States And Edge Cases
+
+- no timer used
+- timer exceeds target significantly
+- repeat review versus first solve
+- user wants explicit override instead of inferred quick submit behavior
+
+### In Scope
+
+- clearer wording around timer-driven defaults
+- more transparent solve-time interpretation
+
+### Out Of Scope
+
+- competitive timing or leaderboard systems
+- cloud analytics based on solve times
+
+### Acceptance Criteria
+
+- users can understand the difference between quick submit and explicit save
+- timer state and review outcome relationship is visible
+
+## Notes And Review Overrides
+
+### Purpose
+
+Support lightweight reflection and correction during review logging.
+
+### User Flow
+
+1. User opens the overlay on a problem page
+2. User adds or edits notes while solving or reviewing
+3. User chooses quick submit or explicit save
+4. Product persists the note content with the problem state
+
+### Current Behavior
+
+- notes can be entered on the overlay
+- explicit save supports review override flow
+- review result can include notes snapshot and context
+
+### Key States And Edge Cases
+
+- notes exist before a new review is logged
+- user wants to save notes without changing other fields
+- quick submit and explicit save produce different levels of control
+
+### In Scope
+
+- clearer note persistence and messaging
+- stronger override clarity
+
+### Out Of Scope
+
+- collaborative notes
+- rich-text notebooks
+
+### Acceptance Criteria
+
+- notes remain associated with the problem
+- explicit save path allows deliberate override behavior
+
+## Dashboard Overview
+
+### Purpose
+
+Give the user a broader control surface than the popup.
+
+### User Flow
+
+1. User opens the dashboard from the popup or extension page
+2. Dashboard loads the app shell and overview data
+3. User uses the overview as an entry point into courses, library, analytics, or settings
+
+### Current Behavior
+
+- overview page surfaces recommendation, active course state, and summary metrics
+- dashboard acts as the navigation root for the wider extension controls
+
+### Key States And Edge Cases
+
+- no active course exists
+- no recommendation is currently available
+- empty-state sections still need to preserve navigability
+
+### In Scope
+
+- clearer section hierarchy
+- better overview readability
+
+### Out Of Scope
+
+- transforming the dashboard into a generic product shell unrelated to study flow
+
+### Acceptance Criteria
+
+- dashboard overview helps users understand current state at a glance
+
+## Course Management
+
+### Purpose
+
+Support course inspection, course switching, and question ingestion into course paths.
+
+### User Flow
+
+1. User opens the dashboard courses view
+2. User inspects course cards and chapter state
+3. User switches the active course, changes chapter focus, or adds problems to a course
+
+### Current Behavior
+
+- course cards
+- active course selection
+- chapter selection
+- add-problem-to-course flow
+
+### Key States And Edge Cases
+
+- active course changes after progress already exists
+- chapter focus changes without changing the active course
+- user adds a problem that is not yet fully represented in the library
+
+### In Scope
+
+- better course management clarity
+- clearer course completion and next-step visibility
+
+### Out Of Scope
+
+- collaborative course authoring platform
+
+### Acceptance Criteria
+
+- users can inspect course progress and change the active course intentionally
+
+## Library View
+
+### Purpose
+
+Provide a searchable and filterable view of tracked problems.
+
+### User Flow
+
+1. User opens the dashboard library view
+2. User filters or searches for a problem
+3. User inspects review state, course membership, and problem metadata
+
+### Current Behavior
+
+- table of tracked problems
+- filters by query, course, difficulty, and status
+- displays review state summary and course memberships
+
+### Key States And Edge Cases
+
+- no problems match the current filter
+- a problem belongs to multiple course contexts
+- imported problems have partial metadata
+
+### In Scope
+
+- better filtering and readability
+- stronger empty and edge-state messaging
+
+### Out Of Scope
+
+- external problem sync beyond current extension-owned data
+
+### Acceptance Criteria
+
+- user can find a tracked problem and inspect its current review state
+
+## Analytics
+
+### Purpose
+
+Show retention and workload signals without requiring external analytics infrastructure.
+
+### User Flow
+
+1. User opens the dashboard analytics view
+2. Product shows retention and workload summaries derived from local data
+3. User uses the metrics to decide whether to review, rebalance, or inspect weak areas
+
+### Current Behavior
+
+- streak
+- total reviews
+- retention proxy
+- due forecast
+- weakest problems
+- phase distribution
+
+### Key States And Edge Cases
+
+- very little review history exists
+- no current weak-problem set can be derived
+- metrics trend is useful but should not imply precision beyond local data
+
+### In Scope
+
+- clearer interpretation of metrics
+- better visualization of weak/problem areas
+
+### Out Of Scope
+
+- enterprise analytics pipeline
+- server-backed analytics warehousing
+
+### Acceptance Criteria
+
+- analytics help the user decide whether retention and workload are healthy
+
+## Settings And Notifications
+
+### Purpose
+
+Let users tune study behavior and optional alerting.
+
+### User Flow
+
+1. User opens the dashboard settings view
+2. User changes study preferences or notification behavior
+3. Product persists settings and uses them in scheduling and alerts
+
+### Current Behavior
+
+- daily limits
+- study mode
+- active course selection
+- review order
+- require solve time
+- notifications toggle
+- quiet hours
+
+### Key States And Edge Cases
+
+- notifications disabled
+- quiet hours suppress alerts
+- invalid or missing active course falls back to defaults
+
+### In Scope
+
+- better validation and clarity around settings
+- better notification UX
+
+### Out Of Scope
+
+- account-synced preferences
+
+### Acceptance Criteria
+
+- settings are understandable and persist reliably
+
+## Import / Export Backup
+
+### Purpose
+
+Allow users to preserve and restore local extension state.
+
+### User Flow
+
+1. User exports a backup from the dashboard
+2. Product writes a versioned JSON payload with problems, study states, settings, and course data
+3. User later imports a valid backup to restore local state
+
+### Current Behavior
+
+- export backup JSON
+- import backup JSON
+- validation on import path
+
+### Key States And Edge Cases
+
+- backup JSON comes from an older schema version
+- backup JSON is malformed or incomplete
+- import replaces existing local state
+
+### In Scope
+
+- clearer backup messaging
+- safer import validation over time
+
+### Out Of Scope
+
+- cloud backup
+- remote sync
+
+### Acceptance Criteria
+
+- users can export their local state
+- users can restore a valid backup without account infrastructure
+
+## Local-First Storage Behavior
+
+### Purpose
+
+Define the current persistence model and its limits.
+
+### User Flow
+
+1. User interacts with popup, overlay, or dashboard
+2. Background worker loads and mutates normalized app data
+3. Product persists changes to `chrome.storage.local`
+4. Export/import provides the manual portability path
+
+### Current Behavior
+
+- app data is stored in `chrome.storage.local`
+- product state is normalized into a single application data model
+- schema versioning exists in the app data layer
+
+### Key States And Edge Cases
+
+- stored data comes from an older schema
+- missing course data is normalized during load
+- local-only persistence means state does not automatically follow the user across devices
+
+### In Scope
+
+- stronger validation and migration clarity
+- better backup/restore robustness
+
+### Out Of Scope
+
+- backend persistence
+- team sync
+- multi-device identity
+
+### Acceptance Criteria
+
+- contributors understand that local-first is an intentional product decision, not an incomplete backend

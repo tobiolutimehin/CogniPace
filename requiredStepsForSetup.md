@@ -9,6 +9,28 @@ This file is the ordered setup checklist for making this repo collaboration-read
 - `CLAUDE.md` is intentionally out of scope for this first pass.
 - `AGENTS.md` comes later, after product docs exist.
 - Branch protection and required checks should be phased in only after repo-native CI is in place.
+- Unchecked later phases are planning artifacts, not self-starting authorization for humans or agents.
+- Until `AGENTS.md` exists, changes should only be made when explicitly requested.
+
+## Doc Precedence And Update Triggers
+
+Precedence order:
+
+1. `docs/product.md`
+2. `docs/features.md`
+3. `docs/architecture.md`
+4. `docs/DESIGN_GUIDELINES.md`
+5. `docs/stitch-design-doc.md`
+6. this file
+
+Rules:
+
+- If two docs disagree, follow the higher-precedence doc and ask a human before implementing the conflicting part.
+- The PR author owns updating any affected docs, and reviewers should block merges when behavior or architecture changes are undocumented.
+- Any PR that changes product behavior should update `docs/product.md` or `docs/features.md`.
+- Any PR that changes runtime boundaries, persisted data, or message contracts should update `docs/architecture.md`.
+- Any PR that changes design conventions should update `docs/DESIGN_GUIDELINES.md`.
+- Any PR that changes setup or process expectations should update this file.
 
 ## Current Baseline Snapshot
 
@@ -29,6 +51,11 @@ This file is the ordered setup checklist for making this repo collaboration-read
 - Current docs:
   - `README.md`
   - `CONTRIBUTING.md`
+  - `docs/product.md`
+  - `docs/features.md`
+  - `docs/architecture.md`
+  - `docs/DESIGN_GUIDELINES.md`
+  - `docs/decisions/`
   - `docs/stitch-design-doc.md`
 
 ### Still Missing
@@ -52,6 +79,11 @@ This file is the ordered setup checklist for making this repo collaboration-read
 - Dynamic `innerHTML` usage exists in UI code and should be tracked as a security hardening item
 
 ## Ordered Setup Phases
+
+Important:
+
+- Completion of one phase does not authorize automatic start of the next phase.
+- Later phases should only be implemented when a human explicitly requests them.
 
 ## Phase 0: Stabilize Local Baseline
 
@@ -96,6 +128,8 @@ Status: completed on 2026-03-29
 
 ## Phase 1: Product And Scope Documentation
 
+Status: completed on 2026-03-29
+
 ### Goals
 
 - Make the product understandable without reading code
@@ -104,24 +138,26 @@ Status: completed on 2026-03-29
 
 ### Steps
 
-- [ ] Expand `README.md`
-- [ ] Add `docs/product.md`
-- [ ] Add `docs/features.md`
-- [ ] Add `docs/architecture.md`
-- [ ] Add `docs/decisions/`
-- [ ] Add initial ADRs for:
+- [x] Expand `README.md`
+- [x] Add `docs/product.md`
+- [x] Add `docs/features.md`
+- [x] Add `docs/architecture.md`
+- [x] Add `docs/decisions/`
+- [x] Add initial ADRs for:
   - no account system for now
   - local-first storage for now
   - plain CSS for now
   - no backend for now
   - minimal extension permissions
-- [ ] Keep `docs/stitch-design-doc.md` as a design artifact, not the main product source of truth
+- [x] Add `docs/DESIGN_GUIDELINES.md` as a complementary design reference
+- [x] Keep `docs/stitch-design-doc.md` as a design artifact, not the main product source of truth
+- [x] Keep infra/setup documentation out of Phase 1
 
 ### Done When
 
-- [ ] a new contributor can explain the product and current scope without reading code
-- [ ] approved scope is clearly separated from future candidates
-- [ ] implementation work can be reviewed against documented product behavior
+- [x] a new contributor can explain the product and current scope without reading code
+- [x] approved scope is clearly separated from future candidates
+- [x] implementation work can be reviewed against documented product behavior
 
 ## Phase 2: Collaboration And Governance Docs
 
