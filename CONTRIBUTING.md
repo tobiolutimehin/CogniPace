@@ -1,28 +1,84 @@
 # Contributing to LeetCode Spaced Repetition
 
-Thanks for your interest in contributing! Here's how to get started.
+This repo is a TypeScript Chrome extension with a React 19 + MUI + Emotion UI stack. Contribute against the current layered architecture, not the legacy pre-React structure.
 
-## Making Changes
+## Baseline Setup
 
-1. **Clone the repo** locally
-2. **Create a branch** for your changes:
-   ```bash
-   git checkout -b your-feature-name
-   ```
-3. **Make your changes** and test them locally
-4. **Commit** with a clear message
-5. **Push** your branch and open a Pull Request
+- Use Node `24.x` LTS
+- Use `npm`
+- Install dependencies with `npm install`
+- Run the full local verification path with `npm run check`
 
-## Before You Submit
+## Branching
 
-- **Let the team know** - Drop a message in the groupchat so someone can review your PR
-- **Keep PRs focused** - One feature or fix per PR makes reviewing easier
-- **Test your changes** - Load the extension locally and make sure it works
+- Branch from the latest `main`
+- Use focused branch names:
+  - `feat/*`
+  - `fix/*`
+  - `docs/*`
+  - `chore/*`
+  - `refactor/*`
+  - `test/*`
+  - `security/*`
+- Keep one logical change per PR whenever possible
 
-## Getting a Review
+## Layer Ownership
 
-Once your PR is up:
+- `src/ui/*`
+  React screens, components, theme, presentation helpers, and local UI state
+- `src/data/*`
+  Repositories, Chrome datasources, catalog access, and import/export helpers
+- `src/domain/*`
+  Pure business logic and domain types; keep this layer React-free
+- `src/extension/*`
+  Runtime contracts, validation, background routing, responses, and notifications
+- `src/entrypoints/*`
+  Thin bootstraps only; do not move product logic here
 
-1. Send a message in the groupchat
-2. Tag a reviewer if you know who should look at it
-3. Be open to feedback and questions
+## Implementation Rules
+
+- Do not access `chrome.storage` directly from `src/ui/*`
+- Do not call runtime transport directly from leaf UI components; go through repositories
+- Do not move React or browser dependencies into `src/domain/*`
+- Treat `src/ui/providers.tsx` and `src/ui/theme.ts` as the shared provider/theme contract
+- Keep popup, dashboard, and overlay behavior aligned with the product and architecture docs
+
+## Required Checks Before Opening A PR
+
+Run:
+
+```bash
+npm run lint
+npm run typecheck
+npm run test
+npm run build
+```
+
+You can also run:
+
+```bash
+npm run check
+```
+
+## PR Expectations
+
+- Keep the PR focused and explain the user-facing or architectural reason for the change
+- Add screenshots for visible popup, dashboard, or overlay changes
+- Update UI tests when popup, dashboard, or overlay behavior changes
+- Update docs when:
+  - product behavior changes
+  - architecture boundaries change
+  - runtime contracts change
+  - provider/theme conventions change
+  - setup expectations change
+- Call out any risky areas such as:
+  - `public/manifest.json`
+  - `src/extension/*`
+  - `src/data/datasources/chrome/*`
+  - import/export flows
+
+## Review Expectations
+
+- Ask for review in the team channel or group chat once the PR is ready
+- Expect comments on architecture boundaries, docs drift, and test coverage, not just visible behavior
+- Do not merge if the change leaves the docs out of sync with the code

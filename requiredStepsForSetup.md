@@ -40,6 +40,7 @@ Rules:
 - Project type: TypeScript Chrome extension using Manifest V3 with React 19 UI mounted from TSX entrypoints
 - Frontend stack: React 19 + MUI + Emotion
 - Architecture layout: `ui + data + domain + extension + entrypoints`
+- Repository visibility: private
 - Package manager: `npm`
 - Lockfile: `package-lock.json`
 - Bundler: `esbuild`
@@ -58,6 +59,7 @@ Rules:
 - Current docs:
   - `README.md`
   - `CONTRIBUTING.md`
+  - `SECURITY.md`
   - `docs/product.md`
   - `docs/features.md`
   - `docs/architecture.md`
@@ -65,15 +67,14 @@ Rules:
   - `docs/DESIGN_GUIDELINES.md`
   - `docs/decisions/`
   - `docs/stitch-design-doc.md`
+  - `.github/PULL_REQUEST_TEMPLATE.md`
+  - `.github/ISSUE_TEMPLATE/`
 
 ### Still Missing
 
 - `.github` workflows
-- `SECURITY.md`
-- `CODEOWNERS`
-- issue templates
-- pull request template
 - `AGENTS.md`
+- root `LICENSE` if repo visibility changes to public
 
 ### Current Health
 
@@ -97,19 +98,17 @@ Important:
 
 ## Current Phase
 
-- Phase 1.5 is the React baseline reset that makes the checklist trustworthy again.
+- Phase 2 is now complete.
 - Status: completed on 2026-03-30
-- Next true setup phase: Phase 2
+- Next true setup phase: Phase 3
 
-## Recommended Execution Order From The React Baseline
+## Remaining Execution Order From The React Baseline
 
-1. Phase 1.5
-2. Phase 2
-3. Phase 3
-4. Phase 5
-5. Phase 4
-6. Phase 6
-7. Phase 7
+1. Phase 3
+2. Phase 5
+3. Phase 4
+4. Phase 6
+5. Phase 7
 
 ## Phase 0: Stabilize Local Baseline
 
@@ -214,6 +213,8 @@ Status: completed on 2026-03-30
 
 ## Phase 2: Collaboration And Governance Docs
 
+Status: completed on 2026-03-30
+
 ### Goals
 
 - Make contribution flow explicit
@@ -223,29 +224,30 @@ Status: completed on 2026-03-30
 
 ### Steps
 
-- [ ] Upgrade `CONTRIBUTING.md`
-- [ ] Document layer ownership for:
+- [x] Upgrade `CONTRIBUTING.md`
+- [x] Document layer ownership for:
   - `src/ui/*` for React screens, components, theme, and presentation
   - `src/data/*` for repositories, datasources, and import/export helpers
   - `src/domain/*` for pure business logic
   - `src/extension/*` for runtime contracts, validation, and background routing
-- [ ] Require screenshots for visible popup, dashboard, or overlay changes
-- [ ] Require UI test updates when popup, dashboard, or overlay behavior changes
-- [ ] Require docs updates when architectural boundaries or runtime contracts change
-- [ ] Add `SECURITY.md`
-- [ ] Add `LICENSE` if the repo becomes public
-- [ ] Add `CODEOWNERS`
-- [ ] Add `.github/PULL_REQUEST_TEMPLATE.md`
-- [ ] Add issue forms for:
+- [x] Require screenshots for visible popup, dashboard, or overlay changes
+- [x] Require UI test updates when popup, dashboard, or overlay behavior changes
+- [x] Require docs updates when architectural boundaries or runtime contracts change
+- [x] Add `SECURITY.md`
+- [x] Check repo visibility for `LICENSE` requirements
+- [x] Repo is private; defer root `LICENSE` until visibility changes
+- [x] Add `CODEOWNERS`
+- [x] Add `.github/PULL_REQUEST_TEMPLATE.md`
+- [x] Add issue forms for:
   - bug
   - feature request
   - maintenance task
 
 ### Done When
 
-- [ ] contributors have a consistent issue and PR flow
-- [ ] ownership and review expectations are explicit
-- [ ] security reporting path is documented
+- [x] contributors have a consistent issue and PR flow
+- [x] ownership and review expectations are explicit
+- [x] security reporting path is documented
 
 ## Phase 3: Agent And Automation Rules
 

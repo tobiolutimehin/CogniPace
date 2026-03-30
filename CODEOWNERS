@@ -1,0 +1,8 @@
+* @tobiolutimehin
+
+/public/manifest.json @tobiolutimehin
+/src/extension/ @tobiolutimehin
+/src/data/datasources/chrome/ @tobiolutimehin
+/src/data/importexport/ @tobiolutimehin
+/docs/decisions/ @tobiolutimehin
+/.github/ @tobiolutimehin

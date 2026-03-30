@@ -1,0 +1,62 @@
+name: Bug report
+description: Report a reproducible defect in the extension.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What is broken?
+      placeholder: The popup opens, but the recommended problem card is blank.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - Popup
+        - Dashboard
+        - Overlay
+        - Background/runtime
+        - Settings/notifications
+        - Import/export
+        - Build/test/docs
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ...
+        2. Click ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser version, OS, branch, or commit if known.
+      placeholder: Chrome 135 on macOS, main at abc123
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshots or logs
+      description: Paste screenshots, stack traces, or console logs if relevant.
