@@ -94,6 +94,8 @@ Load the extension in Chrome:
   Non-canonical architecture hardening roadmap
 - [docs/stitch-design-doc.md](docs/stitch-design-doc.md)
   Supporting design-generation artifact for Stitch prompts
+- [AGENTS.md](AGENTS.md)
+  Canonical operating rules for coding agents and automation
 - [requiredStepsForSetup.md](requiredStepsForSetup.md)
   Ordered setup and hardening checklist
 
@@ -127,6 +129,8 @@ Load the extension in Chrome:
 4. `docs/architecture.md`
 5. `docs/DESIGN_GUIDELINES.md`
 6. relevant ADRs under `docs/decisions/`
+
+Agents and automation must follow `AGENTS.md` after reading the core product and architecture docs.
 
 ## Doc Precedence And Update Triggers
 

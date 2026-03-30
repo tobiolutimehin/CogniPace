@@ -7,10 +7,10 @@ This file is the ordered setup checklist for making this repo collaboration-read
 - Complete steps in order unless a step is explicitly marked as parallelizable.
 - This is an operational setup document, not the product spec.
 - `CLAUDE.md` is intentionally out of scope for this first pass.
-- `AGENTS.md` comes later, after product docs exist.
+- `AGENTS.md` is the canonical agent operating contract for this repo.
 - Branch protection and required checks should be phased in only after repo-native CI is in place.
 - Unchecked later phases are planning artifacts, not self-starting authorization for humans or agents.
-- Until `AGENTS.md` exists, changes should only be made when explicitly requested.
+- Agents must follow `AGENTS.md` in addition to the higher-precedence product and architecture docs.
 
 ## Doc Precedence And Update Triggers
 
@@ -40,6 +40,7 @@ Rules:
 - Project type: TypeScript Chrome extension using Manifest V3 with React 19 UI mounted from TSX entrypoints
 - Frontend stack: React 19 + MUI + Emotion
 - Architecture layout: `ui + data + domain + extension + entrypoints`
+- GitHub operating model: personal + private
 - Repository visibility: private
 - Package manager: `npm`
 - Lockfile: `package-lock.json`
@@ -57,6 +58,7 @@ Rules:
   - `typecheck`
   - `test:logic`
 - Current docs:
+  - `AGENTS.md`
   - `README.md`
   - `CONTRIBUTING.md`
   - `SECURITY.md`
@@ -73,7 +75,6 @@ Rules:
 ### Still Missing
 
 - `.github` workflows
-- `AGENTS.md`
 - root `LICENSE` if repo visibility changes to public
 
 ### Current Health
@@ -88,6 +89,8 @@ Rules:
 - React architecture tests enforce canonical entrypoints, layer boundaries, and repository usage rules
 - Local baseline now includes `Node 24 LTS`, `ESLint + Prettier`, `.editorconfig`, and ignored temp output under `.tmp/`
 - React is now the canonical UI model, not a provisional migration path
+- GitHub merge settings now use squash-only merges with auto-delete-on-merge kept on
+- GitHub rulesets and protected-branch enforcement remain unavailable on the current private repo tier
 
 ## Ordered Setup Phases
 
@@ -98,17 +101,15 @@ Important:
 
 ## Current Phase
 
-- Phase 2 is now complete.
+- Phase 4 is now complete.
 - Status: completed on 2026-03-30
-- Next true setup phase: Phase 3
+- Next true setup phase: Phase 5
 
 ## Remaining Execution Order From The React Baseline
 
-1. Phase 3
-2. Phase 5
-3. Phase 4
-4. Phase 6
-5. Phase 7
+1. Phase 5
+2. Phase 6
+3. Phase 7
 
 ## Phase 0: Stabilize Local Baseline
 
@@ -251,70 +252,88 @@ Status: completed on 2026-03-30
 
 ## Phase 3: Agent And Automation Rules
 
+Status: completed on 2026-03-30
+
 ### Goals
 
 - Constrain agents to documented scope
 - Separate product authority from execution authority
 - Make automation useful without allowing scope drift
 - Make agent rules explicit for the React architecture
+- Make agent validation defaults explicit so code-bearing work always runs the full repo check
 
 ### Steps
 
-- [ ] Add root `AGENTS.md`
-- [ ] Require this reading order in `AGENTS.md`:
+- [x] Add root `AGENTS.md`
+- [x] Require this reading order in `AGENTS.md`:
   - `README.md`
   - `docs/product.md`
   - `docs/features.md`
   - `docs/architecture.md`
-- [ ] Define roles:
+- [x] Define roles:
   - humans own roadmap, scope, releases, architecture, and permissions
   - Jules owns recurring maintenance, suggested tasks, CI repair on Jules PRs, dependency hygiene, performance, and UX polish
   - Codex and other interactive coding agents handle human-directed implementation
-- [ ] State that React is the canonical UI model
-- [ ] State that agents must not reintroduce direct DOM-rendered UI patterns into popup or dashboard surfaces
-- [ ] State that domain code must remain React-free
-- [ ] State that UI code should talk through repositories and runtime clients, not direct Chrome storage access
-- [ ] Require docs updates when agents change routes, providers, repositories, or runtime contracts
-- [ ] Require ADR or doc updates when agents change MUI theme, provider, or styling conventions
-- [ ] Explicitly block agents from:
+- [x] State that React is the canonical UI model
+- [x] State that agents must not reintroduce direct DOM-rendered UI patterns into popup or dashboard surfaces
+- [x] State that domain code must remain React-free
+- [x] State that UI code should talk through repositories and runtime clients, not direct Chrome storage access
+- [x] Require docs updates when agents change routes, providers, repositories, or runtime contracts
+- [x] Require ADR or doc updates when agents change MUI theme, provider, or styling conventions
+- [x] Define agent validation defaults:
+  - run `npm run check` for code, product/runtime config, build/tooling config, and test changes
+  - allow `npm run format:check` for docs-only and governance-only changes
+  - do not claim full runtime validation unless `npm run check` actually ran
+- [x] Explicitly block agents from:
   - new product scope without human direction
   - manifest permission changes
   - backend or auth additions
   - major architecture shifts without approval
   - major dependency shifts without approval
+- [x] Explicitly defer:
+  - actual Jules scheduled-task setup
+  - GitHub Marketplace installs
+  - `CLAUDE.md`
+  - CI workflow files
+  - branch protection work
+  - GitHub org transfer
 
 ### Done When
 
-- [ ] Jules cannot plausibly interpret future ideas as implementation approval
-- [ ] all agents are constrained by documented product scope
-- [ ] product work and maintenance work are clearly distinct
+- [x] Jules cannot plausibly interpret future ideas as implementation approval
+- [x] all agents are constrained by documented product scope
+- [x] product work and maintenance work are clearly distinct
 
 ## Phase 4: GitHub Org And Repo Settings
 
+Status: completed on 2026-03-30
+
 ### Goals
 
-- Move long-term ownership out of a personal-only workflow
-- Make the main branch safe for a multi-person team
-- Keep merge flow simple and enforceable
-- Stage branch protections against the React test and build surface
+- Harden the GitHub settings that are currently available on a personal + private repo
+- Make the main branch safer for a multi-person team even without full branch protection
+- Keep merge flow simple and explicit
+- Preserve a clean org/public upgrade path for later
 
 ### Steps
 
-- [ ] Transfer the repo to a GitHub org
-- [ ] Make it public if that remains the chosen setup
-- [ ] Only enforce required status checks after the shared React baseline branch is green in CI
-- [ ] Configure:
-  - default branch `main`
-  - squash merge only
-  - auto-delete merged branches
-  - ruleset on `main`
-  - 1 required approval
-  - stale review dismissal
-  - conversation resolution before merge
-  - no direct pushes to `main`
-  - no force pushes
-  - no branch deletion on `main`
-- [ ] Required checks should eventually include:
+- [x] Confirm the current operating model is personal + private
+- [x] Keep `main` as the default branch
+- [x] Keep auto-delete of merged branches enabled
+- [x] Set squash merge as the only enabled merge strategy
+- [x] Disable merge commits
+- [x] Disable rebase merges
+- [x] Document the temporary manual governance policy while full GitHub protections are unavailable:
+  - all team changes go through pull requests
+  - no direct pushes to `main` except emergencies
+  - one human review is required by team policy before merge
+  - squash merge is the only accepted merge style
+  - required validation for merge decisions remains `npm run check` or the equivalent `lint`, `typecheck`, `test`, and `build` results
+- [x] Document the deferred future org/public upgrade path:
+  - org transfer remains a future option
+  - public visibility remains a future option
+  - rulesets and protected-branch enforcement are deferred until the repo becomes public or moves to an org or paid tier that supports them
+  - future enforced checks should include:
   - `lint`
   - `typecheck`
   - `test`
@@ -322,9 +341,9 @@ Status: completed on 2026-03-30
 
 ### Done When
 
-- [ ] the repo is org-owned
-- [ ] `main` is protected through a PR-only workflow
-- [ ] merge policy is clear and lightweight
+- [x] current personal + private hardening is applied
+- [x] merge policy is clear and lightweight
+- [x] the deferred org/public protection path is documented
 
 ## Phase 5: CI And GitHub-Native Security
 
@@ -510,9 +529,9 @@ These are intentionally deferred for later:
 - `requiredStepsForSetup.md` is a living execution checklist
 - It lives at the repo root
 - `CLAUDE.md` is out of scope for this first pass
-- `AGENTS.md` is added only after product docs exist
+- `AGENTS.md` is now the canonical agent operating contract
 - The React architecture represented by this repo is the intended canonical baseline going forward
 - React + MUI + Emotion are intentional stack choices, not temporary migration scaffolding
 - `esbuild` remains the bundler for the current product stage unless a later explicit decision changes it
-- Public-org repo remains the target because it gives the strongest mostly-free setup
+- Personal + private is the current operating model; org/public remains a future upgrade path, not a current blocker
 - Jules is part of the core operating model, not an optional later add-on

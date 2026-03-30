@@ -30,11 +30,11 @@ body:
     attributes:
       label: Likely layers touched
       options:
-        - label: `src/ui/*`
-        - label: `src/data/*`
-        - label: `src/domain/*`
-        - label: `src/extension/*`
-        - label: docs only
+        - label: "`src/ui/*`"
+        - label: "`src/data/*`"
+        - label: "`src/domain/*`"
+        - label: "`src/extension/*`"
+        - label: "docs only"
   - type: textarea
     id: validation
     attributes:

@@ -60,6 +60,18 @@ You can also run:
 npm run check
 ```
 
+## Merge And Review Policy
+
+The repo is currently operating as a personal + private repository, so some GitHub-native protections are still unavailable on the current tier.
+
+- All non-emergency changes should go through pull requests
+- Do not push directly to `main` except for an explicit emergency fix
+- One human review is required by team policy before merge
+- Squash merge is the only accepted merge style
+- Merge decisions should be based on:
+  - `npm run check`
+  - or the equivalent `lint`, `typecheck`, `test`, and `build` results when called out separately
+
 ## PR Expectations
 
 - Keep the PR focused and explain the user-facing or architectural reason for the change
