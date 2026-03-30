@@ -278,7 +278,13 @@ export function OverlayPanel(props: OverlayPanelProps) {
                   onChange={(event) => {
                     props.onChangeNotes(event.target.value);
                   }}
+                  placeholder="Add your technical notes or learnings here..."
                   rows={5}
+                  slotProps={{
+                    htmlInput: {
+                      "aria-label": "Technical Notes",
+                    },
+                  }}
                   value={props.notes}
                 />
               </Stack>
