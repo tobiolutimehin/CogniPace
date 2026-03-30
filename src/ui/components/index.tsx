@@ -7,7 +7,7 @@ import LinearProgress from "@mui/material/LinearProgress";
 import Stack from "@mui/material/Stack";
 import { alpha } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
-import { ReactNode } from "react";
+import { memo, ReactNode } from "react";
 
 import { Tone } from "../presentation/studyState";
 import { kineticTokens } from "../theme";
@@ -35,7 +35,7 @@ const toneStyles: Record<Tone, { background: string; color: string }> = {
   },
 };
 
-export function BrandMark() {
+export const BrandMark = memo(function BrandMark() {
   return (
     <Box
       sx={{
@@ -55,8 +55,12 @@ export function BrandMark() {
       ⌘
     </Box>
   );
-}
+});
 
+// Note: SurfaceCard is NOT memoized because it accepts `children: ReactNode`.
+// In React, `children` are almost always passed as new reference objects
+// (new JSX elements) on every render, meaning the shallow comparison will fail
+// and the component will re-render anyway, turning the memoization check into pure overhead.
 export function SurfaceCard(props: {
   label?: string;
   title?: string;
@@ -104,7 +108,13 @@ export function SurfaceCard(props: {
   );
 }
 
-export function ToneChip(props: { label: string; tone?: Tone }) {
+// ⚡ Bolt Optimization: Memoize pure functional UI components
+// These components (ToneChip, ProgressTrack, MetricCard, StatusBanner, BrandMark)
+// only receive primitive props (strings, numbers) and are frequently used in long lists
+// or dashboard surfaces (e.g., ProblemStatusTable, QueuePreview, LibraryView).
+// Wrapping them in React.memo prevents unnecessary re-renders when parent views update,
+// reducing CPU overhead during list scrolling and filtering operations.
+export const ToneChip = memo(function ToneChip(props: { label: string; tone?: Tone }) {
   const tone = props.tone ?? "default";
 
   return (
@@ -117,18 +127,18 @@ export function ToneChip(props: { label: string; tone?: Tone }) {
       }}
     />
   );
-}
+});
 
-export function ProgressTrack(props: { value: number }) {
+export const ProgressTrack = memo(function ProgressTrack(props: { value: number }) {
   return (
     <LinearProgress
       value={Math.max(0, Math.min(100, props.value))}
       variant="determinate"
     />
   );
-}
+});
 
-export function MetricCard(props: {
+export const MetricCard = memo(function MetricCard(props: {
   label: string;
   value: string | number;
   caption: string;
@@ -146,9 +156,9 @@ export function MetricCard(props: {
       </Stack>
     </SurfaceCard>
   );
-}
+});
 
-export function StatusBanner(props: { message: string; isError?: boolean }) {
+export const StatusBanner = memo(function StatusBanner(props: { message: string; isError?: boolean }) {
   if (!props.message) {
     return null;
   }
@@ -158,4 +168,4 @@ export function StatusBanner(props: { message: string; isError?: boolean }) {
       {props.message}
     </Alert>
   );
-}
+});
