@@ -5,6 +5,7 @@ import js from "@eslint/js";
 import eslintConfigPrettier from "eslint-config-prettier";
 import importPlugin from "eslint-plugin-import";
 import noUnsanitized from "eslint-plugin-no-unsanitized";
+import reactHooks from "eslint-plugin-react-hooks";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
@@ -41,6 +42,8 @@ const phaseZeroTsRules = {
   "@typescript-eslint/no-misused-promises": "off",
   "@typescript-eslint/no-unnecessary-type-assertion": "off",
 };
+
+const reactHookRules = reactHooks.configs.flat.recommended.rules;
 
 export default [
   {
@@ -86,7 +89,7 @@ export default [
   },
   ...tseslint.configs.recommended.map((config) => ({
     ...config,
-    files: ["tests/**/*.ts"],
+    files: ["tests/**/*.ts", "tests/**/*.tsx"],
     plugins: {
       ...(config.plugins ?? {}),
       import: importPlugin,
@@ -99,7 +102,7 @@ export default [
   })),
   ...tseslint.configs.recommendedTypeChecked.map((config) => ({
     ...config,
-    files: ["src/**/*.ts"],
+    files: ["src/**/*.ts", "src/**/*.tsx"],
     languageOptions: {
       ...(config.languageOptions ?? {}),
       globals: {
@@ -117,11 +120,13 @@ export default [
       ...(config.plugins ?? {}),
       import: importPlugin,
       "no-unsanitized": noUnsanitized,
+      "react-hooks": reactHooks,
     },
     rules: {
       ...(config.rules ?? {}),
       ...phaseZeroTsRules,
       ...importRules,
+      ...reactHookRules,
       "no-unsanitized/method": "warn",
       "no-unsanitized/property": "warn",
     },
