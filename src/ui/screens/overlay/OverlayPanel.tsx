@@ -5,6 +5,7 @@ import Button from "@mui/material/Button";
 import FormControl from "@mui/material/FormControl";
 import IconButton from "@mui/material/IconButton";
 import MenuItem from "@mui/material/MenuItem";
+import Tooltip from "@mui/material/Tooltip";
 import Paper from "@mui/material/Paper";
 import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
@@ -94,21 +95,25 @@ export function OverlayPanel(props: OverlayPanelProps) {
         </Typography>
         <Stack direction="row" spacing={0.5}>
           {!props.collapsed ? (
+            <Tooltip title="Open settings">
+              <IconButton
+                aria-label="Open settings"
+                onClick={props.onOpenSettings}
+                size="small"
+              >
+                ⚙
+              </IconButton>
+            </Tooltip>
+          ) : null}
+          <Tooltip title={props.collapsed ? "Expand overlay" : "Collapse overlay"}>
             <IconButton
-              aria-label="Open settings"
-              onClick={props.onOpenSettings}
+              aria-label={props.collapsed ? "Expand overlay" : "Collapse overlay"}
+              onClick={props.onToggleCollapse}
               size="small"
             >
-              ⚙
+              {props.collapsed ? "▢" : "▁"}
             </IconButton>
-          ) : null}
-          <IconButton
-            aria-label={props.collapsed ? "Expand overlay" : "Collapse overlay"}
-            onClick={props.onToggleCollapse}
-            size="small"
-          >
-            {props.collapsed ? "▢" : "▁"}
-          </IconButton>
+          </Tooltip>
         </Stack>
       </Stack>
 
