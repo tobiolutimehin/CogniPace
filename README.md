@@ -63,12 +63,15 @@ Load the extension in Chrome:
 
 ## Core Commands
 
-- `npm run lint`
-- `npm run typecheck`
-- `npm run test`
-- `npm run test:ui`
-- `npm run build`
 - `npm run check`
+- `npm run build`
+- `npm run format`
+- `npm run format:check`
+- `npm run lint`
+- `npm run test`
+- `npm run test:logic`
+- `npm run test:ui`
+- `npm run typecheck`
 
 ## Repo Map
 
