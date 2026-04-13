@@ -10,8 +10,8 @@ import Paper from "@mui/material/Paper";
 import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import ToggleButton from "@mui/material/ToggleButton";
 import Typography from "@mui/material/Typography";
 
 import {Difficulty, Rating, ReviewMode} from "../../../shared/types";
