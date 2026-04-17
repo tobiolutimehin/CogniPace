@@ -76,7 +76,7 @@ Rules:
 
 ### Still Missing
 
-- root `LICENSE` if repo visibility changes to public
+- none for current public-visibility prep
 
 ### Current Health
 
@@ -90,6 +90,7 @@ Rules:
 - React architecture tests enforce canonical entrypoints, layer boundaries, and repository usage rules
 - Local baseline now includes `Node 24 LTS`, `ESLint + Prettier`, `.editorconfig`, and ignored temp output under `.tmp/`
 - React is now the canonical UI model, not a provisional migration path
+- Root `LICENSE` is now present so the repo can be made public without license drift
 - GitHub merge settings now use squash-only merges with auto-delete-on-merge kept on
 - GitHub rulesets and protected-branch enforcement remain unavailable on the current private repo tier
 - GitHub Actions CI now runs `lint`, `typecheck`, `test`, and `build` on pull requests and pushes to `main`

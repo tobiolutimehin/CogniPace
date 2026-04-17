@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "CogniPace",
-  "description": "Master coding practice with spaced repetition and curated paths.",
+  "description": "Deliberate LeetCode practice with spaced repetition and curated paths.",
   "version": "0.1.0",
   "permissions": [
     "storage",

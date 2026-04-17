@@ -20,7 +20,7 @@ export function PopupHeader(props: PopupHeaderProps) {
     >
       <Stack alignItems="center" direction="row" spacing={1}>
         <BrandMark />
-        <Typography variant="subtitle1">LeetCode Reviews</Typography>
+        <Typography variant="subtitle1">CogniPace</Typography>
       </Stack>
       <Stack direction="row" spacing={0.5}>
         <Tooltip title="Refresh popup">

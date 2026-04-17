@@ -40,7 +40,7 @@ That is the core MVP.
 
 ## 2. MVP Product Summary
 
-The extension helps users practice LeetCode with spaced repetition.
+CogniPace helps users practice LeetCode with spaced repetition.
 
 There are two key ideas in the MVP:
 
@@ -173,7 +173,7 @@ Sections:
 
 1. Header
 
-- title: LeetCode Reviews
+- title: CogniPace
 - optional small refresh action
 
 2. Summary row
