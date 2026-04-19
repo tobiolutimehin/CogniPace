@@ -1,6 +1,6 @@
 /** Notification helpers and quiet-hour policy for the background worker. */
-import {getAppData, STORAGE_KEY} from "../../data/repositories/appDataRepository";
 import {readLocalStorage} from "../../data/datasources/chrome/storage";
+import {getAppData, STORAGE_KEY} from "../../data/repositories/appDataRepository";
 import {findEarliestDueDate} from "../../domain/fsrs/scheduler";
 import {buildTodayQueue} from "../../domain/queue/buildTodayQueue";
 import {StudyState} from "../../domain/types";
