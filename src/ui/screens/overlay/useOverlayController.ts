@@ -1,9 +1,10 @@
-/** Overlay controller for page detection, timer state, review state, and stale-refresh guards. */
+/** Overlay controller for page detection, timer state, structured logging, and stale-refresh guards. */
 import {useCallback, useEffect, useRef, useState} from "react";
 
 import {
   getProblemContext,
   openExtensionPage,
+  overrideLastReviewResult,
   saveReviewResult,
   upsertProblemFromPage,
 } from "../../../data/repositories/problemSessionRepository";
@@ -12,9 +13,15 @@ import {defaultReviewMode, deriveQuickRating, goalForDifficulty,} from "../../..
 import {getStudyStateSummary} from "../../../domain/fsrs/studyState";
 import {parseDifficulty} from "../../../domain/problem/difficulty";
 import {normalizeSlug, slugToTitle} from "../../../domain/problem/slug";
-import {Difficulty, Rating, ReviewMode, StudyState,} from "../../../domain/types";
+import {Difficulty, Rating, ReviewMode, StudyState} from "../../../domain/types";
 
-import {OverlayPanelProps} from "./OverlayPanel";
+import {
+  OverlayDraftLogFields,
+  OverlayHeaderStatus,
+  OverlayHeaderStatusCard,
+  OverlayHeaderStatusTone,
+  OverlayPanelProps,
+} from "./overlayPanel.types";
 
 const TIMER_TICK_MS = 250;
 
@@ -48,7 +55,42 @@ function detectTitle(documentRef: Document, slug: string): string {
   return title || slugToTitle(slug);
 }
 
-function formatDate(iso?: string): string {
+function startOfLocalDay(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function differenceInCalendarDays(left: Date, right: Date): number {
+  const dayMs = 24 * 60 * 60 * 1000;
+  const leftDay = startOfLocalDay(left).getTime();
+  const rightDay = startOfLocalDay(right).getTime();
+  return Math.round((leftDay - rightDay) / dayMs);
+}
+
+function formatMonthDay(date: Date): string {
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+  }).format(date);
+}
+
+function formatMonthDayYear(date: Date): string {
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+}
+
+function formatWeekday(date: Date): string {
+  return new Intl.DateTimeFormat(undefined, {
+    weekday: "long",
+  }).format(date);
+}
+
+export function formatSubmissionDateLabel(
+  iso?: string,
+  relativeTo = new Date()
+): string {
   if (!iso) {
     return "-";
   }
@@ -58,33 +100,179 @@ function formatDate(iso?: string): string {
     return "-";
   }
 
-  return date.toLocaleDateString();
-}
-
-function ratingLabel(rating: Rating): string {
-  switch (rating) {
-    case 0:
-      return "Again";
-    case 1:
-      return "Hard";
-    case 2:
-      return "Good";
-    default:
-      return "Easy";
+  const difference = differenceInCalendarDays(date, relativeTo);
+  if (difference === 0) {
+    return "today";
   }
+  if (difference === 1) {
+    return "tomorrow";
+  }
+  if (difference === -1) {
+    return "yesterday";
+  }
+  if (difference >= 2 && difference <= 6) {
+    return `this ${formatWeekday(date)}`;
+  }
+  if (difference <= -2 && difference >= -6) {
+    return `last ${formatWeekday(date)}`;
+  }
+  if (date.getFullYear() === relativeTo.getFullYear()) {
+    return formatMonthDay(date);
+  }
+
+  return formatMonthDayYear(date);
 }
 
-function buildStatusLabel(state: StudyState | null): string {
+function emptyDraft(): OverlayDraftLogFields {
+  return {
+    interviewPattern: "",
+    timeComplexity: "",
+    spaceComplexity: "",
+    languages: "",
+    notes: "",
+  };
+}
+
+function cloneDraft(draft: OverlayDraftLogFields): OverlayDraftLogFields {
+  return {
+    interviewPattern: draft.interviewPattern,
+    timeComplexity: draft.timeComplexity,
+    spaceComplexity: draft.spaceComplexity,
+    languages: draft.languages,
+    notes: draft.notes,
+  };
+}
+
+function draftFromStudyState(state: StudyState | null): OverlayDraftLogFields {
+  return {
+    interviewPattern: state?.interviewPattern ?? "",
+    timeComplexity: state?.timeComplexity ?? "",
+    spaceComplexity: state?.spaceComplexity ?? "",
+    languages: state?.languages ?? "",
+    notes: state?.notes ?? "",
+  };
+}
+
+function reviewPayloadFromDraft(draft: OverlayDraftLogFields) {
+  return {
+    interviewPattern: draft.interviewPattern,
+    timeComplexity: draft.timeComplexity,
+    spaceComplexity: draft.spaceComplexity,
+    languages: draft.languages,
+    notes: draft.notes,
+  };
+}
+
+function buildSessionLabel(
+  state: StudyState | null,
+  sessionMode?: ReviewMode
+): string {
+  const mode = sessionMode ?? defaultReviewMode(state);
+  return mode === "FULL_SOLVE" ? "First solve" : "Recall review";
+}
+
+function buildDueTone(
+  iso?: string,
+  relativeTo = new Date()
+): OverlayHeaderStatusTone {
+  if (!iso) {
+    return "neutral";
+  }
+
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) {
+    return "neutral";
+  }
+
+  const difference = differenceInCalendarDays(date, relativeTo);
+  if (difference <= 0) {
+    return "danger";
+  }
+  if (difference <= 7) {
+    return "warning";
+  }
+
+  return "accent";
+}
+
+function buildHistoryStatusCard(
+  label: string,
+  iso: string,
+  tone: OverlayHeaderStatusTone,
+  emphasized = false
+): OverlayHeaderStatusCard {
+  return {
+    emphasized,
+    label,
+    primary: formatSubmissionDateLabel(iso),
+    secondary: "",
+    tone,
+  };
+}
+
+function buildHeaderStatus(state: StudyState | null): OverlayHeaderStatus {
   const summary = getStudyStateSummary(state);
-  const labels: string[] = [];
+  const cards: OverlayHeaderStatusCard[] = [];
 
-  if (summary.isDue) {
-    labels.push("Due now");
+  if (summary.lastReviewedAt) {
+    cards.push(
+      buildHistoryStatusCard(
+        "Last submitted",
+        summary.lastReviewedAt,
+        "neutral"
+      )
+    );
   }
 
-  labels.push(summary.reviewCount > 0 ? "Repeat review" : "First solve");
+  if (summary.nextReviewAt) {
+    cards.push(
+      buildHistoryStatusCard(
+        "Next due",
+        summary.nextReviewAt,
+        buildDueTone(summary.nextReviewAt),
+        true
+      )
+    );
+  }
 
-  return labels.join(" · ");
+  if (cards.length > 0) {
+    return {
+      cards,
+      kind: "history",
+    };
+  }
+
+  return {
+    cards: [
+      {
+        label: "No submissions yet",
+        primary: "After first submission",
+        secondary: "",
+        tone: "neutral",
+      },
+    ],
+    kind: "empty",
+  };
+}
+
+function draftsEqual(
+  left: OverlayDraftLogFields,
+  right: OverlayDraftLogFields
+): boolean {
+  return (
+    left.interviewPattern === right.interviewPattern &&
+    left.timeComplexity === right.timeComplexity &&
+    left.spaceComplexity === right.spaceComplexity &&
+    left.languages === right.languages &&
+    left.notes === right.notes
+  );
+}
+
+interface SubmittedSessionSnapshot {
+  draft: OverlayDraftLogFields;
+  mode: ReviewMode;
+  rating: Rating;
+  solveTimeMs?: number;
 }
 
 interface OverlayState {
@@ -93,12 +281,12 @@ interface OverlayState {
   currentDifficulty: Difficulty;
   currentState: StudyState | null;
   currentTitle: string;
+  draft: OverlayDraftLogFields;
   draftContextSlug: string;
-  draftNotes: string;
   feedbackIsError: boolean;
   feedbackMessage: string;
-  selectedMode: ReviewMode;
   selectedRating: Rating;
+  submittedSession: SubmittedSessionSnapshot | null;
 }
 
 const initialOverlayState: OverlayState = {
@@ -107,12 +295,12 @@ const initialOverlayState: OverlayState = {
   currentDifficulty: "Unknown",
   currentState: null,
   currentTitle: "",
+  draft: emptyDraft(),
   draftContextSlug: "",
-  draftNotes: "",
   feedbackIsError: false,
   feedbackMessage: "",
-  selectedMode: "FULL_SOLVE",
   selectedRating: 2,
+  submittedSession: null,
 };
 
 export interface OverlayControllerEnvironment {
@@ -170,22 +358,18 @@ export function useOverlayController(
   }, []);
 
   const resetTimer = useCallback(
-    (showFeedback = false) => {
+    () => {
       timerStartedAtMsRef.current = null;
       pausedElapsedMsRef.current = 0;
       clearTick();
       setElapsedMs(0);
       setTimerRunning(false);
-
-      if (showFeedback) {
-        setFeedback("Timer restarted.");
-      }
     },
-    [clearTick, setFeedback]
+    [clearTick]
   );
 
   const pauseTimer = useCallback(
-    (showFeedback = false) => {
+    () => {
       if (!isTimerRunning() || timerStartedAtMsRef.current === null) {
         return;
       }
@@ -196,32 +380,34 @@ export function useOverlayController(
       clearTick();
       setElapsedMs(nextElapsed);
       setTimerRunning(false);
-
-      if (showFeedback) {
-        setFeedback("Timer paused.");
-      }
     },
-    [clearTick, getElapsedMs, isTimerRunning, setFeedback]
+    [clearTick, getElapsedMs, isTimerRunning]
   );
 
-  const startTimer = useCallback(
-    (showFeedback = true) => {
+  const beginTimer = useCallback(
+    () => {
       if (isTimerRunning()) {
         return;
       }
-
       timerStartedAtMsRef.current = Date.now();
       tickHandleRef.current = windowRef.setInterval(() => {
         setElapsedMs(getElapsedMs());
       }, TIMER_TICK_MS);
       setElapsedMs(getElapsedMs());
       setTimerRunning(true);
-
-      if (showFeedback) {
-        setFeedback("Timer started.");
-      }
     },
-    [getElapsedMs, isTimerRunning, setFeedback, windowRef]
+    [getElapsedMs, isTimerRunning, windowRef]
+  );
+
+  const startTimer = useCallback(
+    () => {
+      if (state.submittedSession) {
+        return;
+      }
+
+      beginTimer();
+    },
+    [beginTimer, state.submittedSession]
   );
 
   const refreshCurrentPage = useCallback(
@@ -276,6 +462,7 @@ export function useOverlayController(
         problemContext.problem?.difficulty ?? detectedDifficulty;
       const currentState = problemContext.studyState ?? null;
       const currentTitle = problemContext.problem?.title ?? title;
+      const nextDraft = draftFromStudyState(currentState);
 
       setState((current) => ({
         ...current,
@@ -284,12 +471,12 @@ export function useOverlayController(
         currentTitle,
         draftContextSlug:
           current.draftContextSlug !== slug ? slug : current.draftContextSlug,
-        draftNotes:
+        draft:
           current.draftContextSlug !== slug
-            ? (currentState?.notes ?? "")
-            : current.draftNotes,
+            ? nextDraft
+            : current.draft,
         feedbackIsError: false,
-        selectedMode: defaultReviewMode(currentState),
+        feedbackMessage: "",
         selectedRating:
           current.draftContextSlug !== slug
             ? (currentState?.lastRating ?? 2)
@@ -304,14 +491,15 @@ export function useOverlayController(
       slug: string,
       rating: Rating,
       mode: ReviewMode,
-      solveTimeMs?: number
+      solveTimeMs: number | undefined,
+      draft: OverlayDraftLogFields
     ): Promise<boolean> => {
       const response = await saveReviewResult({
         slug,
         rating,
         mode,
         solveTimeMs,
-        notes: state.draftNotes,
+        ...reviewPayloadFromDraft(draft),
         source: "overlay",
       });
 
@@ -322,120 +510,55 @@ export function useOverlayController(
 
       return true;
     },
-    [setFeedback, state.draftNotes]
+    [setFeedback]
   );
 
-  const onQuickSubmit = useCallback(async (): Promise<void> => {
-    if (!state.activeSlug) {
-      return;
-    }
+  const persistOverride = useCallback(
+    async (
+      slug: string,
+      rating: Rating,
+      mode: ReviewMode,
+      solveTimeMs: number | undefined,
+      draft: OverlayDraftLogFields
+    ): Promise<boolean> => {
+      const response = await overrideLastReviewResult({
+        slug,
+        rating,
+        mode,
+        solveTimeMs,
+        ...reviewPayloadFromDraft(draft),
+        source: "overlay",
+      });
 
-    setFeedback("Logging quick submit...");
+      if (!response.ok) {
+        setFeedback(response.error ?? "Failed to save override.", true);
+        return false;
+      }
 
-    if (isTimerRunning()) {
-      pauseTimer(false);
-    }
+      return true;
+    },
+    [setFeedback]
+  );
 
-    const solveTimeMs = getElapsedMs() > 0 ? getElapsedMs() : undefined;
-    const rating = deriveQuickRating(
-      solveTimeMs,
-      goalForDifficulty(state.currentDifficulty)
-    );
-
-    setState((current) => ({
-      ...current,
-      selectedRating: rating,
-    }));
-
-    const saved = await persistReview(
-      state.activeSlug,
-      rating,
-      defaultReviewMode(state.currentState),
-      solveTimeMs
-    );
-    if (!saved) {
-      return;
-    }
-
-    if (solveTimeMs) {
-      setFeedback(
-        `Logged ${ratingLabel(rating)} from ${formatClock(
-          solveTimeMs
-        )} against a ${formatClock(goalForDifficulty(state.currentDifficulty))} goal.`
-      );
-    } else {
-      setFeedback("Logged Good. Expand if you want to change the rating.");
-    }
-
-    await refreshCurrentPage(state.activeSlug);
-  }, [
-    getElapsedMs,
-    isTimerRunning,
-    pauseTimer,
-    persistReview,
-    refreshCurrentPage,
-    setFeedback,
-    state.activeSlug,
-    state.currentDifficulty,
-    state.currentState,
-  ]);
-
-  const onSaveReview = useCallback(async (): Promise<void> => {
-    if (!state.activeSlug) {
-      return;
-    }
-
-    setFeedback("Saving review...");
-
-    if (isTimerRunning()) {
-      pauseTimer(false);
-    }
-
-    const solveTimeMs = getElapsedMs() > 0 ? getElapsedMs() : undefined;
-    const saved = await persistReview(
-      state.activeSlug,
-      state.selectedRating,
-      state.selectedMode,
-      solveTimeMs
-    );
-    if (!saved) {
-      return;
-    }
-
-    setFeedback("Saved. Refreshing schedule...");
-    await refreshCurrentPage(state.activeSlug);
-  }, [
-    getElapsedMs,
-    isTimerRunning,
-    pauseTimer,
-    persistReview,
-    refreshCurrentPage,
-    setFeedback,
-    state.activeSlug,
-    state.selectedMode,
-    state.selectedRating,
-  ]);
-
-  const saveCompactReview = useCallback(
-    async (rating: Rating, startMessage: string): Promise<void> => {
-      if (!state.activeSlug) {
+  const commitSubmission = useCallback(
+    async (rating: Rating): Promise<void> => {
+      if (!state.activeSlug || state.submittedSession) {
         return;
       }
 
-      setFeedback(startMessage);
-
       if (isTimerRunning()) {
-        pauseTimer(false);
+        pauseTimer();
       }
 
       const solveTimeMs = getElapsedMs() > 0 ? getElapsedMs() : undefined;
       const mode = defaultReviewMode(state.currentState);
-
+      const draftSnapshot = cloneDraft(state.draft);
       const saved = await persistReview(
         state.activeSlug,
         rating,
         mode,
-        solveTimeMs
+        solveTimeMs,
+        draftSnapshot
       );
       if (!saved) {
         return;
@@ -444,19 +567,14 @@ export function useOverlayController(
       setState((current) => ({
         ...current,
         collapsed: false,
-        selectedMode: mode,
         selectedRating: rating,
+        submittedSession: {
+          draft: draftSnapshot,
+          mode,
+          rating,
+          solveTimeMs,
+        },
       }));
-
-      if (solveTimeMs) {
-        setFeedback(
-          `Logged ${ratingLabel(rating)} from ${formatClock(
-            solveTimeMs
-          )}. Details open below.`
-        );
-      } else {
-        setFeedback(`Logged ${ratingLabel(rating)}. Details open below.`);
-      }
 
       await refreshCurrentPage(state.activeSlug);
     },
@@ -466,14 +584,19 @@ export function useOverlayController(
       pauseTimer,
       persistReview,
       refreshCurrentPage,
-      setFeedback,
       state.activeSlug,
       state.currentState,
+      state.draft,
+      state.submittedSession,
     ]
   );
 
+  const onSubmit = useCallback(async (): Promise<void> => {
+    await commitSubmission(state.selectedRating);
+  }, [commitSubmission, state.selectedRating]);
+
   const onCompactSubmit = useCallback(async (): Promise<void> => {
-    if (!state.activeSlug) {
+    if (!state.activeSlug || state.submittedSession) {
       return;
     }
 
@@ -481,17 +604,74 @@ export function useOverlayController(
       getElapsedMs() > 0 ? getElapsedMs() : undefined,
       goalForDifficulty(state.currentDifficulty)
     );
-    await saveCompactReview(rating, "Submitting review...");
+    await commitSubmission(rating);
   }, [
+    commitSubmission,
+    getElapsedMs,
     state.activeSlug,
     state.currentDifficulty,
-    saveCompactReview,
-    getElapsedMs,
+    state.submittedSession,
   ]);
 
-  const onCompactFail = useCallback(async (): Promise<void> => {
-    await saveCompactReview(0, "Logging failure...");
-  }, [saveCompactReview]);
+  const onFailReview = useCallback(async (): Promise<void> => {
+    await commitSubmission(0);
+  }, [commitSubmission]);
+
+  const onSaveOverride = useCallback(async (): Promise<void> => {
+    if (!state.activeSlug || !state.submittedSession) {
+      return;
+    }
+
+    const draftSnapshot = cloneDraft(state.draft);
+    const saved = await persistOverride(
+      state.activeSlug,
+      state.selectedRating,
+      state.submittedSession.mode,
+      state.submittedSession.solveTimeMs,
+      draftSnapshot
+    );
+    if (!saved) {
+      return;
+    }
+
+    setState((current) => ({
+      ...current,
+      submittedSession: {
+        ...current.submittedSession!,
+        draft: draftSnapshot,
+        rating: state.selectedRating,
+      },
+    }));
+    await refreshCurrentPage(state.activeSlug);
+  }, [
+    persistOverride,
+    refreshCurrentPage,
+    state.activeSlug,
+    state.draft,
+    state.selectedRating,
+    state.submittedSession,
+  ]);
+
+  const restartSession = useCallback(
+    (startTimerAfterRestart: boolean) => {
+      resetTimer();
+      setState((current) => ({
+        ...current,
+        draft: draftFromStudyState(current.currentState),
+        feedbackIsError: false,
+        feedbackMessage: "",
+        selectedRating: current.currentState?.lastRating ?? 2,
+        submittedSession: null,
+      }));
+
+      if (startTimerAfterRestart) {
+        windowRef.setTimeout(() => {
+          beginTimer();
+        }, 0);
+      }
+    },
+    [beginTimer, resetTimer, windowRef]
+  );
 
   const scheduleWarmRefreshes = useCallback(
     (slug: string) => {
@@ -514,7 +694,7 @@ export function useOverlayController(
       ++requestTokenRef.current;
       activeSlugRef.current = "";
       clearWarmRefreshes();
-      resetTimer(false);
+      resetTimer();
       setTimerRunning(false);
       setState((current) => ({
         ...current,
@@ -522,12 +702,12 @@ export function useOverlayController(
         currentDifficulty: "Unknown",
         currentState: null,
         currentTitle: "",
+        draft: emptyDraft(),
         draftContextSlug: "",
-        draftNotes: "",
         feedbackIsError: false,
         feedbackMessage: "",
-        selectedMode: "FULL_SOLVE",
         selectedRating: 2,
+        submittedSession: null,
       }));
       return;
     }
@@ -539,7 +719,7 @@ export function useOverlayController(
     ++requestTokenRef.current;
     activeSlugRef.current = slug;
     clearWarmRefreshes();
-    resetTimer(false);
+    resetTimer();
     setTimerRunning(false);
     setState((current) => ({
       ...current,
@@ -547,12 +727,12 @@ export function useOverlayController(
       currentState: null,
       currentTitle: detectTitle(documentRef, slug),
       currentDifficulty: detectDifficulty(documentRef),
+      draft: emptyDraft(),
       draftContextSlug: "",
-      draftNotes: "",
       feedbackIsError: false,
       feedbackMessage: "",
-      selectedMode: "FULL_SOLVE",
       selectedRating: 2,
+      submittedSession: null,
     }));
 
     await refreshCurrentPage(slug);
@@ -600,59 +780,68 @@ export function useOverlayController(
     return {panelProps: null};
   }
 
-  const studyStateSummary = getStudyStateSummary(state.currentState);
+  const sessionMode =
+    state.submittedSession?.mode ?? defaultReviewMode(state.currentState);
+  const canSubmit = state.submittedSession === null;
+  const canSaveOverride =
+    state.submittedSession !== null &&
+    (
+      state.submittedSession.rating !== state.selectedRating ||
+      !draftsEqual(state.submittedSession.draft, state.draft)
+    );
 
   return {
     panelProps: {
-      canReset: timerRunning || elapsedMs > 0,
+      canEditTimer: canSubmit,
+      canResetTimer: canSubmit && (timerRunning || elapsedMs > 0),
+      canRestartSession: state.submittedSession !== null,
+      canSaveOverride,
+      canSubmit,
       collapsed: state.collapsed,
       difficulty: state.currentDifficulty,
-      feedback:
-        state.feedbackMessage ||
-        (studyStateSummary.nextReviewAt
-          ? `Next review ${formatDate(studyStateSummary.nextReviewAt)}`
-          : "Expand to rate or add notes."),
+      draft: state.draft,
+      feedback: state.feedbackMessage,
       feedbackIsError: state.feedbackIsError,
       isTimerRunning: timerRunning,
-      nextReviewLabel: studyStateSummary.nextReviewAt
-        ? `Next review ${formatDate(studyStateSummary.nextReviewAt)}`
-        : "Expand to rate or add notes.",
-      notes: state.draftNotes,
-      onChangeMode: (mode: ReviewMode) => {
+      onChangeDraft: (field, value) => {
         setState((current) => ({
           ...current,
-          selectedMode: mode,
-        }));
-      },
-      onChangeNotes: (value: string) => {
-        setState((current) => ({
-          ...current,
-          draftNotes: value,
+          draft: {
+            ...current.draft,
+            [field]: value,
+          },
         }));
       },
       onCompactSubmit: () => {
         void onCompactSubmit();
       },
-      onCompactFail: () => {
-        void onCompactFail();
+      onFailReview: () => {
+        void onFailReview();
       },
       onOpenSettings: () => {
         void openExtensionPage("dashboard.html?view=settings");
       },
       onPauseTimer: () => {
-        pauseTimer(true);
-      },
-      onQuickSubmit: () => {
-        void onQuickSubmit();
-      },
-      onRefresh: () => {
-        void refreshCurrentPage(state.activeSlug);
+        if (!canSubmit) {
+          return;
+        }
+        pauseTimer();
       },
       onResetTimer: () => {
-        resetTimer(true);
+        if (!canSubmit) {
+          return;
+        }
+        resetTimer();
       },
-      onSaveReview: () => {
-        void onSaveReview();
+      onRestartSession: () => {
+        if (!state.submittedSession) {
+          return;
+        }
+
+        restartSession(false);
+      },
+      onSaveOverride: () => {
+        void onSaveOverride();
       },
       onSelectRating: (rating: Rating) => {
         setState((current) => ({
@@ -661,7 +850,17 @@ export function useOverlayController(
         }));
       },
       onStartTimer: () => {
-        startTimer(true);
+        if (state.submittedSession) {
+          restartSession(true);
+          return;
+        }
+        if (!canSubmit) {
+          return;
+        }
+        startTimer();
+      },
+      onSubmit: () => {
+        void onSubmit();
       },
       onToggleCollapse: () => {
         setState((current) => ({
@@ -669,12 +868,9 @@ export function useOverlayController(
           collapsed: !current.collapsed,
         }));
       },
-      saveButtonLabel: studyStateSummary.reviewCount
-        ? "Save Override"
-        : "Save First Solve",
-      selectedMode: state.selectedMode,
+      headerStatus: buildHeaderStatus(state.currentState),
       selectedRating: state.selectedRating,
-      statusLabel: buildStatusLabel(state.currentState),
+      sessionLabel: buildSessionLabel(state.currentState, sessionMode),
       targetDisplay: formatClock(goalForDifficulty(state.currentDifficulty)),
       timerDisplay: formatClock(elapsedMs),
       title: state.currentTitle,
