@@ -9,8 +9,19 @@ import {buildDashboardUrl, readDashboardViewFromSearch,} from "../src/ui/navigat
 import {filterLibraryRows} from "../src/ui/presentation/library";
 import {AppProviders} from "../src/ui/providers";
 import {DashboardApp} from "../src/ui/screens/dashboard/DashboardApp";
+import {
+  cloneDraft,
+  draftFromStudyState,
+  draftsEqual,
+  emptyDraft,
+  reviewPayloadFromDraft,
+} from "../src/ui/screens/overlay/controller/draftFields";
+import {
+  buildDueTone,
+  buildHeaderStatus,
+  formatSubmissionDateLabel,
+} from "../src/ui/screens/overlay/controller/headerStatus";
 import {OverlayRoot} from "../src/ui/screens/overlay/OverlayRoot";
-import {formatSubmissionDateLabel} from "../src/ui/screens/overlay/useOverlayController";
 
 const sendMessageMock = vi.fn();
 const tabsCreateMock = vi.fn();
@@ -242,6 +253,71 @@ describe("route and selector contracts", () => {
     expect(
       formatSubmissionDateLabel("2025-12-31T12:00:00", relativeTo)
     ).toBe("Dec 31, 2025");
+  });
+
+  it("maps structured log drafts to and from study state", () => {
+    const studyState: StudyState = {
+      attemptHistory: [],
+      interviewPattern: "Sliding window",
+      languages: "TypeScript",
+      notes: "Track left and right bounds.",
+      spaceComplexity: "O(1)",
+      suspended: false,
+      tags: [],
+      timeComplexity: "O(n)",
+    };
+
+    const draft = draftFromStudyState(studyState);
+    expect(draft).toEqual({
+      interviewPattern: "Sliding window",
+      languages: "TypeScript",
+      notes: "Track left and right bounds.",
+      spaceComplexity: "O(1)",
+      timeComplexity: "O(n)",
+    });
+    expect(cloneDraft(draft)).toEqual(draft);
+    expect(draftsEqual(draft, cloneDraft(draft))).toBe(true);
+    expect(draftsEqual(draft, emptyDraft())).toBe(false);
+    expect(reviewPayloadFromDraft(draft)).toEqual(draft);
+  });
+
+  it("builds header cards and due tones from review state", () => {
+    const relativeTo = new Date("2026-04-19T10:00:00");
+    const studyState: StudyState = {
+      attemptHistory: [
+        {
+          mode: "RECALL",
+          rating: 2,
+          reviewedAt: "2026-04-18T12:00:00.000Z",
+        },
+      ],
+      fsrsCard: {
+        difficulty: 4,
+        due: "2026-04-20T12:00:00.000Z",
+        elapsedDays: 1,
+        lapses: 0,
+        learningSteps: 0,
+        reps: 1,
+        scheduledDays: 2,
+        stability: 2,
+        state: "Review",
+      },
+      suspended: false,
+      tags: [],
+    };
+
+    const headerStatus = buildHeaderStatus(studyState);
+    expect(headerStatus.kind).toBe("history");
+    expect(headerStatus.cards.map((card) => card.label)).toEqual([
+      "Last submitted",
+      "Next due",
+    ]);
+    expect(headerStatus.cards[0]?.primary).toBe("yesterday");
+    expect(headerStatus.cards[1]?.primary).toBe("tomorrow");
+    expect(headerStatus.cards[1]?.tone).toBe("warning");
+    expect(buildDueTone("2026-04-19T12:00:00.000Z", relativeTo)).toBe("danger");
+    expect(buildDueTone("2026-04-21T12:00:00.000Z", relativeTo)).toBe("warning");
+    expect(buildDueTone("2026-05-10T12:00:00.000Z", relativeTo)).toBe("accent");
   });
 });
 

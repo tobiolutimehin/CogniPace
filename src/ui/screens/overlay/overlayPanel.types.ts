@@ -24,45 +24,97 @@ export interface OverlayHeaderStatusCard {
 
 export type OverlayHeaderStatus =
   | {
-  cards: OverlayHeaderStatusCard[];
-  kind: "empty";
-}
+    cards: OverlayHeaderStatusCard[];
+    kind: "empty";
+  }
   | {
-  cards: OverlayHeaderStatusCard[];
-  kind: "history";
-};
+    cards: OverlayHeaderStatusCard[];
+    kind: "history";
+  };
 
-export interface OverlayPanelProps {
-  canEditTimer: boolean;
-  canResetTimer: boolean;
-  canRestartSession: boolean;
-  canSaveOverride: boolean;
-  canSubmit: boolean;
-  collapsed: boolean;
+export type OverlayDraftChangeHandler = (
+  field: keyof OverlayDraftLogFields,
+  value: string
+) => void;
+
+export interface OverlayHeaderSectionViewModel {
   difficulty: Difficulty;
-  draft: OverlayDraftLogFields;
-  feedback: string;
-  feedbackIsError: boolean;
-  isTimerRunning: boolean;
-  onChangeDraft: (
-    field: keyof OverlayDraftLogFields,
-    value: string
-  ) => void;
-  onCompactSubmit: () => void;
-  onFailReview: () => void;
   onOpenSettings: () => void;
-  onPauseTimer: () => void;
-  onResetTimer: () => void;
-  onRestartSession: () => void;
-  onSaveOverride: () => void;
-  onSelectRating: (rating: Rating) => void;
-  onStartTimer: () => void;
-  onSubmit: () => void;
   onToggleCollapse: () => void;
-  headerStatus: OverlayHeaderStatus;
-  selectedRating: Rating;
   sessionLabel: string;
-  targetDisplay: string;
-  timerDisplay: string;
+  status: OverlayHeaderStatus;
   title: string;
 }
+
+export interface OverlayTimerSectionViewModel {
+  canPause: boolean;
+  canReset: boolean;
+  canStart: boolean;
+  display: string;
+  isRunning: boolean;
+  onPause: () => void;
+  onReset: () => void;
+  onStart: () => void;
+  startLabel: string;
+  targetDisplay?: string;
+}
+
+export interface OverlayAssessmentSectionViewModel {
+  onSelectRating: (rating: Rating) => void;
+  selectedRating: Rating;
+}
+
+export interface OverlayLogSectionViewModel {
+  draft: OverlayDraftLogFields;
+  onChange: OverlayDraftChangeHandler;
+}
+
+export interface OverlayFeedbackViewModel {
+  isError: boolean;
+  message: string;
+}
+
+export interface CollapsedOverlayActionsViewModel {
+  canFail: boolean;
+  canSubmit: boolean;
+  onFail: () => void;
+  onSubmit: () => void;
+  onToggleCollapse: () => void;
+}
+
+export interface ExpandedOverlayActionsViewModel {
+  canFail: boolean;
+  canRestart: boolean;
+  canSubmit: boolean;
+  canUpdate: boolean;
+  onFail: () => void;
+  onRestart: () => void;
+  onSubmit: () => void;
+  onUpdate: () => void;
+}
+
+export interface CollapsedOverlayViewModel {
+  actions: CollapsedOverlayActionsViewModel;
+  timer: OverlayTimerSectionViewModel;
+}
+
+export interface ExpandedOverlayViewModel {
+  actions: ExpandedOverlayActionsViewModel;
+  assessment: OverlayAssessmentSectionViewModel;
+  feedback: OverlayFeedbackViewModel | null;
+  header: OverlayHeaderSectionViewModel;
+  log: OverlayLogSectionViewModel;
+  timer: OverlayTimerSectionViewModel & {
+    targetDisplay: string;
+  };
+}
+
+export type OverlayRenderModel =
+  | {
+    model: CollapsedOverlayViewModel;
+    variant: "collapsed";
+  }
+  | {
+    model: ExpandedOverlayViewModel;
+    variant: "expanded";
+  };

@@ -64,6 +64,7 @@ Responsibilities:
 - detect page context and current problem metadata
 - manage timer, structured log fields, FSRS assessment, and review-session actions
 - keep the compact inlay and expanded overlay panel separated inside `src/ui/screens/overlay/*`
+- compose page bootstrap in `useOverlayController.ts`, extracted helpers/hooks in `controller/*`, and explicit collapsed/expanded sections in `components/*`
 - save new review results and last-review overrides through runtime messaging
 
 ### Library Redirect
@@ -214,8 +215,10 @@ This keeps React screens free of direct Chrome API calls and keeps domain logic 
 - Queue logic: `src/domain/queue/*`
 - Runtime contracts: `src/extension/runtime/contracts.ts`
 - Background router and handlers: `src/extension/background/*`
-- Overlay panel split: `src/ui/screens/overlay/OverlayPanel.tsx`, `src/ui/screens/overlay/ExpandedOverlayPanel.tsx`,
-  `src/ui/screens/overlay/overlayPanel.types.ts`
+- Overlay controller orchestration: `src/ui/screens/overlay/useOverlayController.ts`
+- Overlay controller helpers/hooks: `src/ui/screens/overlay/controller/*`
+- Overlay surface variants and sections: `src/ui/screens/overlay/OverlayPanel.tsx`,
+  `src/ui/screens/overlay/components/*`, `src/ui/screens/overlay/overlayPanel.types.ts`
 
 ## Runtime Message Flow
 

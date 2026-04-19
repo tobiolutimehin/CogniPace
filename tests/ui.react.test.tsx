@@ -7,6 +7,11 @@ import {createMockAppShellPayload} from "../src/ui/mockData";
 import {AppProviders} from "../src/ui/providers";
 import {DashboardApp} from "../src/ui/screens/dashboard/DashboardApp";
 import {OverlayPanel} from "../src/ui/screens/overlay/OverlayPanel";
+import {
+  CollapsedOverlayViewModel,
+  ExpandedOverlayViewModel,
+  OverlayRenderModel,
+} from "../src/ui/screens/overlay/overlayPanel.types";
 import {PopupApp} from "../src/ui/screens/popup/PopupApp";
 
 const sendMessageMock = vi.fn();
@@ -370,42 +375,60 @@ describe("DashboardApp", () => {
 });
 
 describe("OverlayPanel", () => {
-  function renderOverlayPanel(
-    overrides: Partial<Parameters<typeof OverlayPanel>[0]> = {}
-  ) {
-    return render(
-      <AppProviders>
-        <OverlayPanel
-          canEditTimer
-          canResetTimer
-          canRestartSession={false}
-          canSaveOverride={false}
-          canSubmit
-          collapsed={false}
-          difficulty="Medium"
-          draft={{
-            interviewPattern: "",
-            timeComplexity: "",
-            spaceComplexity: "",
-            languages: "",
-            notes: "",
-          }}
-          feedback="Last reviewed today."
-          feedbackIsError={false}
-          isTimerRunning={false}
-          onChangeDraft={() => undefined}
-          onCompactSubmit={() => undefined}
-          onFailReview={() => undefined}
-          onOpenSettings={() => undefined}
-          onPauseTimer={() => undefined}
-          onResetTimer={() => undefined}
-          onRestartSession={() => undefined}
-          onSaveOverride={() => undefined}
-          onSelectRating={() => undefined}
-          onStartTimer={() => undefined}
-          onSubmit={() => undefined}
-          onToggleCollapse={() => undefined}
-          headerStatus={{
+  type ExpandedRenderModelOverrides = {
+    actions?: Partial<ExpandedOverlayViewModel["actions"]>;
+    assessment?: Partial<ExpandedOverlayViewModel["assessment"]>;
+    feedback?: Partial<NonNullable<ExpandedOverlayViewModel["feedback"]>> | null;
+    header?: Partial<ExpandedOverlayViewModel["header"]>;
+    log?: {
+      draft?: Partial<ExpandedOverlayViewModel["log"]["draft"]>;
+      onChange?: ExpandedOverlayViewModel["log"]["onChange"];
+    };
+    timer?: Partial<ExpandedOverlayViewModel["timer"]>;
+  };
+
+  type CollapsedRenderModelOverrides = {
+    actions?: Partial<CollapsedOverlayViewModel["actions"]>;
+    timer?: Partial<CollapsedOverlayViewModel["timer"]>;
+  };
+
+  function makeExpandedRenderModel(
+    overrides: ExpandedRenderModelOverrides = {}
+  ): OverlayRenderModel {
+    const feedback =
+      overrides.feedback === null
+        ? null
+        : {
+          isError: false,
+          message: "Last reviewed today.",
+          ...(overrides.feedback ?? {}),
+        };
+
+    return {
+      model: {
+        actions: {
+          canFail: true,
+          canRestart: false,
+          canSubmit: true,
+          canUpdate: false,
+          onFail: () => undefined,
+          onRestart: () => undefined,
+          onSubmit: () => undefined,
+          onUpdate: () => undefined,
+          ...overrides.actions,
+        },
+        assessment: {
+          onSelectRating: () => undefined,
+          selectedRating: 2,
+          ...overrides.assessment,
+        },
+        feedback,
+        header: {
+          difficulty: "Medium",
+          onOpenSettings: () => undefined,
+          onToggleCollapse: () => undefined,
+          sessionLabel: "Recall review",
+          status: {
             kind: "history",
             cards: [
               {
@@ -422,14 +445,73 @@ describe("OverlayPanel", () => {
                 tone: "warning",
               },
             ],
-          }}
-          selectedRating={2}
-          sessionLabel="Recall review"
-          targetDisplay="35:00"
-          timerDisplay="00:00"
-          title="Group Anagrams"
-          {...overrides}
-        />
+          },
+          title: "Group Anagrams",
+          ...overrides.header,
+        },
+        log: {
+          draft: {
+            interviewPattern: "",
+            timeComplexity: "",
+            spaceComplexity: "",
+            languages: "",
+            notes: "",
+            ...(overrides.log?.draft ?? {}),
+          },
+          onChange: overrides.log?.onChange ?? (() => undefined),
+        },
+        timer: {
+          canPause: true,
+          canReset: true,
+          canStart: true,
+          display: "00:00",
+          isRunning: false,
+          onPause: () => undefined,
+          onReset: () => undefined,
+          onStart: () => undefined,
+          startLabel: "Start timer",
+          targetDisplay: "35:00",
+          ...overrides.timer,
+        },
+      },
+      variant: "expanded",
+    };
+  }
+
+  function makeCollapsedRenderModel(
+    overrides: CollapsedRenderModelOverrides = {}
+  ): OverlayRenderModel {
+    return {
+      model: {
+        actions: {
+          canFail: true,
+          canSubmit: true,
+          onFail: () => undefined,
+          onSubmit: () => undefined,
+          onToggleCollapse: () => undefined,
+          ...overrides.actions,
+        },
+        timer: {
+          canPause: true,
+          canReset: true,
+          canStart: true,
+          display: "03:12",
+          isRunning: false,
+          onPause: () => undefined,
+          onReset: () => undefined,
+          onStart: () => undefined,
+          startLabel: "Start timer",
+          ...overrides.timer,
+        },
+      },
+      variant: "collapsed",
+    };
+  }
+
+  function renderOverlayPanel(renderModel = makeExpandedRenderModel()) {
+    return render(
+      <AppProviders>
+        <OverlayPanel renderModel={renderModel}/>
       </AppProviders>
     );
   }
@@ -438,10 +520,16 @@ describe("OverlayPanel", () => {
     const onSelectRating = vi.fn();
     const onChangeDraft = vi.fn();
 
-    const {rerender} = renderOverlayPanel({
-      onChangeDraft,
-      onSelectRating,
-    });
+    const {rerender} = renderOverlayPanel(
+      makeExpandedRenderModel({
+        assessment: {
+          onSelectRating,
+        },
+        log: {
+          onChange: onChangeDraft,
+        },
+      })
+    );
 
     expect(screen.getByRole("button", {name: "Open settings"})).toBeTruthy();
     expect(
@@ -469,58 +557,15 @@ describe("OverlayPanel", () => {
     rerender(
       <AppProviders>
         <OverlayPanel
-          canEditTimer
-          canResetTimer
-          canRestartSession={false}
-          canSaveOverride={false}
-          canSubmit
-          collapsed={false}
-          difficulty="Medium"
-          draft={{
-            interviewPattern: "",
-            timeComplexity: "",
-            spaceComplexity: "",
-            languages: "",
-            notes: "",
-          }}
-          feedback="Last reviewed today."
-          feedbackIsError={false}
-          isTimerRunning={false}
-          onChangeDraft={onChangeDraft}
-          onCompactSubmit={() => undefined}
-          onFailReview={() => undefined}
-          onOpenSettings={() => undefined}
-          onPauseTimer={() => undefined}
-          onResetTimer={() => undefined}
-          onRestartSession={() => undefined}
-          onSaveOverride={() => undefined}
-          onSelectRating={onSelectRating}
-          onStartTimer={() => undefined}
-          onSubmit={() => undefined}
-          onToggleCollapse={() => undefined}
-          headerStatus={{
-            kind: "history",
-            cards: [
-              {
-                label: "Last submitted",
-                primary: "Mar 29",
-                secondary: "",
-                tone: "neutral",
-              },
-              {
-                emphasized: true,
-                label: "Next due",
-                primary: "Mar 30",
-                secondary: "",
-                tone: "warning",
-              },
-            ],
-          }}
-          selectedRating={0}
-          sessionLabel="Recall review"
-          targetDisplay="35:00"
-          timerDisplay="00:00"
-          title="Group Anagrams"
+          renderModel={makeExpandedRenderModel({
+            assessment: {
+              onSelectRating,
+              selectedRating: 0,
+            },
+            log: {
+              onChange: onChangeDraft,
+            },
+          })}
         />
       </AppProviders>
     );
@@ -546,10 +591,14 @@ describe("OverlayPanel", () => {
     const onOpenSettings = vi.fn();
     const onToggleCollapse = vi.fn();
 
-    renderOverlayPanel({
-      onOpenSettings,
-      onToggleCollapse,
-    });
+    renderOverlayPanel(
+      makeExpandedRenderModel({
+        header: {
+          onOpenSettings,
+          onToggleCollapse,
+        },
+      })
+    );
 
     fireEvent.click(screen.getByRole("button", {name: "Open settings"}));
     expect(onOpenSettings).toHaveBeenCalledTimes(1);
@@ -569,25 +618,7 @@ describe("OverlayPanel", () => {
   });
 
   it("renders a compact collapsed summary", () => {
-    renderOverlayPanel({
-      collapsed: true,
-      difficulty: "Easy",
-      headerStatus: {
-        kind: "empty",
-        cards: [
-          {
-            label: "No submissions yet",
-            primary: "After first submission",
-            secondary: "",
-            tone: "neutral",
-          },
-        ],
-      },
-      sessionLabel: "First solve",
-      targetDisplay: "20:00",
-      timerDisplay: "03:12",
-      title: "Counting Bits",
-    });
+    renderOverlayPanel(makeCollapsedRenderModel());
 
     expect(screen.getByRole("button", {name: "Expand overlay"})).toBeTruthy();
     expect(screen.getByText("03:12")).toBeTruthy();
@@ -608,30 +639,20 @@ describe("OverlayPanel", () => {
     const onFailReview = vi.fn();
     const onToggleCollapse = vi.fn();
 
-    const {rerender} = renderOverlayPanel({
-      collapsed: true,
-      difficulty: "Easy",
-      onCompactSubmit,
-      onFailReview,
-      onPauseTimer,
-      onResetTimer,
-      onStartTimer,
-      headerStatus: {
-        kind: "empty",
-        cards: [
-          {
-            label: "No submissions yet",
-            primary: "After first submission",
-            secondary: "",
-            tone: "neutral",
-          },
-        ],
-      },
-      sessionLabel: "First solve",
-      targetDisplay: "20:00",
-      timerDisplay: "03:12",
-      title: "Counting Bits",
-    });
+    const {rerender} = renderOverlayPanel(
+      makeCollapsedRenderModel({
+        actions: {
+          onFail: onFailReview,
+          onSubmit: onCompactSubmit,
+          onToggleCollapse,
+        },
+        timer: {
+          onPause: onPauseTimer,
+          onReset: onResetTimer,
+          onStart: onStartTimer,
+        },
+      })
+    );
 
     fireEvent.click(screen.getByRole("button", {name: "Start timer"}));
     expect(onStartTimer).toHaveBeenCalledTimes(1);
@@ -648,51 +669,20 @@ describe("OverlayPanel", () => {
     rerender(
       <AppProviders>
         <OverlayPanel
-          canEditTimer
-          canResetTimer
-          canRestartSession={false}
-          canSaveOverride={false}
-          canSubmit
-          collapsed
-          difficulty="Easy"
-          draft={{
-            interviewPattern: "",
-            timeComplexity: "",
-            spaceComplexity: "",
-            languages: "",
-            notes: "",
-          }}
-          feedback=""
-          feedbackIsError={false}
-          isTimerRunning
-          onChangeDraft={() => undefined}
-          onCompactSubmit={onCompactSubmit}
-          onFailReview={onFailReview}
-          onOpenSettings={() => undefined}
-          onPauseTimer={onPauseTimer}
-          onResetTimer={onResetTimer}
-          onRestartSession={() => undefined}
-          onSaveOverride={() => undefined}
-          onSelectRating={() => undefined}
-          onStartTimer={onStartTimer}
-          onSubmit={() => undefined}
-          onToggleCollapse={onToggleCollapse}
-          headerStatus={{
-            kind: "empty",
-            cards: [
-              {
-                label: "No submissions yet",
-                primary: "After first submission",
-                secondary: "",
-                tone: "neutral",
-              },
-            ],
-          }}
-          selectedRating={2}
-          sessionLabel="First solve"
-          targetDisplay="20:00"
-          timerDisplay="03:12"
-          title="Counting Bits"
+          renderModel={makeCollapsedRenderModel({
+            actions: {
+              onFail: onFailReview,
+              onSubmit: onCompactSubmit,
+              onToggleCollapse,
+            },
+            timer: {
+              isRunning: true,
+              onPause: onPauseTimer,
+              onReset: onResetTimer,
+              onStart: onStartTimer,
+              startLabel: "Pause timer",
+            },
+          })}
         />
       </AppProviders>
     );
@@ -703,58 +693,22 @@ describe("OverlayPanel", () => {
     rerender(
       <AppProviders>
         <OverlayPanel
-          canEditTimer={false}
-          canResetTimer={false}
-          canRestartSession
-          canSaveOverride
-          canSubmit={false}
-          collapsed
-          difficulty="Easy"
-          draft={{
-            interviewPattern: "Two pointers",
-            timeComplexity: "O(n)",
-            spaceComplexity: "O(1)",
-            languages: "TypeScript",
-            notes: "Keep the window balanced.",
-          }}
-          feedback=""
-          feedbackIsError={false}
-          isTimerRunning={false}
-          onChangeDraft={() => undefined}
-          onCompactSubmit={onCompactSubmit}
-          onFailReview={onFailReview}
-          onOpenSettings={() => undefined}
-          onPauseTimer={onPauseTimer}
-          onResetTimer={onResetTimer}
-          onRestartSession={() => undefined}
-          onSaveOverride={() => undefined}
-          onSelectRating={() => undefined}
-          onStartTimer={onStartTimer}
-          onSubmit={() => undefined}
-          onToggleCollapse={() => undefined}
-          headerStatus={{
-            kind: "history",
-            cards: [
-              {
-                label: "Last submitted",
-                primary: "Mar 29",
-                secondary: "",
-                tone: "neutral",
-              },
-              {
-                emphasized: true,
-                label: "Next due",
-                primary: "Mar 30",
-                secondary: "",
-                tone: "warning",
-              },
-            ],
-          }}
-          selectedRating={2}
-          sessionLabel="Recall review"
-          targetDisplay="20:00"
-          timerDisplay="03:12"
-          title="Counting Bits"
+          renderModel={makeCollapsedRenderModel({
+            actions: {
+              canFail: false,
+              canSubmit: false,
+              onFail: onFailReview,
+              onSubmit: onCompactSubmit,
+            },
+            timer: {
+              canReset: false,
+              canStart: true,
+              onPause: onPauseTimer,
+              onReset: onResetTimer,
+              onStart: onStartTimer,
+              startLabel: "Start a new session",
+            },
+          })}
         />
       </AppProviders>
     );
@@ -774,41 +728,35 @@ describe("OverlayPanel", () => {
   });
 
   it("shows expanded submission controls for override and restart", () => {
-    renderOverlayPanel({
-      canEditTimer: false,
-      canResetTimer: false,
-      canRestartSession: true,
-      canSaveOverride: true,
-      canSubmit: false,
-      difficulty: "Easy",
-      draft: {
-        interviewPattern: "Binary search on answer",
-        timeComplexity: "O(n log n)",
-        spaceComplexity: "O(1)",
-        languages: "Python",
-        notes: "Track the feasibility boundary.",
-      },
-      headerStatus: {
-        kind: "history",
-        cards: [
-          {
-            label: "Last submitted",
-            primary: "Mar 29",
-            secondary: "",
-            tone: "neutral",
+    renderOverlayPanel(
+      makeExpandedRenderModel({
+        actions: {
+          canFail: false,
+          canRestart: true,
+          canSubmit: false,
+          canUpdate: true,
+        },
+        header: {
+          difficulty: "Easy",
+          sessionLabel: "Recall review",
+          title: "Find Minimum In Rotated Sorted Array",
+        },
+        log: {
+          draft: {
+            interviewPattern: "Binary search on answer",
+            timeComplexity: "O(n log n)",
+            spaceComplexity: "O(1)",
+            languages: "Python",
+            notes: "Track the feasibility boundary.",
           },
-          {
-            emphasized: true,
-            label: "Next due",
-            primary: "Mar 30",
-            secondary: "",
-            tone: "warning",
-          },
-        ],
-      },
-      sessionLabel: "Recall review",
-      title: "Find Minimum In Rotated Sorted Array",
-    });
+        },
+        timer: {
+          canPause: false,
+          canReset: false,
+          canStart: true,
+        },
+      })
+    );
 
     expect(screen.getByText("Assessment")).toBeTruthy();
     expect(screen.getByText("Next due")).toBeTruthy();
