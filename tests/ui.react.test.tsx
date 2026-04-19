@@ -387,7 +387,8 @@ describe("OverlayPanel", () => {
           notes=""
           onChangeMode={onChangeMode}
           onChangeNotes={() => undefined}
-          onOpenFeedbackForm={() => undefined}
+          onCompactFail={() => undefined}
+          onCompactSubmit={() => undefined}
           onOpenSettings={() => undefined}
           onPauseTimer={() => undefined}
           onQuickSubmit={() => undefined}
@@ -434,7 +435,8 @@ describe("OverlayPanel", () => {
           notes=""
           onChangeMode={() => undefined}
           onChangeNotes={() => undefined}
-          onOpenFeedbackForm={() => undefined}
+          onCompactFail={() => undefined}
+          onCompactSubmit={() => undefined}
           onOpenSettings={() => undefined}
           onPauseTimer={() => undefined}
           onQuickSubmit={() => undefined}
@@ -455,23 +457,24 @@ describe("OverlayPanel", () => {
       </AppProviders>
     );
 
-    expect(screen.getByText("Kinetic Terminal")).toBeTruthy();
     expect(screen.getByRole("button", {name: "Expand overlay"})).toBeTruthy();
-    expect(screen.getByText("Counting Bits")).toBeTruthy();
     expect(screen.getByText("03:12")).toBeTruthy();
-    expect(screen.getByText("Due now · Repeat review")).toBeTruthy();
-    expect(screen.getByText("Easy target 20:00")).toBeTruthy();
     expect(screen.getByRole("button", {name: "Start timer"})).toBeTruthy();
-    expect(
-      screen.getByRole("button", {name: "Open feedback form"})
-    ).toBeTruthy();
+    expect(screen.getByRole("button", {name: "Restart timer"})).toBeTruthy();
+    expect(screen.getByRole("button", {name: "Fail review"})).toBeTruthy();
+    expect(screen.getByRole("button", {name: "Submit"})).toBeTruthy();
+    expect(screen.queryByText("Counting Bits")).toBeNull();
+    expect(screen.queryByText("Due now · Repeat review")).toBeNull();
+    expect(screen.queryByText("Easy target 20:00")).toBeNull();
     expect(screen.queryByText("Next review 3/30/2026")).toBeNull();
   });
 
-  it("uses stateful timer icon and feedback-form action in the collapsed overlay", () => {
+  it("uses compact timer, restart, and submit actions in the collapsed overlay", () => {
     const onStartTimer = vi.fn();
     const onPauseTimer = vi.fn();
-    const onOpenFeedbackForm = vi.fn();
+    const onResetTimer = vi.fn();
+    const onCompactSubmit = vi.fn();
+    const onCompactFail = vi.fn();
 
     const {rerender} = render(
       <AppProviders>
@@ -486,12 +489,13 @@ describe("OverlayPanel", () => {
           notes=""
           onChangeMode={() => undefined}
           onChangeNotes={() => undefined}
-          onOpenFeedbackForm={onOpenFeedbackForm}
+          onCompactFail={onCompactFail}
+          onCompactSubmit={onCompactSubmit}
           onOpenSettings={() => undefined}
           onPauseTimer={onPauseTimer}
           onQuickSubmit={() => undefined}
           onRefresh={() => undefined}
-          onResetTimer={() => undefined}
+          onResetTimer={onResetTimer}
           onSaveReview={() => undefined}
           onSelectRating={() => undefined}
           onStartTimer={onStartTimer}
@@ -510,8 +514,14 @@ describe("OverlayPanel", () => {
     fireEvent.click(screen.getByRole("button", {name: "Start timer"}));
     expect(onStartTimer).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByRole("button", {name: "Open feedback form"}));
-    expect(onOpenFeedbackForm).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", {name: "Restart timer"}));
+    expect(onResetTimer).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole("button", {name: "Fail review"}));
+    expect(onCompactFail).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole("button", {name: "Submit"}));
+    expect(onCompactSubmit).toHaveBeenCalledTimes(1);
 
     rerender(
       <AppProviders>
@@ -526,12 +536,13 @@ describe("OverlayPanel", () => {
           notes=""
           onChangeMode={() => undefined}
           onChangeNotes={() => undefined}
-          onOpenFeedbackForm={onOpenFeedbackForm}
+          onCompactFail={onCompactFail}
+          onCompactSubmit={onCompactSubmit}
           onOpenSettings={() => undefined}
           onPauseTimer={onPauseTimer}
           onQuickSubmit={() => undefined}
           onRefresh={() => undefined}
-          onResetTimer={() => undefined}
+          onResetTimer={onResetTimer}
           onSaveReview={() => undefined}
           onSelectRating={() => undefined}
           onStartTimer={onStartTimer}

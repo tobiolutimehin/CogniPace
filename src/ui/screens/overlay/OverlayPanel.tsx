@@ -1,9 +1,10 @@
 /** Pure presentational overlay panel rendered inside the LeetCode page shadow root. */
-import CheckCircleRounded from "@mui/icons-material/CheckCircleRounded";
+import CancelRounded from "@mui/icons-material/CancelRounded";
 import CloseFullscreenRounded from "@mui/icons-material/CloseFullscreenRounded";
-import OpenInFullRounded from "@mui/icons-material/OpenInFullRounded";
+import KeyboardArrowUpRounded from "@mui/icons-material/KeyboardArrowUpRounded";
 import PauseRounded from "@mui/icons-material/PauseRounded";
 import PlayArrowRounded from "@mui/icons-material/PlayArrowRounded";
+import RestartAltRounded from "@mui/icons-material/RestartAltRounded";
 import SettingsRounded from "@mui/icons-material/SettingsRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -48,7 +49,8 @@ export interface OverlayPanelProps {
   notes: string;
   onChangeMode: (mode: ReviewMode) => void;
   onChangeNotes: (value: string) => void;
-  onOpenFeedbackForm: () => void;
+  onCompactSubmit: () => void;
+  onCompactFail: () => void;
   onOpenSettings: () => void;
   onPauseTimer: () => void;
   onQuickSubmit: () => void;
@@ -153,7 +155,7 @@ export function OverlayPanel(props: OverlayPanelProps) {
   const collapsedTimerActionLabel = props.isTimerRunning
     ? "Pause timer"
     : "Start timer";
-  const collapsedSubmitLabel = "Open feedback form";
+  const collapsedRestartLabel = "Restart timer";
 
   if (props.collapsed) {
     return (
@@ -165,119 +167,124 @@ export function OverlayPanel(props: OverlayPanelProps) {
           width: shellWidth,
         }}
       >
-        <Stack spacing={1} sx={{p: 1.75}}>
-          <Stack
-            alignItems="center"
-            direction="row"
-            justifyContent="space-between"
-            spacing={1.5}
-          >
-            <Typography color="primary.light" variant="overline">
-              Kinetic Terminal
-            </Typography>
-            <Tooltip title="Expand overlay">
-              <IconButton
-                aria-label="Expand overlay"
-                onClick={props.onToggleCollapse}
-                size="small"
-              >
-                <OpenInFullRounded fontSize="small"/>
-              </IconButton>
-            </Tooltip>
-          </Stack>
-
+        <Stack spacing={1.1} sx={{p: 1.75}}>
           <Stack
             alignItems="center"
             direction="row"
             justifyContent="space-between"
             spacing={1.75}
           >
-            <Typography noWrap sx={{flex: 1, minWidth: 0}} variant="h6">
-              {props.title}
-            </Typography>
-            <Stack
-              alignItems="center"
-              direction="row"
-              spacing={0.75}
-              sx={{flexShrink: 0}}
-            >
+            <Stack alignItems="center" direction="row" spacing={0.9}>
+              <Tooltip title="Expand overlay">
+                <IconButton
+                  aria-label="Expand overlay"
+                  onClick={props.onToggleCollapse}
+                  size="small"
+                  sx={{
+                    backgroundColor: alpha(kineticTokens.mutedText, 0.08),
+                    border: `1px solid ${alpha(kineticTokens.mutedText, 0.16)}`,
+                    color: "text.secondary",
+                    "&:hover": {
+                      backgroundColor: alpha(kineticTokens.mutedText, 0.14),
+                    },
+                  }}
+                >
+                  <KeyboardArrowUpRounded fontSize="small"/>
+                </IconButton>
+              </Tooltip>
+              <Box
+                sx={{
+                  alignSelf: "stretch",
+                  backgroundColor: (theme) => theme.palette.divider,
+                  borderRadius: 999,
+                  width: "1px",
+                }}
+              />
               <Typography
                 component="div"
                 sx={{
                   ...timerTextSx,
-                  fontSize: "1.55rem",
+                  flexShrink: 0,
+                  fontSize: "2rem",
                 }}
               >
                 {props.timerDisplay}
               </Typography>
-              <Stack direction="row" spacing={1}>
-                <Tooltip title={collapsedTimerActionLabel}>
+              <Tooltip title={collapsedTimerActionLabel}>
+                <IconButton
+                  aria-label={collapsedTimerActionLabel}
+                  onClick={
+                    props.isTimerRunning
+                      ? props.onPauseTimer
+                      : props.onStartTimer
+                  }
+                  size="small"
+                  sx={{
+                    backgroundColor: alpha(kineticTokens.accent, 0.12),
+                    border: `1px solid ${alpha(kineticTokens.accentSoft, 0.2)}`,
+                    color: "primary.light",
+                    "&:hover": {
+                      backgroundColor: alpha(kineticTokens.accent, 0.2),
+                    },
+                  }}
+                >
+                  {props.isTimerRunning ? (
+                    <PauseRounded fontSize="small"/>
+                  ) : (
+                    <PlayArrowRounded fontSize="small"/>
+                  )}
+                </IconButton>
+              </Tooltip>
+              <Tooltip title={collapsedRestartLabel}>
+                <span>
                   <IconButton
-                    aria-label={collapsedTimerActionLabel}
-                    onClick={
-                      props.isTimerRunning
-                        ? props.onPauseTimer
-                        : props.onStartTimer
-                    }
+                    aria-label={collapsedRestartLabel}
+                    disabled={!props.canReset}
+                    onClick={props.onResetTimer}
                     size="small"
                     sx={{
-                      backgroundColor: alpha(kineticTokens.accent, 0.12),
-                      border: `1px solid ${alpha(kineticTokens.accentSoft, 0.2)}`,
-                      color: "primary.light",
+                      backgroundColor: alpha(kineticTokens.mutedText, 0.08),
+                      border: `1px solid ${alpha(kineticTokens.mutedText, 0.16)}`,
+                      color: "text.secondary",
                       "&:hover": {
-                        backgroundColor: alpha(kineticTokens.accent, 0.2),
+                        backgroundColor: alpha(kineticTokens.mutedText, 0.14),
                       },
                     }}
                   >
-                    {props.isTimerRunning ? (
-                      <PauseRounded fontSize="small"/>
-                    ) : (
-                      <PlayArrowRounded fontSize="small"/>
-                    )}
+                    <RestartAltRounded fontSize="small"/>
                   </IconButton>
-                </Tooltip>
-                <Tooltip title={collapsedSubmitLabel}>
-                  <IconButton
-                    aria-label={collapsedSubmitLabel}
-                    onClick={props.onOpenFeedbackForm}
-                    size="small"
-                    sx={{
-                      backgroundColor: alpha(kineticTokens.success, 0.14),
-                      border: `1px solid ${alpha(kineticTokens.success, 0.24)}`,
-                      color: "success.main",
-                      "&:hover": {
-                        backgroundColor: alpha(kineticTokens.success, 0.22),
-                      },
-                    }}
-                  >
-                    <CheckCircleRounded fontSize="small"/>
-                  </IconButton>
-                </Tooltip>
-              </Stack>
+                </span>
+              </Tooltip>
             </Stack>
-          </Stack>
-
-          <Stack
-            alignItems="center"
-            direction="row"
-            justifyContent="space-between"
-            spacing={1.75}
-          >
-            <Typography
-              color="text.secondary"
-              noWrap
-              sx={{flex: 1, minWidth: 0}}
-              variant="caption"
-            >
-              {props.statusLabel}
-            </Typography>
-            <Typography
-              color="text.secondary"
-              sx={{flexShrink: 0, whiteSpace: "nowrap"}}
-              variant="caption"
-            >
-              {props.difficulty} target {props.targetDisplay}
-            </Typography>
+            <Stack alignItems="center" direction="row" spacing={0.75}>
+              <Button
+                onClick={props.onCompactSubmit}
+                size="small"
+                variant="contained"
+              >
+                Submit
+              </Button>
+              <Tooltip title="Fail review">
+                <IconButton
+                  aria-label="Fail review"
+                  onClick={props.onCompactFail}
+                  size="small"
+                  sx={{
+                    backgroundColor: kineticTokens.danger,
+                    borderRadius: 1.1,
+                    boxShadow: `0 12px 24px ${alpha(kineticTokens.danger, 0.18)}`,
+                    color: kineticTokens.background,
+                    height: 34,
+                    width: 34,
+                    "&:hover": {
+                      backgroundColor: "#ffc3bb",
+                    },
+                  }}
+                >
+                  <CancelRounded fontSize="small"/>
+                </IconButton>
+              </Tooltip>
+            </Stack>
           </Stack>
         </Stack>
       </Paper>

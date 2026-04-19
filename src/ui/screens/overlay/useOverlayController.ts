@@ -416,16 +416,82 @@ export function useOverlayController(
     state.selectedRating,
   ]);
 
-  const openFeedbackForm = useCallback(() => {
-    if (isTimerRunning()) {
-      pauseTimer(false);
+  const saveCompactReview = useCallback(
+    async (rating: Rating, startMessage: string): Promise<void> => {
+      if (!state.activeSlug) {
+        return;
+      }
+
+      setFeedback(startMessage);
+
+      if (isTimerRunning()) {
+        pauseTimer(false);
+      }
+
+      const solveTimeMs = getElapsedMs() > 0 ? getElapsedMs() : undefined;
+      const mode = defaultReviewMode(state.currentState);
+
+      const saved = await persistReview(
+        state.activeSlug,
+        rating,
+        mode,
+        solveTimeMs
+      );
+      if (!saved) {
+        return;
+      }
+
+      setState((current) => ({
+        ...current,
+        collapsed: false,
+        selectedMode: mode,
+        selectedRating: rating,
+      }));
+
+      if (solveTimeMs) {
+        setFeedback(
+          `Logged ${ratingLabel(rating)} from ${formatClock(
+            solveTimeMs
+          )}. Details open below.`
+        );
+      } else {
+        setFeedback(`Logged ${ratingLabel(rating)}. Details open below.`);
+      }
+
+      await refreshCurrentPage(state.activeSlug);
+    },
+    [
+      getElapsedMs,
+      isTimerRunning,
+      pauseTimer,
+      persistReview,
+      refreshCurrentPage,
+      setFeedback,
+      state.activeSlug,
+      state.currentState,
+    ]
+  );
+
+  const onCompactSubmit = useCallback(async (): Promise<void> => {
+    if (!state.activeSlug) {
+      return;
     }
 
-    setState((current) => ({
-      ...current,
-      collapsed: false,
-    }));
-  }, [isTimerRunning, pauseTimer]);
+    const rating = deriveQuickRating(
+      getElapsedMs() > 0 ? getElapsedMs() : undefined,
+      goalForDifficulty(state.currentDifficulty)
+    );
+    await saveCompactReview(rating, "Submitting review...");
+  }, [
+    state.activeSlug,
+    state.currentDifficulty,
+    saveCompactReview,
+    getElapsedMs,
+  ]);
+
+  const onCompactFail = useCallback(async (): Promise<void> => {
+    await saveCompactReview(0, "Logging failure...");
+  }, [saveCompactReview]);
 
   const scheduleWarmRefreshes = useCallback(
     (slug: string) => {
@@ -564,8 +630,11 @@ export function useOverlayController(
           draftNotes: value,
         }));
       },
-      onOpenFeedbackForm: () => {
-        openFeedbackForm();
+      onCompactSubmit: () => {
+        void onCompactSubmit();
+      },
+      onCompactFail: () => {
+        void onCompactFail();
       },
       onOpenSettings: () => {
         void openExtensionPage("dashboard.html?view=settings");
