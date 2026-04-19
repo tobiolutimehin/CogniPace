@@ -1,6 +1,9 @@
 /** Notification helpers and quiet-hour policy for the background worker. */
-import {getAppData} from "../../data/repositories/appDataRepository";
+import {getAppData, STORAGE_KEY} from "../../data/repositories/appDataRepository";
+import {readLocalStorage} from "../../data/datasources/chrome/storage";
+import {findEarliestDueDate} from "../../domain/fsrs/scheduler";
 import {buildTodayQueue} from "../../domain/queue/buildTodayQueue";
+import {StudyState} from "../../domain/types";
 
 function inQuietHours(
   startHour: number,
@@ -42,10 +45,29 @@ export async function maybeNotifyDueQueue(): Promise<void> {
     return;
   }
 
+  /**
+   * [TODO]: ÍReplace with Cognipace icon when available. Using a 1x1 transparent PNG to avoid showing the default Chrome notification icon, which can be visually jarring and doesn't fit with our branding.
+   */
   await chrome.notifications.create("cognipace-due", {
     type: "basic",
-    iconUrl: "icons/icon-128.png",
+    iconUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
     title: "CogniPace reviews due",
     message: `You have ${queue.dueCount} review${queue.dueCount === 1 ? "" : "s"} due today.`,
   });
+}
+
+/** Cancels any existing due-check alarm and schedules a new one for the next future due date.
+ *  Reads raw storage to avoid triggering a writeback that would re-fire storage.onChanged. */
+export async function scheduleNextDueAlarm(): Promise<void> {
+  const result = await readLocalStorage([STORAGE_KEY]);
+  const stored = result[STORAGE_KEY] as { studyStatesBySlug?: Record<string, StudyState> } | undefined;
+  const studyStatesBySlug = stored?.studyStatesBySlug ?? {};
+
+  const now = new Date();
+  const earliest = findEarliestDueDate(studyStatesBySlug, now);
+
+  await chrome.alarms.clear("due-check");
+  if (earliest) {
+    chrome.alarms.create("due-check", { when: earliest.getTime() });
+  }
 }
