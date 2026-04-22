@@ -24,16 +24,18 @@ Give the user the fastest possible answer to what to do next.
 1. User opens the extension popup
 2. Popup shows summary metrics
 3. Popup shows the recommended problem for the current moment
-4. Popup also shows the next problem in the active course
+4. Popup also shows course progression context or a freestyle-mode message in the course panel
 5. User opens a problem or shuffles the recommendation
 
 ### Current Behavior
 
 - Shows due count and streak
 - Shows one current recommendation plus a pool of recommendation candidates
-- Supports shuffle without changing course-next state
-- Supports opening the dashboard
-- Supports toggling study mode between `studyPlan` and `freestyle`
+- Shows recommendation and active-course progression as separate popup panels
+- Keeps shuffle as a compact recommendation-only action without changing course-next state
+- Uses a compact course-panel action to open the dashboard on the courses view
+- Keeps the course panel visible in both `studyPlan` and `freestyle`
+- Uses explicit course-panel actions to start `studyPlan` or `freestyle` rather than a blind mode toggle
 
 ### Key States And Edge Cases
 
@@ -60,6 +62,7 @@ Give the user the fastest possible answer to what to do next.
 - the user can tell what to review now
 - the user can tell what is next in the active course
 - shuffle changes only the recommendation
+- mode switching is explicit rather than a blind toggle
 - popup remains compact and extension-appropriate
 
 ## Course Progression
@@ -80,7 +83,7 @@ Provide guided traversal through curated learning paths without losing review aw
 - supports curated courses and chapters
 - tracks active course and active chapter
 - computes next question and course completion data
-- shows course progress in popup and dashboard
+- shows course progress in popup and dashboard, with the popup using a single compact active-course panel that includes progress and the up-next question
 
 ### Key States And Edge Cases
 

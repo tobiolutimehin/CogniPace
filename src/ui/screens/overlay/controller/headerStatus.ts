@@ -111,19 +111,21 @@ function buildHistoryStatusCard(
   label: string,
   iso: string,
   tone: OverlayHeaderStatusTone,
-  emphasized = false
+  emphasized = false,
+  relativeTo = new Date()
 ): OverlayHeaderStatusCard {
   return {
     emphasized,
     label,
-    primary: formatSubmissionDateLabel(iso),
+    primary: formatSubmissionDateLabel(iso, relativeTo),
     secondary: "",
     tone,
   };
 }
 
 export function buildHeaderStatus(
-  state: StudyState | null
+  state: StudyState | null,
+  relativeTo = new Date()
 ): OverlayHeaderStatus {
   const summary = getStudyStateSummary(state);
   const cards: OverlayHeaderStatusCard[] = [];
@@ -133,7 +135,9 @@ export function buildHeaderStatus(
       buildHistoryStatusCard(
         "Last submitted",
         summary.lastReviewedAt,
-        "neutral"
+        "neutral",
+        false,
+        relativeTo
       )
     );
   }
@@ -143,8 +147,9 @@ export function buildHeaderStatus(
       buildHistoryStatusCard(
         "Next due",
         summary.nextReviewAt,
-        buildDueTone(summary.nextReviewAt),
-        true
+        buildDueTone(summary.nextReviewAt, relativeTo),
+        true,
+        relativeTo
       )
     );
   }

@@ -1,8 +1,15 @@
 /** Repository for extension-owned page navigation triggered by UI surfaces. */
 
+export type ExtensionDashboardView =
+  | "dashboard"
+  | "courses"
+  | "library"
+  | "analytics"
+  | "settings";
+
 /** Opens the dashboard in a new tab, preserving the existing `?view=` contract. */
 export function openDashboardPage(
-  view?: string,
+  view?: ExtensionDashboardView,
   windowRef: Window = window
 ): void {
   const url = new URL(

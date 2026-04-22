@@ -1,38 +1,55 @@
 /** Popup screen composition for the compact extension surface. */
-import ShuffleRounded from "@mui/icons-material/ShuffleRounded";
+import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Divider from "@mui/material/Divider";
 import Grid from "@mui/material/Grid";
-import IconButton from "@mui/material/IconButton";
+import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
-import Tooltip from "@mui/material/Tooltip";
-import Typography from "@mui/material/Typography";
+import {alpha} from "@mui/material/styles";
 
-import {StatusBanner, SurfaceCard} from "../../components";
-import {CourseNextCard} from "../../features/courses/CourseNextCard";
-import {CourseProgressCard} from "../../features/courses/CourseProgressCard";
-import {RecommendedProblemCard} from "../../features/recommended/RecommendedProblemCard";
+import {kineticTokens} from "../../theme";
 
-import {PopupActions} from "./components/PopupActions";
+import {
+  CoursePanelCompleted,
+  CoursePanelEmpty,
+  CoursePanelFreestyle,
+  CoursePanelStudyPlan,
+} from "./components/PopupCourseSection";
 import {PopupHeader} from "./components/PopupHeader";
+import {PopupMetricTile} from "./components/PopupMetricTile";
+import {RecommendationActive, RecommendationEmpty,} from "./components/PopupRecommendationSection";
+import {popupShellSx} from "./components/popupStyles";
 import {usePopupController} from "./usePopupController";
 
 export function PopupApp() {
   const controller = usePopupController();
 
+  const courseActions = {
+    onEnterFreestyle: () => {
+      void controller.setStudyMode("freestyle");
+    },
+    onOpenDashboard: controller.openCoursesDashboard,
+    onOpenProblem: controller.onOpenProblem,
+    onReturnToStudyMode: () => {
+      void controller.setStudyMode("studyPlan");
+    },
+  };
+
+  const recommendationActions = {
+    onOpenProblem: controller.onOpenProblem,
+    onShuffle: controller.shuffleRecommendation,
+  };
+
   return (
     <Box
       sx={{
-        height: 500,
-        maxHeight: 500,
-        overflowY: "auto",
-        p: 1.25,
-        scrollbarGutter: "stable",
+        display: "flex",
+        flexDirection: "column",
+        gap: 1.25,
+        p: 1.1,
         width: 380,
       }}
     >
-      <Stack spacing={1.25}>
+      <Paper sx={popupShellSx}>
         <PopupHeader
           onOpenSettings={controller.onOpenSettings}
           onRefresh={() => {
@@ -40,109 +57,83 @@ export function PopupApp() {
           }}
         />
 
-        <Grid container spacing={1}>
-          <Grid size={6}>
-            <SurfaceCard compact>
-              <Stack spacing={0.5}>
-                <Typography color="text.secondary" variant="overline">
-                  Items Due
-                </Typography>
-                <Typography variant="h4">
-                  {controller.payload?.popup.dueCount ?? 0}
-                </Typography>
-              </Stack>
-            </SurfaceCard>
-          </Grid>
-          <Grid size={6}>
-            <SurfaceCard compact>
-              <Stack spacing={0.5}>
-                <Typography color="text.secondary" variant="overline">
-                  Streak
-                </Typography>
-                <Typography variant="h4">
-                  {controller.payload?.popup.streakDays ?? 0}
-                </Typography>
-              </Stack>
-            </SurfaceCard>
-          </Grid>
-        </Grid>
+        <Box sx={{p: 1.25}}>
+          <Stack spacing={1.2}>
+            <Grid container spacing={1.25}>
+              <Grid size={6}>
+                <PopupMetricTile
+                  accent={kineticTokens.danger}
+                  label="Due Today"
+                  value={controller.payload?.popup.dueCount ?? 0}
+                />
+              </Grid>
+              <Grid size={6}>
+                <PopupMetricTile
+                  accent={kineticTokens.accentSoft}
+                  label="Streak"
+                  suffix="days"
+                  value={controller.payload?.popup.streakDays ?? 0}
+                />
+              </Grid>
+            </Grid>
 
-        <RecommendedProblemCard
-          buttonFullWidth
-          onOpenProblem={controller.onOpenProblem}
-          recommended={controller.recommended}
-        />
-        {controller.hasMultipleRecommended ? (
-          <Stack alignItems="flex-end">
-            <Tooltip title="Shuffle recommendation">
-              <IconButton
-                aria-label="Shuffle recommendation"
-                onClick={controller.shuffleRecommendation}
-                size="small"
-              >
-                <ShuffleRounded fontSize="small"/>
-              </IconButton>
-            </Tooltip>
+            {controller.recommended ? (
+              <RecommendationActive
+                actions={recommendationActions}
+                canShuffle={controller.hasMultipleRecommended}
+                recommended={controller.recommended}
+              />
+            ) : (
+              <RecommendationEmpty
+                canShuffle={controller.hasMultipleRecommended}
+                onShuffle={controller.shuffleRecommendation}
+              />
+            )}
+
+            {controller.studyMode === "freestyle" ? (
+              <CoursePanelFreestyle
+                disabled={controller.isUpdatingStudyMode}
+                onOpenDashboard={courseActions.onOpenDashboard}
+                onReturnToStudyMode={courseActions.onReturnToStudyMode}
+              />
+            ) : !controller.activeCourseDetail ? (
+              <CoursePanelEmpty
+                disabled={controller.isUpdatingStudyMode}
+                onEnterFreestyle={courseActions.onEnterFreestyle}
+                onOpenDashboard={courseActions.onOpenDashboard}
+              />
+            ) : !controller.courseNext ? (
+              <CoursePanelCompleted
+                courseName={controller.activeCourseDetail.name}
+                disabled={controller.isUpdatingStudyMode}
+                onEnterFreestyle={courseActions.onEnterFreestyle}
+                onOpenDashboard={courseActions.onOpenDashboard}
+              />
+            ) : (
+              <CoursePanelStudyPlan
+                actions={courseActions}
+                course={controller.activeCourseDetail}
+                disabled={controller.isUpdatingStudyMode}
+                nextQuestion={controller.courseNext}
+              />
+            )}
           </Stack>
-        ) : null}
+        </Box>
+      </Paper>
 
-        {!controller.activeCourse ? (
-          <SurfaceCard label="Next In Course" title="No active course">
-            <Stack spacing={1.25}>
-              <Typography color="text.secondary" variant="body2">
-                Choose an active course in the dashboard to restore the guided
-                path.
-              </Typography>
-              <Button fullWidth onClick={() => controller.onOpenDashboard()} variant="outlined">
-                Open Dashboard
-              </Button>
-            </Stack>
-          </SurfaceCard>
-        ) : !controller.courseNext ? (
-          <SurfaceCard
-            label="Next In Course"
-            title={controller.activeCourse.name}
-          >
-            <Stack spacing={1.25}>
-              <Typography color="text.secondary" variant="body2">
-                This course is fully traversed. Use the dashboard to switch tracks
-                or focus on due reviews.
-              </Typography>
-              <Button fullWidth onClick={() => controller.onOpenDashboard()} variant="outlined">
-                Open Dashboard
-              </Button>
-            </Stack>
-          </SurfaceCard>
-        ) : (
-          <CourseNextCard
-            activeCourseId={controller.activeCourse.id}
-            buttonFullWidth
-            onOpenProblem={controller.onOpenProblem}
-            view={controller.courseNext}
-          />
-        )}
-
-        <CourseProgressCard
-          course={controller.activeCourse}
-          emptyCopy="Choose an active course in the dashboard to restore the guided path."
-          emptyTitle="No active course"
-          label="Active Track"
-        />
-
-        <PopupActions
-          onOpenDashboard={() => {
-            controller.onOpenDashboard();
+      {controller.status.message ? (
+        <Alert
+          aria-live="polite"
+          severity={controller.status.isError ? "error" : "info"}
+          sx={{
+            border: `1px solid ${alpha(kineticTokens.outlineStrong, 0.28)}`,
+            borderRadius: 1.4,
           }}
-          onToggleStudyMode={controller.onToggleStudyMode}
-          studyMode={controller.payload?.settings.studyMode}
-        />
-
-        <Divider/>
-        <StatusBanner
-          isError={controller.status.isError}
-          message={controller.status.message}
-        />
-      </Stack>
+          variant="filled"
+        >
+          {controller.status.message}
+        </Alert>
+      ) : null}
     </Box>
   );
 }

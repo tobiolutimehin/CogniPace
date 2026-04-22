@@ -18,10 +18,17 @@ body {
 }
 
 body[data-surface="popup"] {
-  width: 380px;
-  height: 500px;
-  max-height: 500px;
-  overflow: hidden;
+  display: inline-block;
+  width: auto;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+}
+
+body[data-surface="popup"] #popup-root,
+body[data-surface="popup"] main {
+  min-height: 0;
+  height: auto;
 }
 
 body[data-surface="dashboard"] {
