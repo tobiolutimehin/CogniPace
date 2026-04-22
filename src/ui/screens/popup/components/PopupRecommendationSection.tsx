@@ -10,18 +10,10 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 
 import {RecommendedProblemView} from "../../../../domain/views";
-import {
-  difficultyTone,
-  recommendedTone,
-} from "../../../presentation/studyState";
+import {difficultyTone, recommendedTone,} from "../../../presentation/studyState";
 import {kineticTokens} from "../../../theme";
 
-import {
-  popupIconButtonSx,
-  popupPanelSx,
-  popupSmallButtonSx,
-  popupSectionLabelSx,
-} from "./popupStyles";
+import {popupIconButtonSx, popupPanelSx, popupSectionLabelSx, popupSmallButtonSx,} from "./popupStyles";
 
 const chipToneSx = {
   accent: {
@@ -46,7 +38,7 @@ const chipToneSx = {
   },
 } as const;
 
-function PopupChip(props: {label: string; tone: keyof typeof chipToneSx}) {
+function PopupChip(props: { label: string; tone: keyof typeof chipToneSx }) {
   return (
     <Chip
       label={props.label}
@@ -158,7 +150,11 @@ export function PopupRecommendationSection(props: PopupRecommendationSectionProp
               fontWeight: 700,
               lineHeight: 1.22,
               minWidth: 0,
-              textWrap: "balance",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+              height: "2.44em",
             }}
             translate="no"
           >
