@@ -22,6 +22,9 @@ The UI should feel like a sharp browser tool rather than a marketing site or mob
 - hierarchy should emphasize the best next action immediately
 - the layout should remain narrow, compact, and single-column
 - dense is acceptable if the information order is clear
+- the popup should prefer surface-specific sections over generic dashboard cards
+- compact icon actions are preferred over oversized footer buttons when the destination is secondary
+- study-mode actions in the popup should name the next action explicitly, for example `Start study mode` or `Start freestyle mode`
 
 ## Dashboard Guidelines
 
@@ -55,6 +58,8 @@ Labels should explain the state directly, for example:
 - keep recommendation and course progression visibly separate
 - make secondary controls visually secondary
 - use status and difficulty badges sparingly but clearly
+- keep the recommendation panel visually strongest, with the active-course panel directly beneath it
+- when progress and next-up content belong to the same course flow, keep them in one panel instead of splitting them into separate cards
 
 ## What Not To Design
 

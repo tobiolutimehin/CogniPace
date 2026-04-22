@@ -1,0 +1,103 @@
+import CodeRounded from "@mui/icons-material/CodeRounded";
+import SchoolRounded from "@mui/icons-material/SchoolRounded";
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
+import Stack from "@mui/material/Stack";
+import {alpha} from "@mui/material/styles";
+import Typography from "@mui/material/Typography";
+
+import {StudyMode} from "../../../../domain/types";
+import {kineticTokens} from "../../../theme";
+
+import {popupPanelSx} from "./popupStyles";
+
+interface PopupModeOptionProps {
+  active: boolean;
+  icon: typeof SchoolRounded;
+  label: string;
+  onClick: () => void;
+}
+
+function PopupModeOption(props: PopupModeOptionProps) {
+  const Icon = props.icon;
+
+  return (
+    <ButtonBase
+      aria-pressed={props.active}
+      onClick={props.onClick}
+      sx={{
+        backgroundColor: props.active
+          ? kineticTokens.accent
+          : "transparent",
+        borderRadius: 1.1,
+        color: props.active ? "#2b1700" : kineticTokens.softText,
+        display: "flex",
+        flex: 1,
+        minHeight: 60,
+        px: 1.2,
+        py: 0.8,
+        transition: "background-color 160ms ease, color 160ms ease",
+        touchAction: "manipulation",
+        "&:hover": {
+          backgroundColor: props.active
+            ? kineticTokens.accent
+            : alpha(kineticTokens.paperStrong, 0.82),
+          color: props.active ? "#2b1700" : kineticTokens.text,
+        },
+        "&:focus-visible": {
+          outline: `2px solid ${alpha(kineticTokens.info, 0.72)}`,
+          outlineOffset: 2,
+        },
+      }}
+    >
+      <Stack alignItems="center" spacing={0.55} sx={{width: "100%"}}>
+        <Icon aria-hidden="true" fontSize="small"/>
+        <Typography
+          sx={{
+            fontSize: "0.68rem",
+            fontWeight: 700,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+          }}
+        >
+          {props.label}
+        </Typography>
+      </Stack>
+    </ButtonBase>
+  );
+}
+
+export interface PopupModeSwitchProps {
+  onSelectMode: (mode: StudyMode) => Promise<void> | void;
+  studyMode: StudyMode;
+}
+
+export function PopupModeSwitch(props: PopupModeSwitchProps) {
+  return (
+    <Box
+      sx={{
+        ...popupPanelSx,
+        p: 0.55,
+      }}
+    >
+      <Stack direction="row" spacing={0.8}>
+        <PopupModeOption
+          active={props.studyMode === "studyPlan"}
+          icon={SchoolRounded}
+          label="Study Mode"
+          onClick={() => {
+            void props.onSelectMode("studyPlan");
+          }}
+        />
+        <PopupModeOption
+          active={props.studyMode === "freestyle"}
+          icon={CodeRounded}
+          label="Freestyle"
+          onClick={() => {
+            void props.onSelectMode("freestyle");
+          }}
+        />
+      </Stack>
+    </Box>
+  );
+}

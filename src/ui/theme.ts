@@ -123,6 +123,10 @@ export const kineticTheme = createTheme({
         "html, body, #popup-root, #app-shell": {
           minHeight: "100%",
         },
+        'body[data-surface="popup"], body[data-surface="popup"] #popup-root': {
+          minHeight: 0,
+          height: "auto",
+        },
         body: {
           margin: 0,
           background: [

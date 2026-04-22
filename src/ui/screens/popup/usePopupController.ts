@@ -7,6 +7,7 @@ import {
 } from "../../../data/repositories/extensionNavigationRepository";
 import { openProblemPage } from "../../../data/repositories/problemSessionRepository";
 import { updateSettings } from "../../../data/repositories/settingsRepository";
+import { StudyMode } from "../../../domain/types";
 import { RecommendedProblemView } from "../../../domain/views";
 import { createMockAppShellPayload } from "../../mockData";
 import { useAppShellQuery } from "../../state/useAppShellQuery";
@@ -23,12 +24,22 @@ function currentRecommended(
   return candidates[recommendedIndex % candidates.length] ?? candidates[0];
 }
 
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
+}
+
+const STUDY_MODE_REQUEST_DELAY_MS = 500;
+
 /** Coordinates popup data loading, recommendation rotation, and user actions. */
 export function usePopupController() {
-  const { load, payload, setStatus, status } = useAppShellQuery(
+  const { load, payload, setPayload, setStatus, status } = useAppShellQuery(
     createMockAppShellPayload()
   );
   const [recommendedIndex, setRecommendedIndex] = useState(0);
+  const [isUpdatingStudyMode, setIsUpdatingStudyMode] = useState(false);
+  const studyMode = payload?.settings.studyMode ?? "studyPlan";
 
   const recommended = useMemo(
     () =>
@@ -37,7 +48,11 @@ export function usePopupController() {
         payload?.popup.recommended ?? null,
         recommendedIndex
       ),
-    [payload?.popup.recommended, payload?.popup.recommendedCandidates, recommendedIndex]
+    [
+      payload?.popup.recommended,
+      payload?.popup.recommendedCandidates,
+      recommendedIndex,
+    ]
   );
 
   async function refresh(resetRecommendation = false): Promise<void> {
@@ -64,15 +79,22 @@ export function usePopupController() {
     }
   }
 
-  async function onToggleStudyMode(): Promise<void> {
-    if (!payload) {
+  async function setStudyMode(mode: StudyMode): Promise<void> {
+    if (studyMode === mode || isUpdatingStudyMode) {
       return;
     }
 
-    const nextMode =
-      payload.settings.studyMode === "studyPlan" ? "freestyle" : "studyPlan";
-    const response = await updateSettings({ studyMode: nextMode });
+    setIsUpdatingStudyMode(true);
+    setStatus({
+      message: "",
+      isError: false,
+    });
+
+    await delay(STUDY_MODE_REQUEST_DELAY_MS);
+    const response = await updateSettings({ studyMode: mode });
+
     if (!response.ok) {
+      setIsUpdatingStudyMode(false);
       setStatus({
         message: response.error ?? "Failed to update study mode.",
         isError: true,
@@ -80,26 +102,48 @@ export function usePopupController() {
       return;
     }
 
-    await load();
+    setPayload((current) => {
+      if (!current) {
+        return current;
+      }
+
+      return {
+        ...current,
+        settings: response.data?.settings ?? {
+          ...current.settings,
+          studyMode: mode,
+        },
+      };
+    });
+    setIsUpdatingStudyMode(false);
   }
 
   return {
+    activeCourseDetail: payload?.activeCourse ?? null,
     activeCourse: payload?.popup.activeCourse ?? null,
     courseNext: payload?.popup.courseNext ?? null,
     hasMultipleRecommended:
       (payload?.popup.recommendedCandidates.length ?? 0) > 1,
+    isUpdatingStudyMode,
+    isCourseMode: studyMode === "studyPlan",
+    studyMode,
     onOpenDashboard: openDashboardPage,
+    openCoursesDashboard: () => {
+      openDashboardPage("courses");
+    },
     onOpenProblem,
     onOpenSettings: openSettingsPage,
-    onToggleStudyMode,
     payload,
     recommended,
     refresh,
+    setStudyMode,
     setRecommendedIndex,
     shuffleRecommendation: () => {
-      setRecommendedIndex((current) => {
-        const count = payload?.popup.recommendedCandidates.length ?? 1;
-        return (current + 1) % count;
+      startTransition(() => {
+        setRecommendedIndex((current) => {
+          const count = payload?.popup.recommendedCandidates.length ?? 1;
+          return (current + 1) % count;
+        });
       });
     },
     status,

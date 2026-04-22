@@ -306,7 +306,7 @@ describe("route and selector contracts", () => {
       tags: [],
     };
 
-    const headerStatus = buildHeaderStatus(studyState);
+    const headerStatus = buildHeaderStatus(studyState, relativeTo);
     expect(headerStatus.kind).toBe("history");
     expect(headerStatus.cards.map((card) => card.label)).toEqual([
       "Last submitted",
