@@ -785,6 +785,7 @@ describe("OverlayPanel", () => {
           ...overrides.actionAssist,
         },
         assessment: {
+          disabledRatings: [],
           onSelectRating: () => undefined,
           selectedRating: 2,
           ...overrides.assessment,
@@ -987,6 +988,42 @@ describe("OverlayPanel", () => {
     expect(screen.getByLabelText("Notes").getAttribute("autocomplete")).toBe(
       "off"
     );
+  });
+
+  it("locks the assessment rail to Again after a failed session", () => {
+    const onSelectRating = vi.fn();
+
+    renderOverlayPanel(
+      makeExpandedRenderModel({
+        assessment: {
+          disabledRatings: [1, 2, 3],
+          onSelectRating,
+          selectedRating: 0,
+        },
+        assessmentAssist: {
+          message: "Failed sessions stay locked to Again until you restart.",
+          tone: "danger",
+        },
+      })
+    );
+
+    const easyButton = screen.getByRole("button", {name: "Easy Fast"});
+    const goodButton = screen.getByRole("button", {name: "Good Stable"});
+    const hardButton = screen.getByRole("button", {name: "Hard Lagging"});
+    const againButton = screen.getByRole("button", {name: "Again Failed"});
+
+    expect((easyButton as HTMLButtonElement).disabled).toBe(true);
+    expect((goodButton as HTMLButtonElement).disabled).toBe(true);
+    expect((hardButton as HTMLButtonElement).disabled).toBe(true);
+    expect((againButton as HTMLButtonElement).disabled).toBe(false);
+    expect(againButton.getAttribute("aria-pressed")).toBe("true");
+
+    fireEvent.click(easyButton);
+    fireEvent.click(goodButton);
+    fireEvent.click(hardButton);
+    fireEvent.click(againButton);
+
+    expect(onSelectRating).not.toHaveBeenCalled();
   });
 
   it("shows clear icons for populated log fields and clears through the shared change handler", () => {

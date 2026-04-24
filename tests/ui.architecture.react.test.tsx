@@ -813,6 +813,37 @@ describe("overlay controller", () => {
       expect(screen.getByText("Counting Bits")).toBeTruthy();
       expect(screen.getByText("Assessment")).toBeTruthy();
       expect(screen.getByText("00:04")).toBeTruthy();
+      expect(
+        (screen.getByRole("button", {name: "Easy Fast"}) as HTMLButtonElement)
+          .disabled
+      ).toBe(true);
+      expect(
+        (screen.getByRole("button", {name: "Good Stable"}) as HTMLButtonElement)
+          .disabled
+      ).toBe(true);
+      expect(
+        (screen.getByRole("button", {name: "Hard Lagging"}) as HTMLButtonElement)
+          .disabled
+      ).toBe(true);
+      expect(
+        (screen.getByRole("button", {name: "Again Failed"}) as HTMLButtonElement)
+          .disabled
+      ).toBe(false);
+
+      fireEvent.click(screen.getByRole("button", {name: "Restart"}));
+
+      expect(
+        (screen.getByRole("button", {name: "Easy Fast"}) as HTMLButtonElement)
+          .disabled
+      ).toBe(false);
+      expect(
+        (screen.getByRole("button", {name: "Good Stable"}) as HTMLButtonElement)
+          .disabled
+      ).toBe(false);
+      expect(
+        (screen.getByRole("button", {name: "Hard Lagging"}) as HTMLButtonElement)
+          .disabled
+      ).toBe(false);
     } finally {
       dateNowSpy.mockRestore();
     }

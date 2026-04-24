@@ -60,6 +60,7 @@ export interface OverlayTimerSectionViewModel {
 }
 
 export interface OverlayAssessmentSectionViewModel {
+  disabledRatings: Rating[];
   onSelectRating: (rating: Rating) => void;
   selectedRating: Rating;
 }

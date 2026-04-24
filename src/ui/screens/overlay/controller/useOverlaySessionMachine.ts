@@ -27,6 +27,7 @@ interface OverlaySessionState {
   currentTitle: string;
   draft: OverlayDraftLogFields;
   draftContextSlug: string;
+  failureLocked: boolean;
   feedbackIsError: boolean;
   feedbackMessage: string;
   persistedDraft: OverlayDraftLogFields;
@@ -55,6 +56,7 @@ const initialOverlaySessionState: OverlaySessionState = {
   currentTitle: "",
   draft: emptyDraft(),
   draftContextSlug: "",
+  failureLocked: false,
   feedbackIsError: false,
   feedbackMessage: "",
   persistedDraft: emptyDraft(),
@@ -101,6 +103,7 @@ export function useOverlaySessionMachine(
       currentTitle: "",
       draft: emptyDraft(),
       draftContextSlug: "",
+      failureLocked: false,
       feedbackIsError: false,
       feedbackMessage: "",
       persistedDraft: emptyDraft(),
@@ -120,6 +123,7 @@ export function useOverlaySessionMachine(
         currentTitle: title,
         draft: emptyDraft(),
         draftContextSlug: "",
+        failureLocked: false,
         feedbackIsError: false,
         feedbackMessage: "",
         persistedDraft: emptyDraft(),
@@ -277,7 +281,12 @@ export function useOverlaySessionMachine(
   );
 
   const submitRating = useCallback(
-    async (rating: Rating): Promise<string | null> => {
+    async (
+      rating: Rating,
+      options?: {
+        lockFailureRating?: boolean;
+      }
+    ): Promise<string | null> => {
       if (!state.activeSlug || state.submittedSession) {
         return null;
       }
@@ -312,6 +321,7 @@ export function useOverlaySessionMachine(
             lastSolveTimeMs: solveTimeMs,
           }
           : current.currentState,
+        failureLocked: options?.lockFailureRating === true,
         persistedDraft: draftSnapshot,
         selectedRating: rating,
         submittedSession: {
@@ -324,7 +334,14 @@ export function useOverlaySessionMachine(
 
       return state.activeSlug;
     },
-    [persistReview, state.activeSlug, state.currentState, state.draft, state.submittedSession, timer]
+    [
+      persistReview,
+      state.activeSlug,
+      state.currentState,
+      state.draft,
+      state.submittedSession,
+      timer,
+    ]
   );
 
   const saveOverride = useCallback(async (): Promise<string | null> => {
@@ -380,6 +397,7 @@ export function useOverlaySessionMachine(
         draft: draftFromStudyState(current.currentState),
         feedbackIsError: false,
         feedbackMessage: "",
+        failureLocked: false,
         selectedRating: current.currentState?.lastRating ?? 2,
         submittedSession: null,
       }));

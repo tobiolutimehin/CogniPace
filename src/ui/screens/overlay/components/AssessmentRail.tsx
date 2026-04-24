@@ -80,6 +80,17 @@ function assessmentToggleSx(color: string) {
     "&.Mui-selected:hover": {
       backgroundColor: alpha(color, 0.4),
     },
+    "&.Mui-disabled": {
+      backgroundColor: alpha(color, 0.03),
+      color: alpha(color, 0.26),
+      opacity: 1,
+    },
+    "&.Mui-disabled .assessment-label": {
+      color: alpha(color, 0.28),
+    },
+    "&.Mui-disabled .assessment-copy": {
+      color: alpha(color, 0.2),
+    },
   } as const;
 }
 
@@ -122,6 +133,7 @@ export function AssessmentRail(
       >
         {assessmentOptions.map((option) => (
           <ToggleButton
+            disabled={props.assessment.disabledRatings.includes(option.rating)}
             key={option.rating}
             sx={assessmentToggleSx(option.color)}
             value={option.rating}

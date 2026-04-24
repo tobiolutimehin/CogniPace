@@ -221,16 +221,18 @@ export function useOverlayController(
     : null;
   const assessmentAssist = {
     id: "overlay-assessment-help",
-    message:
-      currentState.selectedRating === 3
+    message: currentState.failureLocked
+      ? "Failed sessions stay locked to Again until you restart and open a fresh attempt."
+      : currentState.selectedRating === 3
         ? "Easy means the solution felt immediate and you can trust the recall."
         : currentState.selectedRating === 2
           ? "Good means you finished with steady recall but not instantly."
           : currentState.selectedRating === 1
             ? "Hard means you got there with friction and should expect a sooner review."
             : "Again means you could not complete it and want the shortest review interval.",
-    tone:
-      currentState.selectedRating === 0
+    tone: currentState.failureLocked
+      ? "danger"
+      : currentState.selectedRating === 0
         ? "danger"
         : currentState.selectedRating === 1
           ? "warning"
@@ -259,8 +261,13 @@ export function useOverlayController(
     }
   };
 
-  const submitRating = async (rating: Rating) => {
-    const persistedSlug = await persistSubmittedRating(rating);
+  const submitRating = async (
+    rating: Rating,
+    options?: {
+      lockFailureRating?: boolean;
+    }
+  ) => {
+    const persistedSlug = await persistSubmittedRating(rating, options);
     await refreshAfterMutation(persistedSlug);
   };
 
@@ -273,7 +280,7 @@ export function useOverlayController(
   };
 
   const onFailReview = () => {
-    void submitRating(0);
+    void submitRating(0, {lockFailureRating: true});
   };
 
   const onSaveOverride = () => {
@@ -349,6 +356,7 @@ export function useOverlayController(
           onUpdate: onSaveOverride,
         },
         assessment: {
+          disabledRatings: currentState.failureLocked ? [1, 2, 3] : [],
           onSelectRating: selectRating,
           selectedRating: currentState.selectedRating,
         },

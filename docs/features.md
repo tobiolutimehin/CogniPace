@@ -186,6 +186,7 @@ Give users lightweight solve-time awareness and a fast logging path.
 - collapsed submit derives a conservative default rating, saves immediately, and expands into the full override form
 - expanded submit uses the selected FSRS rating directly
 - failed is a dedicated submission path that currently maps to `Again`
+- failed submissions keep the expanded assessment locked to `Again` until the user restarts the local session
 - save override replaces the latest submission instead of appending a new review
 - restart opens a fresh local session without mutating persisted review history until the next submit
 
