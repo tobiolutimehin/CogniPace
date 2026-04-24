@@ -5,9 +5,9 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 
 import {Rating} from "../../../../domain/types";
-import {SurfaceSectionLabel} from "../../../components";
+import {FieldAssistRow, SurfaceSectionLabel} from "../../../components";
 import {kineticTokens} from "../../../theme";
-import {OverlayAssessmentSectionViewModel} from "../overlayPanel.types";
+import {OverlayAssessmentSectionViewModel, OverlayAssistViewModel} from "../overlayPanel.types";
 
 interface AssessmentOption {
   color: string;
@@ -86,6 +86,7 @@ function assessmentToggleSx(color: string) {
 export function AssessmentRail(
   props: {
     assessment: OverlayAssessmentSectionViewModel;
+    assist: OverlayAssistViewModel;
   }
 ) {
   return (
@@ -108,6 +109,8 @@ export function AssessmentRail(
             borderLeft: `1px solid ${assessmentRailDividerColor}`,
           },
         }}
+        aria-describedby={props.assist.id}
+        aria-label="Review assessment"
         onChange={(_, value: Rating | null) => {
           if (value === null) {
             return;
@@ -138,6 +141,9 @@ export function AssessmentRail(
           </ToggleButton>
         ))}
       </ToggleButtonGroup>
+      <FieldAssistRow id={props.assist.id} tone={props.assist.tone}>
+        {props.assist.message}
+      </FieldAssistRow>
     </Stack>
   );
 }

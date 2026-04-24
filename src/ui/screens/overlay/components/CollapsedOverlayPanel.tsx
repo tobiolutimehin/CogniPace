@@ -8,11 +8,12 @@ import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import {alpha} from "@mui/material/styles";
-import Tooltip from "@mui/material/Tooltip";
 
-import {NumericDisplay, SurfaceIconButton} from "../../../components";
+import {FieldAssistRow, NumericDisplay, SurfaceIconButton, SurfaceTooltip} from "../../../components";
 import {kineticTokens} from "../../../theme";
 import {CollapsedOverlayViewModel} from "../overlayPanel.types";
+
+import {OverlayFeedbackSurface} from "./OverlayFeedbackSurface";
 
 export function CollapsedOverlayPanel(
   props: {
@@ -36,14 +37,14 @@ export function CollapsedOverlayPanel(
           spacing={1.75}
         >
           <Stack alignItems="center" direction="row" spacing={0.9}>
-            <Tooltip title="Expand overlay">
+            <SurfaceTooltip title="Expand overlay">
               <SurfaceIconButton
                 aria-label="Expand overlay"
                 onClick={props.model.actions.onToggleCollapse}
               >
                 <KeyboardArrowUpRounded fontSize="small"/>
               </SurfaceIconButton>
-            </Tooltip>
+            </SurfaceTooltip>
             <Box
               sx={{
                 alignSelf: "stretch",
@@ -61,7 +62,7 @@ export function CollapsedOverlayPanel(
             >
               {props.model.timer.display}
             </NumericDisplay>
-            <Tooltip title={props.model.timer.startLabel}>
+            <SurfaceTooltip title={props.model.timer.startLabel}>
               <span>
                 <SurfaceIconButton
                   aria-label={props.model.timer.startLabel}
@@ -87,8 +88,8 @@ export function CollapsedOverlayPanel(
                   )}
                 </SurfaceIconButton>
               </span>
-            </Tooltip>
-            <Tooltip title="Restart timer">
+            </SurfaceTooltip>
+            <SurfaceTooltip title="Restart timer">
               <span>
                 <SurfaceIconButton
                   aria-label="Restart timer"
@@ -98,7 +99,7 @@ export function CollapsedOverlayPanel(
                   <RestartAltRounded fontSize="small"/>
                 </SurfaceIconButton>
               </span>
-            </Tooltip>
+            </SurfaceTooltip>
           </Stack>
           <Stack alignItems="center" direction="row" spacing={0.75}>
             <Button
@@ -109,7 +110,7 @@ export function CollapsedOverlayPanel(
             >
               Submit
             </Button>
-            <Tooltip title="Fail review">
+            <SurfaceTooltip title="Fail review">
               <span>
                 <SurfaceIconButton
                   aria-label="Fail review"
@@ -130,9 +131,15 @@ export function CollapsedOverlayPanel(
                   <CancelRounded fontSize="small"/>
                 </SurfaceIconButton>
               </span>
-            </Tooltip>
+            </SurfaceTooltip>
           </Stack>
         </Stack>
+        <FieldAssistRow id={props.model.assist.id} tone={props.model.assist.tone}>
+          {props.model.assist.message}
+        </FieldAssistRow>
+        {props.model.feedback ? (
+          <OverlayFeedbackSurface feedback={props.model.feedback}/>
+        ) : null}
       </Stack>
     </Paper>
   );

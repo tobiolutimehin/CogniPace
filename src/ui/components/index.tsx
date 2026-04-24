@@ -7,6 +7,7 @@ import IconButton, {IconButtonProps} from "@mui/material/IconButton";
 import LinearProgress from "@mui/material/LinearProgress";
 import Stack from "@mui/material/Stack";
 import {alpha, Theme} from "@mui/material/styles";
+import Tooltip, {TooltipProps} from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import {SxProps} from "@mui/system";
 import {memo, ReactNode} from "react";
@@ -34,6 +35,35 @@ const toneStyles: Record<Tone, { background: string; color: string }> = {
   danger: {
     background: alpha(kineticTokens.danger, 0.16),
     color: kineticTokens.danger,
+  },
+};
+
+type AssistTone = Tone | "warning";
+
+const assistToneStyles: Record<AssistTone, { border: string; text: string }> = {
+  default: {
+    border: alpha(kineticTokens.outlineStrong, 0.18),
+    text: kineticTokens.mutedText,
+  },
+  accent: {
+    border: alpha(kineticTokens.accentSoft, 0.24),
+    text: kineticTokens.accentSoft,
+  },
+  info: {
+    border: alpha(kineticTokens.info, 0.24),
+    text: kineticTokens.info,
+  },
+  success: {
+    border: alpha(kineticTokens.success, 0.24),
+    text: kineticTokens.success,
+  },
+  warning: {
+    border: alpha(kineticTokens.accentSoft, 0.24),
+    text: kineticTokens.accentSoft,
+  },
+  danger: {
+    border: alpha(kineticTokens.danger, 0.24),
+    text: kineticTokens.danger,
   },
 };
 
@@ -104,6 +134,18 @@ export function SurfaceIconButton(props: IconButtonProps) {
       size="small"
       sx={mergedSx}
       {...rest}
+    />
+  );
+}
+
+export function SurfaceTooltip(props: TooltipProps) {
+  return (
+    <Tooltip
+      arrow
+      enterDelay={250}
+      enterNextDelay={150}
+      placement={props.placement ?? "top"}
+      {...props}
     />
   );
 }
@@ -179,10 +221,83 @@ export function StatusSurface(props: {
   );
 }
 
-// Note: SurfaceCard is NOT memoized because it accepts `children: ReactNode`.
-// In React, `children` are almost always passed as new reference objects
-// (new JSX elements) on every render, meaning the shallow comparison will fail
-// and the component will re-render anyway, turning the memoization check into pure overhead.
+export function FieldAssistRow(props: {
+  children?: ReactNode;
+  id?: string;
+  minHeight?: number | string;
+  tone?: AssistTone;
+}) {
+  const tone = props.tone ?? "default";
+  const toneStyle = assistToneStyles[tone];
+
+  return (
+    <Box
+      id={props.id}
+      sx={{
+        alignItems: "center",
+        borderLeft: `1px solid ${toneStyle.border}`,
+        color: toneStyle.text,
+        display: "flex",
+        minHeight: props.minHeight ?? 18,
+        pl: 1,
+      }}
+    >
+      <Typography
+        color="inherit"
+        sx={{lineHeight: 1.35}}
+        variant="caption"
+      >
+        {props.children ?? "\u00A0"}
+      </Typography>
+    </Box>
+  );
+}
+
+export function InlineStatusRegion(props: {
+  id?: string;
+  isError?: boolean;
+  live?: "assertive" | "off" | "polite";
+  message?: string;
+  minHeight?: number | string;
+  reserveSpace?: boolean;
+}) {
+  const tone = props.isError ? "danger" : "info";
+  const minHeight = props.minHeight ?? 38;
+
+  if (!props.message && !props.reserveSpace) {
+    return null;
+  }
+
+  return (
+    <Box
+      aria-atomic="true"
+      aria-live={props.live ?? "polite"}
+      id={props.id}
+      role={props.isError ? "alert" : "status"}
+      sx={{
+        minHeight,
+      }}
+    >
+      {props.message ? (
+        <StatusSurface
+          sx={{minHeight, px: 1.2, py: 0.9}}
+          tone={tone}
+        >
+          <Typography
+            color={props.isError ? "error.main" : "text.primary"}
+            sx={{lineHeight: 1.35}}
+            variant="body2"
+          >
+            {props.message}
+          </Typography>
+        </StatusSurface>
+      ) : (
+        <Box sx={{minHeight}}/>
+      )}
+    </Box>
+  );
+}
+
 export function SurfaceCard(props: {
   label?: string;
   title?: string;
@@ -228,12 +343,6 @@ export function SurfaceCard(props: {
   );
 }
 
-// ⚡ Bolt Optimization: Memoize pure functional UI components
-// These components (ToneChip, ProgressTrack, MetricCard, StatusBanner, BrandMark)
-// only receive primitive props (strings, numbers) and are frequently used in long lists
-// or dashboard surfaces (e.g., ProblemStatusTable, QueuePreview, LibraryView).
-// Wrapping them in React.memo prevents unnecessary re-renders when parent views update,
-// reducing CPU overhead during list scrolling and filtering operations.
 export const ToneChip = memo(function ToneChip(props: { label: string; tone?: Tone }) {
   const tone = props.tone ?? "default";
 
@@ -284,7 +393,13 @@ export const StatusBanner = memo(function StatusBanner(props: { message: string;
   }
 
   return (
-    <Alert severity={props.isError ? "error" : "info"} variant="filled">
+    <Alert
+      aria-atomic="true"
+      aria-live="polite"
+      role={props.isError ? "alert" : "status"}
+      severity={props.isError ? "error" : "info"}
+      variant="filled"
+    >
       {props.message}
     </Alert>
   );

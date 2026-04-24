@@ -11,7 +11,8 @@ Interpretation rules:
 - `Out of scope` describes work that should not be implemented without explicit human approval
 - `Future candidates` belong in product conversations, not implementation by default
 
-This document is not an auto-generated backlog. A feature being listed as `In scope` does not authorize self-starting work by humans or agents.
+This document is not an auto-generated backlog. A feature being listed as `In scope` does not authorize self-starting
+work by humans or agents.
 
 ## Popup Recommendation Flow
 
@@ -36,6 +37,9 @@ Give the user the fastest possible answer to what to do next.
 - Uses a compact course-panel action to open the dashboard on the courses view
 - Keeps the course panel visible in both `studyPlan` and `freestyle`
 - Uses explicit course-panel actions to start `studyPlan` or `freestyle` rather than a blind mode toggle
+- Keeps recommendation, course help text, and status feedback inside reserved inline slots so popup actions do not cause
+  jumpy reflow
+- Keeps one stable course card shell across `studyPlan`, `freestyle`, `no active course`, and `complete` states
 
 ### Key States And Edge Cases
 
@@ -83,7 +87,8 @@ Provide guided traversal through curated learning paths without losing review aw
 - supports curated courses and chapters
 - tracks active course and active chapter
 - computes next question and course completion data
-- shows course progress in popup and dashboard, with the popup using a single compact active-course panel that includes progress and the up-next question
+- shows course progress in popup and dashboard, with the popup using a single compact active-course panel that includes
+  progress and the up-next question
 
 ### Key States And Edge Cases
 
@@ -129,6 +134,8 @@ Let users review and log progress directly on the LeetCode problem page.
 - expanded logging fields include interview pattern, time complexity, space complexity, languages used, and notes
 - submit, failed, save-override, and restart session actions are distinct
 - open settings shortcut
+- both overlay variants keep helper text and feedback in reserved inline regions so timer and submit states do not shift
+  the control layout unexpectedly
 
 ### Key States And Edge Cases
 

@@ -25,6 +25,8 @@ The UI should feel like a sharp browser tool rather than a marketing site or mob
 - the popup should prefer surface-specific sections over generic dashboard cards
 - compact icon actions are preferred over oversized footer buttons when the destination is secondary
 - study-mode actions in the popup should name the next action explicitly, for example `Start study mode` or `Start freestyle mode`
+- popup sections should reserve space for helper copy and inline status so action feedback does not shift the layout
+- mode changes should update the existing course panel in place instead of swapping between visually unrelated cards
 
 ## Dashboard Guidelines
 
@@ -37,6 +39,8 @@ The UI should feel like a sharp browser tool rather than a marketing site or mob
 - the overlay should remain supportive rather than dominant
 - quick logging must feel fast
 - expanded controls should be available without overwhelming the page
+- collapsed and expanded overlay variants should keep action positions stable as timer and submit state change
+- critical guidance should appear as visible helper text; tooltips are secondary clarification, not the only explanation
 
 ## Copy And Label Tone
 
@@ -76,6 +80,8 @@ Labels should explain the state directly, for example:
 - keep frequent actions one click away
 - prefer direct actions over modal workflows
 - preserve enough context for the user to decide quickly
+- surface errors and confirmations inline near the action that caused them
+- use live regions for async feedback and keep helper/status slots mounted even when empty to prevent UI jump
 
 ## Relationship To Stitch
 

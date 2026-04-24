@@ -2,11 +2,10 @@ import KeyboardArrowDownRounded from "@mui/icons-material/KeyboardArrowDownRound
 import SettingsRounded from "@mui/icons-material/SettingsRounded";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
-import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 
 import {Difficulty} from "../../../../domain/types";
-import {StatusSurface, SurfaceIconButton, SurfaceSectionLabel, ToneChip,} from "../../../components";
+import {StatusSurface, SurfaceIconButton, SurfaceSectionLabel, SurfaceTooltip, ToneChip,} from "../../../components";
 import {difficultyTone} from "../../../presentation/studyState";
 import {kineticTokens} from "../../../theme";
 import {OverlayHeaderSectionViewModel, OverlayHeaderStatusCard, OverlayHeaderStatusTone,} from "../overlayPanel.types";
@@ -106,7 +105,7 @@ export function ExpandedOverlayHeader(
         data-testid="expanded-overlay-header-row"
       >
         <Stack alignItems="center" direction="row" spacing={0.55}>
-          <Tooltip title="Collapse overlay">
+          <SurfaceTooltip title="Collapse overlay">
             <SurfaceIconButton
               aria-label="Collapse overlay"
               onClick={(event) => {
@@ -116,8 +115,8 @@ export function ExpandedOverlayHeader(
             >
               <KeyboardArrowDownRounded fontSize="small"/>
             </SurfaceIconButton>
-          </Tooltip>
-          <Tooltip title="Open settings">
+          </SurfaceTooltip>
+          <SurfaceTooltip title="Open settings">
             <SurfaceIconButton
               aria-label="Open settings"
               onClick={(event) => {
@@ -127,7 +126,7 @@ export function ExpandedOverlayHeader(
             >
               <SettingsRounded fontSize="small"/>
             </SurfaceIconButton>
-          </Tooltip>
+          </SurfaceTooltip>
           <Box
             aria-hidden="true"
             data-testid="expanded-overlay-header-divider"

@@ -74,6 +74,12 @@ export interface OverlayFeedbackViewModel {
   message: string;
 }
 
+export interface OverlayAssistViewModel {
+  id?: string;
+  message: string;
+  tone?: "accent" | "danger" | "default" | "info" | "success" | "warning";
+}
+
 export interface CollapsedOverlayActionsViewModel {
   canFail: boolean;
   canSubmit: boolean;
@@ -95,12 +101,16 @@ export interface ExpandedOverlayActionsViewModel {
 
 export interface CollapsedOverlayViewModel {
   actions: CollapsedOverlayActionsViewModel;
+  assist: OverlayAssistViewModel;
+  feedback: OverlayFeedbackViewModel | null;
   timer: OverlayTimerSectionViewModel;
 }
 
 export interface ExpandedOverlayViewModel {
   actions: ExpandedOverlayActionsViewModel;
+  actionAssist: OverlayAssistViewModel;
   assessment: OverlayAssessmentSectionViewModel;
+  assessmentAssist: OverlayAssistViewModel;
   feedback: OverlayFeedbackViewModel | null;
   header: OverlayHeaderSectionViewModel;
   log: OverlayLogSectionViewModel;

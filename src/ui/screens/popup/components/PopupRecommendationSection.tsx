@@ -1,11 +1,11 @@
 import ShuffleRounded from "@mui/icons-material/ShuffleRounded";
 import Stack from "@mui/material/Stack";
-import Tooltip from "@mui/material/Tooltip";
 
 import {RecommendedProblemView} from "../../../../domain/views";
-import {SurfaceIconButton, ToneChip} from "../../../components";
+import {FieldAssistRow, InlineStatusRegion, SurfaceIconButton, SurfaceTooltip, ToneChip} from "../../../components";
 import {RecommendedProblemCard} from "../../../features/recommended/RecommendedProblemCard";
 import {difficultyTone} from "../../../presentation/studyState";
+import {UiStatus} from "../../../state/useAppShellQuery";
 
 function RecommendationHeaderAction(props: {
   canShuffle: boolean;
@@ -19,7 +19,7 @@ function RecommendationHeaderAction(props: {
         tone={difficultyTone(props.difficulty)}
       />
       {props.canShuffle ? (
-        <Tooltip title="Shuffle recommendation">
+        <SurfaceTooltip title="Shuffle recommendation">
           <SurfaceIconButton
             aria-label="Shuffle recommendation"
             onClick={props.onShuffle}
@@ -27,7 +27,7 @@ function RecommendationHeaderAction(props: {
           >
             <ShuffleRounded aria-hidden="true" fontSize="small"/>
           </SurfaceIconButton>
-        </Tooltip>
+        </SurfaceTooltip>
       ) : null}
     </Stack>
   );
@@ -36,6 +36,7 @@ function RecommendationHeaderAction(props: {
 export function RecommendationEmpty(props: {
   canShuffle: boolean;
   onShuffle: () => void;
+  status?: UiStatus;
 }) {
   return (
     <RecommendedProblemCard
@@ -43,15 +44,27 @@ export function RecommendationEmpty(props: {
       emptyTitle="Queue Clear"
       headerAction={
         props.canShuffle ? (
-          <Tooltip title="Shuffle recommendation">
+          <SurfaceTooltip title="Shuffle recommendation">
             <SurfaceIconButton
               aria-label="Shuffle recommendation"
               onClick={props.onShuffle}
             >
               <ShuffleRounded aria-hidden="true" fontSize="small"/>
             </SurfaceIconButton>
-          </Tooltip>
+          </SurfaceTooltip>
         ) : undefined
+      }
+      helper={
+        <Stack spacing={0.8}>
+          <FieldAssistRow>
+            Review is clear for now. Shuffle only rotates among current
+            recommendation candidates.
+          </FieldAssistRow>
+          <InlineStatusRegion
+            isError={props.status?.isError}
+            message={props.status?.message}
+          />
+        </Stack>
       }
       onOpenProblem={() => undefined}
       recommended={null}
@@ -69,6 +82,7 @@ export function RecommendationActive(props: {
   };
   canShuffle: boolean;
   recommended: RecommendedProblemView;
+  status?: UiStatus;
 }) {
   return (
     <RecommendedProblemCard
@@ -79,6 +93,18 @@ export function RecommendationActive(props: {
           difficulty={props.recommended.difficulty}
           onShuffle={props.actions.onShuffle}
         />
+      }
+      helper={
+        <Stack spacing={0.8}>
+          <FieldAssistRow>
+            Open the current best review target. Shuffle rotates only the
+            recommendation pool and leaves course progression unchanged.
+          </FieldAssistRow>
+          <InlineStatusRegion
+            isError={props.status?.isError}
+            message={props.status?.message}
+          />
+        </Stack>
       }
       onOpenProblem={props.actions.onOpenProblem}
       recommended={props.recommended}

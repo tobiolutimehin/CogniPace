@@ -3,10 +3,9 @@ import SettingsRounded from "@mui/icons-material/SettingsRounded";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import {alpha} from "@mui/material/styles";
-import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 
-import {BrandMark, SurfaceIconButton} from "../../../components";
+import {BrandMark, SurfaceIconButton, SurfaceTooltip} from "../../../components";
 import {kineticTokens} from "../../../theme";
 
 export interface PopupHeaderProps {
@@ -49,8 +48,8 @@ export function PopupHeader(props: PopupHeaderProps) {
         >
           CogniPace
         </Typography>
-        <Stack direction="row" spacing={0.45}>
-          <Tooltip title="Refresh popup">
+        <Stack direction="row" spacing={0.45} sx={{minWidth: 64}}>
+          <SurfaceTooltip title="Refresh popup">
             <SurfaceIconButton
               aria-label="Refresh popup"
               onClick={props.onRefresh}
@@ -58,8 +57,8 @@ export function PopupHeader(props: PopupHeaderProps) {
             >
               <RefreshRounded aria-hidden="true" fontSize="small"/>
             </SurfaceIconButton>
-          </Tooltip>
-          <Tooltip title="Open settings">
+          </SurfaceTooltip>
+          <SurfaceTooltip title="Open settings">
             <SurfaceIconButton
               aria-label="Open settings"
               onClick={props.onOpenSettings}
@@ -67,7 +66,7 @@ export function PopupHeader(props: PopupHeaderProps) {
             >
               <SettingsRounded aria-hidden="true" fontSize="small"/>
             </SurfaceIconButton>
-          </Tooltip>
+          </SurfaceTooltip>
         </Stack>
       </Stack>
     </Box>

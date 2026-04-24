@@ -2,12 +2,21 @@ import CallMadeRounded from "@mui/icons-material/CallMadeRounded";
 import ChevronRightRounded from "@mui/icons-material/ChevronRightRounded";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
-import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 
 import {ActiveCourseView, CourseQuestionView} from "../../../../domain/views";
-import {InsetSurface, SurfaceCard, SurfaceIconButton, SurfaceSectionLabel,} from "../../../components";
-import {CourseProgressCard} from "../../../features/courses/CourseProgressCard";
+import {
+  FieldAssistRow,
+  InlineStatusRegion,
+  InsetSurface,
+  ProgressTrack,
+  SurfaceCard,
+  SurfaceIconButton,
+  SurfaceSectionLabel,
+  SurfaceTooltip,
+  ToneChip
+} from "../../../components";
+import {UiStatus} from "../../../state/useAppShellQuery";
 
 import {popupSmallButtonSx} from "./popupStyles";
 
@@ -39,7 +48,7 @@ function CourseFooter(props: {
       >
         {props.primaryActionLabel}
       </Button>
-      <Tooltip title="Open courses dashboard">
+      <SurfaceTooltip title="Open courses dashboard">
         <SurfaceIconButton
           aria-label="Open courses dashboard"
           onClick={props.onOpenDashboard}
@@ -47,23 +56,31 @@ function CourseFooter(props: {
         >
           <CallMadeRounded aria-hidden="true" fontSize="small"/>
         </SurfaceIconButton>
-      </Tooltip>
+      </SurfaceTooltip>
     </Stack>
   );
 }
 
 function CourseStateCard(props: {
+  action?: ReactNode;
   children: ReactNode;
   disabled?: boolean;
+  helper: string;
   onModeAction: () => void;
   onOpenDashboard: () => void;
   primaryActionLabel: string;
+  status?: UiStatus;
   title: string;
 }) {
   return (
-    <SurfaceCard label="Active Course" title={props.title}>
+    <SurfaceCard action={props.action} label="Active Course" title={props.title}>
       <Stack spacing={1.5}>
         {props.children}
+        <FieldAssistRow>{props.helper}</FieldAssistRow>
+        <InlineStatusRegion
+          isError={props.status?.isError}
+          message={props.status?.message}
+        />
         <CourseFooter
           disabled={props.disabled}
           onModeAction={props.onModeAction}
@@ -96,15 +113,17 @@ function CourseNextInset(props: {
         >
           <Typography
             sx={{
+              minWidth: 0,
               fontSize: "0.92rem",
               fontWeight: 600,
               lineHeight: 1.22,
             }}
+            noWrap
             translate="no"
           >
             {props.nextQuestion.title}
           </Typography>
-          <Tooltip title="Continue path">
+          <SurfaceTooltip title="Continue path">
             <SurfaceIconButton
               aria-label="Continue path"
               onClick={() => {
@@ -118,7 +137,7 @@ function CourseNextInset(props: {
             >
               <ChevronRightRounded aria-hidden="true" fontSize="small"/>
             </SurfaceIconButton>
-          </Tooltip>
+          </SurfaceTooltip>
         </Stack>
       </Stack>
     </InsetSurface>
@@ -129,13 +148,16 @@ export function CoursePanelEmpty(props: {
   disabled?: boolean;
   onEnterFreestyle: () => void;
   onOpenDashboard: () => void;
+  status?: UiStatus;
 }) {
   return (
     <CourseStateCard
       disabled={props.disabled}
+      helper="No guided track is active. Start freestyle for queue-only practice or open Courses to pick a path."
       onModeAction={props.onEnterFreestyle}
       onOpenDashboard={props.onOpenDashboard}
       primaryActionLabel="Start freestyle mode"
+      status={props.status}
       title="No Active Course"
     >
       <Typography color="text.secondary" variant="body2">
@@ -150,13 +172,16 @@ export function CoursePanelCompleted(props: {
   disabled?: boolean;
   onEnterFreestyle: () => void;
   onOpenDashboard: () => void;
+  status?: UiStatus;
 }) {
   return (
     <CourseStateCard
       disabled={props.disabled}
+      helper="This path is complete. Switch tracks in Courses or stay in freestyle to focus on due reviews."
       onModeAction={props.onEnterFreestyle}
       onOpenDashboard={props.onOpenDashboard}
       primaryActionLabel="Start freestyle mode"
+      status={props.status}
       title={props.courseName}
     >
       <Typography color="text.secondary" variant="body2">
@@ -171,13 +196,16 @@ export function CoursePanelFreestyle(props: {
   disabled?: boolean;
   onOpenDashboard: () => void;
   onReturnToStudyMode: () => void;
+  status?: UiStatus;
 }) {
   return (
     <CourseStateCard
       disabled={props.disabled}
+      helper="Freestyle keeps course context visible without advancing the guided path until you switch back."
       onModeAction={props.onReturnToStudyMode}
       onOpenDashboard={props.onOpenDashboard}
       primaryActionLabel="Start study mode"
+      status={props.status}
       title="You are in free style mode"
     >
       <Typography color="text.secondary" variant="body2">
@@ -200,26 +228,33 @@ export function CoursePanelStudyPlan(props: {
   course: ActiveCourseView;
   disabled?: boolean;
   nextQuestion: CourseQuestionView;
+  status?: UiStatus;
 }) {
   return (
-    <CourseProgressCard
-      course={props.course}
-      label="Active Course"
-      showProgressChip={false}
+    <CourseStateCard
+      action={<ToneChip label={`${props.course.completionPercent}%`} tone="accent"/>}
+      disabled={props.disabled}
+      helper="Study mode advances the active path. Use freestyle if you want queue-only review without changing course next."
+      onModeAction={props.actions.onEnterFreestyle}
+      onOpenDashboard={props.actions.onOpenDashboard}
+      primaryActionLabel="Start freestyle mode"
+      status={props.status}
+      title={props.course.name}
     >
-      <Stack spacing={1.2}>
+      <Stack spacing={1.25}>
+        <Typography color="text.secondary" variant="body2">
+          {props.course.description}
+        </Typography>
+        <ProgressTrack value={props.course.completionPercent}/>
+        <Typography color="text.secondary" variant="body2">
+          {props.course.completedQuestions}/{props.course.totalQuestions} questions traversed
+        </Typography>
         <CourseNextInset
           courseId={props.course.id}
           nextQuestion={props.nextQuestion}
           onOpenProblem={props.actions.onOpenProblem}
         />
-        <CourseFooter
-          disabled={props.disabled}
-          onModeAction={props.actions.onEnterFreestyle}
-          onOpenDashboard={props.actions.onOpenDashboard}
-          primaryActionLabel="Start freestyle mode"
-        />
       </Stack>
-    </CourseProgressCard>
+    </CourseStateCard>
   );
 }

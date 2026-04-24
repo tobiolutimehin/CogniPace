@@ -4,7 +4,7 @@ import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 
-import {StatusBanner} from "../../components";
+import {InlineStatusRegion} from "../../components";
 import {kineticTokens} from "../../theme";
 
 import {
@@ -21,6 +21,12 @@ import {usePopupController} from "./usePopupController";
 
 export function PopupApp() {
   const controller = usePopupController();
+  const recommendationStatus =
+    controller.status.scope === "recommendation" ? controller.status : undefined;
+  const courseStatus =
+    controller.status.scope === "course" ? controller.status : undefined;
+  const surfaceStatus =
+    controller.status.scope === "surface" ? controller.status : undefined;
 
   const courseActions = {
     onEnterFreestyle: () => {
@@ -58,6 +64,12 @@ export function PopupApp() {
 
         <Box sx={{p: 1.25}}>
           <Stack spacing={1.2}>
+            {surfaceStatus?.message ? (
+              <InlineStatusRegion
+                isError={surfaceStatus.isError}
+                message={surfaceStatus.message}
+              />
+            ) : null}
             <Grid container spacing={1.25}>
               <Grid size={6}>
                 <PopupMetricTile
@@ -81,11 +93,13 @@ export function PopupApp() {
                 actions={recommendationActions}
                 canShuffle={controller.hasMultipleRecommended}
                 recommended={controller.recommended}
+                status={recommendationStatus}
               />
             ) : (
               <RecommendationEmpty
                 canShuffle={controller.hasMultipleRecommended}
                 onShuffle={controller.shuffleRecommendation}
+                status={recommendationStatus}
               />
             )}
 
@@ -94,12 +108,14 @@ export function PopupApp() {
                 disabled={controller.isUpdatingStudyMode}
                 onOpenDashboard={courseActions.onOpenDashboard}
                 onReturnToStudyMode={courseActions.onReturnToStudyMode}
+                status={courseStatus}
               />
             ) : !controller.activeCourseDetail ? (
               <CoursePanelEmpty
                 disabled={controller.isUpdatingStudyMode}
                 onEnterFreestyle={courseActions.onEnterFreestyle}
                 onOpenDashboard={courseActions.onOpenDashboard}
+                status={courseStatus}
               />
             ) : !controller.courseNext ? (
               <CoursePanelCompleted
@@ -107,6 +123,7 @@ export function PopupApp() {
                 disabled={controller.isUpdatingStudyMode}
                 onEnterFreestyle={courseActions.onEnterFreestyle}
                 onOpenDashboard={courseActions.onOpenDashboard}
+                status={courseStatus}
               />
             ) : (
               <CoursePanelStudyPlan
@@ -114,18 +131,12 @@ export function PopupApp() {
                 course={controller.activeCourseDetail}
                 disabled={controller.isUpdatingStudyMode}
                 nextQuestion={controller.courseNext}
+                status={courseStatus}
               />
             )}
           </Stack>
         </Box>
       </Paper>
-
-      {controller.status.message ? (
-        <StatusBanner
-          isError={controller.status.isError}
-          message={controller.status.message}
-        />
-      ) : null}
     </Box>
   );
 }

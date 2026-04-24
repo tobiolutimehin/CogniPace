@@ -1,6 +1,4 @@
-import Typography from "@mui/material/Typography";
-
-import {StatusSurface} from "../../../components";
+import {InlineStatusRegion} from "../../../components";
 import {OverlayFeedbackViewModel} from "../overlayPanel.types";
 
 export function OverlayFeedbackSurface(
@@ -9,13 +7,9 @@ export function OverlayFeedbackSurface(
   }
 ) {
   return (
-    <StatusSurface tone={props.feedback.isError ? "danger" : "accent"}>
-      <Typography
-        color={props.feedback.isError ? "error.main" : "text.primary"}
-        variant="body2"
-      >
-        {props.feedback.message}
-      </Typography>
-    </StatusSurface>
+    <InlineStatusRegion
+      isError={props.feedback.isError}
+      message={props.feedback.message}
+    />
   );
 }

@@ -1,16 +1,13 @@
 /** Popup-local state and actions for the recommendation-first surface. */
-import { startTransition, useMemo, useState } from "react";
+import {startTransition, useMemo, useState} from "react";
 
-import {
-  openDashboardPage,
-  openSettingsPage,
-} from "../../../data/repositories/extensionNavigationRepository";
-import { openProblemPage } from "../../../data/repositories/problemSessionRepository";
-import { updateSettings } from "../../../data/repositories/settingsRepository";
-import { StudyMode } from "../../../domain/types";
-import { RecommendedProblemView } from "../../../domain/views";
-import { createMockAppShellPayload } from "../../mockData";
-import { useAppShellQuery } from "../../state/useAppShellQuery";
+import {openDashboardPage, openSettingsPage,} from "../../../data/repositories/extensionNavigationRepository";
+import {openProblemPage} from "../../../data/repositories/problemSessionRepository";
+import {updateSettings} from "../../../data/repositories/settingsRepository";
+import {StudyMode} from "../../../domain/types";
+import {RecommendedProblemView} from "../../../domain/views";
+import {createMockAppShellPayload} from "../../mockData";
+import {useAppShellQuery} from "../../state/useAppShellQuery";
 
 function currentRecommended(
   candidates: RecommendedProblemView[],
@@ -34,7 +31,7 @@ const STUDY_MODE_REQUEST_DELAY_MS = 500;
 
 /** Coordinates popup data loading, recommendation rotation, and user actions. */
 export function usePopupController() {
-  const { load, payload, setPayload, setStatus, status } = useAppShellQuery(
+  const {load, payload, setPayload, setStatus, status} = useAppShellQuery(
     createMockAppShellPayload()
   );
   const [recommendedIndex, setRecommendedIndex] = useState(0);
@@ -75,6 +72,7 @@ export function usePopupController() {
       setStatus({
         message: response.error ?? "Failed to open problem.",
         isError: true,
+        scope: target.courseId ? "course" : "recommendation",
       });
     }
   }
@@ -88,16 +86,18 @@ export function usePopupController() {
     setStatus({
       message: "",
       isError: false,
+      scope: "course",
     });
 
     await delay(STUDY_MODE_REQUEST_DELAY_MS);
-    const response = await updateSettings({ studyMode: mode });
+    const response = await updateSettings({studyMode: mode});
 
     if (!response.ok) {
       setIsUpdatingStudyMode(false);
       setStatus({
         message: response.error ?? "Failed to update study mode.",
         isError: true,
+        scope: "course",
       });
       return;
     }
@@ -114,6 +114,14 @@ export function usePopupController() {
           studyMode: mode,
         },
       };
+    });
+    setStatus({
+      message:
+        mode === "freestyle"
+          ? "Freestyle active. The course card stays available so you can jump back into the guided path."
+          : "Study mode active. Your next guided question is ready below.",
+      isError: false,
+      scope: "course",
     });
     setIsUpdatingStudyMode(false);
   }

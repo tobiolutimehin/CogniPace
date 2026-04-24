@@ -29,13 +29,19 @@ export function ExpandedOverlayPanel(
 
       <Box sx={{p: 2}}>
         <Stack spacing={2}>
-          <ExpandedOverlayTimerCard timer={props.model.timer}/>
-          <AssessmentRail assessment={props.model.assessment}/>
-          <OverlayLogFields log={props.model.log}/>
-          <ExpandedOverlayActions actions={props.model.actions}/>
           {props.model.feedback ? (
             <OverlayFeedbackSurface feedback={props.model.feedback}/>
           ) : null}
+          <ExpandedOverlayTimerCard timer={props.model.timer}/>
+          <AssessmentRail
+            assessment={props.model.assessment}
+            assist={props.model.assessmentAssist}
+          />
+          <OverlayLogFields log={props.model.log}/>
+          <ExpandedOverlayActions
+            actions={props.model.actions}
+            assist={props.model.actionAssist}
+          />
         </Stack>
       </Box>
     </Paper>

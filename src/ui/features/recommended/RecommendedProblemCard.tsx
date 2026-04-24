@@ -15,6 +15,7 @@ export interface RecommendedProblemCardProps {
   emptyCopy?: string;
   emptyTitle?: string;
   headerAction?: ReactNode;
+  helper?: ReactNode;
   onOpenProblem: (
     target: Pick<RecommendedProblemView, "slug">
   ) => Promise<void> | void;
@@ -30,6 +31,7 @@ export function RecommendedProblemCard(props: RecommendedProblemCardProps) {
     emptyCopy = "No review pressure right now. Shift to the active course to keep the streak moving.",
     emptyTitle = "Queue clear",
     headerAction,
+    helper,
     onOpenProblem,
     recommended,
     showNextReviewDate = true,
@@ -38,9 +40,12 @@ export function RecommendedProblemCard(props: RecommendedProblemCardProps) {
   if (!recommended) {
     return (
       <SurfaceCard label="Recommended Now" title={emptyTitle}>
-        <Typography color="text.secondary" variant="body2">
-          {emptyCopy}
-        </Typography>
+        <Stack spacing={1.2}>
+          <Typography color="text.secondary" variant="body2">
+            {emptyCopy}
+          </Typography>
+          {helper}
+        </Stack>
       </SurfaceCard>
     );
   }
@@ -84,6 +89,7 @@ export function RecommendedProblemCard(props: RecommendedProblemCardProps) {
         >
           {buttonLabel}
         </Button>
+        {helper}
       </Stack>
     </SurfaceCard>
   );
