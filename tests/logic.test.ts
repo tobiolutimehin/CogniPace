@@ -473,21 +473,23 @@ function testUnauthorizedSenderIsRejected(): void {
   );
 }
 
-function testExtensionSenderWithoutUrlIsAccepted(): void {
+function testExtensionSenderWithoutUrlIsRejected(): void {
   const message = validateRuntimeMessage({
     type: "GET_APP_SHELL_DATA",
     payload: {},
   });
 
-  assert.doesNotThrow(() =>
-    assertAuthorizedRuntimeMessage(
-      message,
-      {
-        id: "test-extension",
-      },
-      "test-extension",
-      "chrome-extension://test-extension/"
-    )
+  assert.throws(
+    () =>
+      assertAuthorizedRuntimeMessage(
+        message,
+        {
+          id: "test-extension",
+        },
+        "test-extension",
+        "chrome-extension://test-extension/"
+      ),
+    /unauthorized runtime sender: missing url/i
   );
 }
 
@@ -722,7 +724,7 @@ function run(): void {
   testRuntimeValidationRejectsMissingPayload();
   testRuntimeValidationRejectsWrongFieldType();
   testUnauthorizedSenderIsRejected();
-  testExtensionSenderWithoutUrlIsAccepted();
+  testExtensionSenderWithoutUrlIsRejected();
   testAllowedContentScriptSenderIsAccepted();
   testImportSanitizationIgnoresIncomingProblemUrl();
   testImportSanitizationAcceptsOlderVersionedBackups();
