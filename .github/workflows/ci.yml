@@ -55,11 +55,11 @@ jobs:
   security:
     name: Security (Semgrep)
     runs-on: ubuntu-latest
-    container:
-      image: semgrep/semgrep
     steps:
       - uses: actions/checkout@v4
-      - run: semgrep scan --config auto --error
+      - uses: returntocorp/semgrep-action@v1
+        with:
+          config: auto
 
   # 4. Dependency Guard
   review:
