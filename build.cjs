@@ -39,7 +39,10 @@ async function build() {
     format: "iife",
     target: "chrome114",
     sourcemap: false,
-    minify: false,
+    minify: true,
+    define: {
+      "process.env.NODE_ENV": '"production"',
+    },
     logLevel: "info",
   });
 
