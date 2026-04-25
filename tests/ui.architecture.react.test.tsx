@@ -572,6 +572,10 @@ describe("overlay controller", () => {
             return Promise.resolve({ok: true, data: {}});
           }
 
+          if (type === "GET_APP_SHELL_DATA") {
+            return Promise.resolve({ok: true, data: makePayload()});
+          }
+
           if (type === "OPEN_EXTENSION_PAGE") {
             return Promise.resolve({ok: true, data: {opened: true}});
           }
@@ -665,6 +669,173 @@ describe("overlay controller", () => {
       expect(screen.getByText("Counting Bits")).toBeTruthy();
       expect(screen.getByText("Assessment")).toBeTruthy();
       expect(screen.getByText("00:04")).toBeTruthy();
+      expect(screen.getByText("Next In Study Mode")).toBeTruthy();
+      expect(screen.getByText("Contains Duplicate")).toBeTruthy();
+    } finally {
+      dateNowSpy.mockRestore();
+    }
+  });
+
+  it("shows an empty post-submit state when only the current problem remains", async () => {
+    let nextTimerId = 1;
+    const timeouts = new Map<number, () => void>();
+    const intervals = new Map<number, () => void>();
+    let nowMs = 1000;
+    const dateNowSpy = vi.spyOn(Date, "now").mockImplementation(() => nowMs);
+
+    try {
+      sendMessageMock.mockImplementation(
+        (type: string, payload: { slug?: string }) => {
+          if (type === "UPSERT_PROBLEM_FROM_PAGE") {
+            return Promise.resolve({
+              ok: true,
+              data: {
+                problem: {
+                  id: payload.slug,
+                  leetcodeSlug: payload.slug,
+                  title: "Counting Bits",
+                  difficulty: "Easy",
+                  url: `https://leetcode.com/problems/${payload.slug}/`,
+                  topics: [],
+                  sourceSet: [],
+                  createdAt: "2026-03-01T00:00:00.000Z",
+                  updatedAt: "2026-03-01T00:00:00.000Z",
+                },
+                studyState: null,
+              },
+            });
+          }
+
+          if (
+            type === "GET_PROBLEM_CONTEXT" &&
+            payload.slug === "counting-bits"
+          ) {
+            return Promise.resolve({
+              ok: true,
+              data: {
+                problem: {title: "Counting Bits", difficulty: "Easy"},
+                studyState: null,
+              },
+            });
+          }
+
+          if (
+            type === "SAVE_REVIEW_RESULT" &&
+            payload.slug === "counting-bits"
+          ) {
+            return Promise.resolve({ok: true, data: {}});
+          }
+
+          if (type === "GET_APP_SHELL_DATA") {
+            const nextPayload = makePayload();
+            nextPayload.settings.studyMode = "freestyle";
+            nextPayload.popup.courseNext = {
+              ...nextPayload.popup.courseNext!,
+              slug: "counting-bits",
+              title: "Counting Bits",
+              url: "https://leetcode.com/problems/counting-bits/",
+            };
+            nextPayload.popup.recommended = {
+              ...nextPayload.popup.recommended!,
+              slug: "counting-bits",
+              title: "Counting Bits",
+              url: "https://leetcode.com/problems/counting-bits/",
+            };
+            nextPayload.popup.recommendedCandidates = [
+              nextPayload.popup.recommended!,
+            ];
+            return Promise.resolve({ok: true, data: nextPayload});
+          }
+
+          if (type === "OPEN_EXTENSION_PAGE") {
+            return Promise.resolve({ok: true, data: {opened: true}});
+          }
+
+          return Promise.resolve({ok: true, data: {}});
+        }
+      );
+
+      const overlayDocument =
+        document.implementation.createHTMLDocument("overlay");
+      overlayDocument.body.innerHTML = `
+        <h1>Counting Bits</h1>
+        <span>Easy</span>
+      `;
+
+      const fakeWindow = {
+        clearInterval: (id: number) => {
+          intervals.delete(id);
+        },
+        clearTimeout: (id: number) => {
+          timeouts.delete(id);
+        },
+        location: {
+          href: "https://leetcode.com/problems/counting-bits/",
+        },
+        setInterval: (callback: TimerHandler) => {
+          const id = nextTimerId++;
+          intervals.set(id, callback as () => void);
+          return id;
+        },
+        setTimeout: (callback: TimerHandler) => {
+          const id = nextTimerId++;
+          timeouts.set(id, callback as () => void);
+          return id;
+        },
+      } as unknown as Window;
+
+      const runPendingTimeouts = () => {
+        const pending = [...timeouts.entries()];
+        timeouts.clear();
+        for (const [, callback] of pending) {
+          callback();
+        }
+      };
+
+      const runIntervalTick = () => {
+        for (const callback of intervals.values()) {
+          callback();
+        }
+      };
+
+      render(
+        <AppProviders>
+          <OverlayRoot documentRef={overlayDocument} windowRef={fakeWindow}/>
+        </AppProviders>
+      );
+
+      runPendingTimeouts();
+
+      expect(
+        await screen.findByRole("button", {name: "Start timer"})
+      ).toBeTruthy();
+
+      fireEvent.click(screen.getByRole("button", {name: "Start timer"}));
+
+      nowMs = 5000;
+      runIntervalTick();
+
+      await waitFor(() => {
+        expect(screen.getByText("00:04")).toBeTruthy();
+      });
+
+      fireEvent.click(screen.getByRole("button", {name: "Submit"}));
+
+      await waitFor(() => {
+        expect(sendMessageMock).toHaveBeenCalledWith(
+          "SAVE_REVIEW_RESULT",
+          expect.objectContaining({
+            slug: "counting-bits",
+            rating: 2,
+            mode: "FULL_SOLVE",
+            solveTimeMs: 4000,
+            source: "overlay",
+          })
+        );
+      });
+
+      expect(await screen.findByText("No next question ready")).toBeTruthy();
+      expect(screen.queryByRole("button", {name: "Open next"})).toBeNull();
     } finally {
       dateNowSpy.mockRestore();
     }
@@ -718,6 +889,34 @@ describe("overlay controller", () => {
             payload.slug === "counting-bits"
           ) {
             return Promise.resolve({ok: true, data: {}});
+          }
+
+          if (type === "GET_APP_SHELL_DATA") {
+            const nextPayload = makePayload();
+            nextPayload.settings.studyMode = "freestyle";
+            nextPayload.popup.courseNext = {
+              ...nextPayload.popup.courseNext!,
+              slug: "counting-bits",
+              title: "Counting Bits",
+            };
+            nextPayload.popup.recommended = {
+              ...nextPayload.popup.recommended!,
+              slug: "counting-bits",
+              title: "Counting Bits",
+            };
+            nextPayload.popup.recommendedCandidates = [
+              nextPayload.popup.recommended!,
+              {
+                slug: "group-anagrams",
+                title: "Group Anagrams",
+                url: "https://leetcode.com/problems/group-anagrams/",
+                difficulty: "Medium",
+                reason: "Review focus",
+                nextReviewAt: "2026-03-31T00:00:00.000Z",
+                alsoCourseNext: false,
+              },
+            ];
+            return Promise.resolve({ok: true, data: nextPayload});
           }
 
           if (type === "OPEN_EXTENSION_PAGE") {
@@ -829,6 +1028,8 @@ describe("overlay controller", () => {
         (screen.getByRole("button", {name: "Again Failed"}) as HTMLButtonElement)
           .disabled
       ).toBe(false);
+      expect(screen.getByText("Recommended Now")).toBeTruthy();
+      expect(screen.getByText("Group Anagrams")).toBeTruthy();
 
       fireEvent.click(screen.getByRole("button", {name: "Restart"}));
 
@@ -855,6 +1056,7 @@ describe("overlay controller", () => {
     const intervals = new Map<number, () => void>();
     const reviewedAt = "2026-03-01T00:00:00.000Z";
     let currentState: StudyState | null = null;
+    const nextPayload = makePayload();
 
     sendMessageMock.mockImplementation(
       (type: string, payload: Record<string, unknown> & { slug?: string }) => {
@@ -969,6 +1171,10 @@ describe("overlay controller", () => {
           return Promise.resolve({ok: true, data: {studyState: currentState}});
         }
 
+        if (type === "GET_APP_SHELL_DATA") {
+          return Promise.resolve({ok: true, data: nextPayload});
+        }
+
         if (type === "OPEN_EXTENSION_PAGE") {
           return Promise.resolve({ok: true, data: {opened: true}});
         }
@@ -1063,6 +1269,8 @@ describe("overlay controller", () => {
     ).toBe(true);
     expect(screen.getByText("Last submitted")).toBeTruthy();
     expect(screen.getByText("Next due")).toBeTruthy();
+    expect(screen.getByText("Next In Study Mode")).toBeTruthy();
+    expect(screen.getByText("Contains Duplicate")).toBeTruthy();
     expect(
       (screen.getByRole("button", {name: "Restart"}) as HTMLButtonElement)
         .disabled
@@ -1112,6 +1320,9 @@ describe("overlay controller", () => {
       (screen.getByRole("button", {name: "Submit"}) as HTMLButtonElement)
         .disabled
     ).toBe(false);
+    await waitFor(() => {
+      expect(screen.queryByText("Next In Study Mode")).toBeNull();
+    });
     expect(
       (screen.getByRole("button", {name: "Update"}) as HTMLButtonElement)
         .disabled
@@ -1136,6 +1347,7 @@ describe("overlay controller", () => {
     const dateNowSpy = vi.spyOn(Date, "now").mockImplementation(() => nowMs);
     const reviewedAt = "2026-04-18T00:00:00.000Z";
     let currentState: StudyState | null = null;
+    const nextPayload = makePayload();
 
     try {
       sendMessageMock.mockImplementation(
@@ -1212,6 +1424,10 @@ describe("overlay controller", () => {
             };
 
             return Promise.resolve({ok: true, data: {studyState: currentState}});
+          }
+
+          if (type === "GET_APP_SHELL_DATA") {
+            return Promise.resolve({ok: true, data: nextPayload});
           }
 
           return Promise.resolve({ok: true, data: {}});
@@ -1291,6 +1507,7 @@ describe("overlay controller", () => {
           })
         );
       });
+      expect(screen.getByText("Next In Study Mode")).toBeTruthy();
 
       nowMs = 9000;
       fireEvent.click(screen.getByRole("button", {name: "Start"}));
@@ -1302,6 +1519,9 @@ describe("overlay controller", () => {
           (screen.getByRole("button", {name: "Submit"}) as HTMLButtonElement)
             .disabled
         ).toBe(false);
+      });
+      await waitFor(() => {
+        expect(screen.queryByText("Next In Study Mode")).toBeNull();
       });
 
       await waitFor(() => {
