@@ -7,13 +7,16 @@ updates:
       day: monday
       time: "09:00"
       timezone: "America/New_York"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 10
     labels:
       - dependencies
     groups:
-      npm-dependencies:
-        patterns:
-          - "*"
+      # Group minor and patch updates for non-major packages to reduce noise
+      minor-patch-updates:
+        update-types:
+          - "minor"
+          - "patch"
+      # Keep major updates individual as they likely require manual migration
 
   - package-ecosystem: github-actions
     directory: "/"
