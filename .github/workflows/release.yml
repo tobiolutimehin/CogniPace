@@ -33,6 +33,7 @@ jobs:
         uses: changesets/action@v1
         with:
           # This creates a "Version Packages" PR when changesets are present
+          version: npx changeset version
           publish: npx changeset tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
