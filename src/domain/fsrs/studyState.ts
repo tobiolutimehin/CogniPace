@@ -1,4 +1,11 @@
-import {Card, createEmptyCard, fsrs, generatorParameters, Rating as FsrsRating, State as FsrsState,} from "ts-fsrs";
+import {
+  Card,
+  createEmptyCard,
+  fsrs,
+  generatorParameters,
+  Rating as FsrsRating,
+  State as FsrsState,
+} from "ts-fsrs";
 
 import {
   AttemptHistoryEntry,
@@ -9,7 +16,7 @@ import {
   StudyState,
   StudyStateSummary,
 } from "./types";
-import {uniqueStrings} from "./utils";
+import { uniqueStrings } from "./utils";
 
 type LegacyStudyStatus =
   | "NEW"
@@ -340,7 +347,7 @@ function rebuildFsrsCardFromHistory(
   for (const entry of history) {
     card = scheduler.repeat(card, new Date(entry.reviewedAt))[
       toFsrsRating(entry.rating)
-      ].card;
+    ].card;
   }
 
   return card;
@@ -422,7 +429,8 @@ export function normalizeStudyState(
         ? rebuildFsrsCardFromHistory(attemptHistory)
         : null);
   const normalizedLogFields = normalizeReviewLogFields({
-    interviewPattern: input?.interviewPattern ?? lastLogSnapshot?.interviewPattern,
+    interviewPattern:
+      input?.interviewPattern ?? lastLogSnapshot?.interviewPattern,
     timeComplexity: input?.timeComplexity ?? lastLogSnapshot?.timeComplexity,
     spaceComplexity: input?.spaceComplexity ?? lastLogSnapshot?.spaceComplexity,
     languages: input?.languages ?? lastLogSnapshot?.languages,

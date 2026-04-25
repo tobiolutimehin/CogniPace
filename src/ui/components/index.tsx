@@ -3,17 +3,17 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
-import IconButton, {IconButtonProps} from "@mui/material/IconButton";
+import IconButton, { IconButtonProps } from "@mui/material/IconButton";
 import LinearProgress from "@mui/material/LinearProgress";
 import Stack from "@mui/material/Stack";
-import {alpha, Theme} from "@mui/material/styles";
-import Tooltip, {TooltipProps} from "@mui/material/Tooltip";
+import { alpha, Theme } from "@mui/material/styles";
+import Tooltip, { TooltipProps } from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import {SxProps} from "@mui/system";
-import {memo, ReactNode} from "react";
+import { SxProps } from "@mui/system";
+import { memo, ReactNode } from "react";
 
-import {Tone} from "../presentation/studyState";
-import {kineticTokens} from "../theme";
+import { Tone } from "../presentation/studyState";
+import { kineticTokens } from "../theme";
 
 const toneStyles: Record<Tone, { background: string; color: string }> = {
   default: {
@@ -106,7 +106,7 @@ export function SurfaceSectionLabel(props: { children: ReactNode }) {
 }
 
 export function SurfaceIconButton(props: IconButtonProps) {
-  const {sx, ...rest} = props;
+  const { sx, ...rest } = props;
   const baseSx: SxProps<Theme> = {
     backgroundColor: alpha(kineticTokens.mutedText, 0.08),
     border: `1px solid ${alpha(kineticTokens.outlineStrong, 0.34)}`,
@@ -129,13 +129,7 @@ export function SurfaceIconButton(props: IconButtonProps) {
   };
   const mergedSx = (sx ? [baseSx, sx] : baseSx) as SxProps<Theme>;
 
-  return (
-    <IconButton
-      size="small"
-      sx={mergedSx}
-      {...rest}
-    />
-  );
+  return <IconButton size="small" sx={mergedSx} {...rest} />;
 }
 
 export function SurfaceTooltip(props: TooltipProps) {
@@ -242,11 +236,7 @@ export function FieldAssistRow(props: {
         pl: 1,
       }}
     >
-      <Typography
-        color="inherit"
-        sx={{lineHeight: 1.35}}
-        variant="caption"
-      >
+      <Typography color="inherit" sx={{ lineHeight: 1.35 }} variant="caption">
         {props.children ?? "\u00A0"}
       </Typography>
     </Box>
@@ -279,20 +269,17 @@ export function InlineStatusRegion(props: {
       }}
     >
       {props.message ? (
-        <StatusSurface
-          sx={{minHeight, px: 1.2, py: 0.9}}
-          tone={tone}
-        >
+        <StatusSurface sx={{ minHeight, px: 1.2, py: 0.9 }} tone={tone}>
           <Typography
             color={props.isError ? "error.main" : "text.primary"}
-            sx={{lineHeight: 1.35}}
+            sx={{ lineHeight: 1.35 }}
             variant="body2"
           >
             {props.message}
           </Typography>
         </StatusSurface>
       ) : (
-        <Box sx={{minHeight}}/>
+        <Box sx={{ minHeight }} />
       )}
     </Box>
   );
@@ -305,14 +292,14 @@ export function SurfaceCard(props: {
   children: ReactNode;
   compact?: boolean;
 }) {
-  const {action, children, compact = false, label, title} = props;
+  const { action, children, compact = false, label, title } = props;
 
   return (
     <Card>
       <CardContent
         sx={{
           p: compact ? 2 : 2.25,
-          "&:last-child": {pb: compact ? 2 : 2.25},
+          "&:last-child": { pb: compact ? 2 : 2.25 },
         }}
       >
         <Stack spacing={compact ? 1.5 : 2}>
@@ -343,7 +330,10 @@ export function SurfaceCard(props: {
   );
 }
 
-export const ToneChip = memo(function ToneChip(props: { label: string; tone?: Tone }) {
+export const ToneChip = memo(function ToneChip(props: {
+  label: string;
+  tone?: Tone;
+}) {
   const tone = props.tone ?? "default";
 
   return (
@@ -358,7 +348,9 @@ export const ToneChip = memo(function ToneChip(props: { label: string; tone?: To
   );
 });
 
-export const ProgressTrack = memo(function ProgressTrack(props: { value: number }) {
+export const ProgressTrack = memo(function ProgressTrack(props: {
+  value: number;
+}) {
   return (
     <LinearProgress
       value={Math.max(0, Math.min(100, props.value))}
@@ -376,7 +368,9 @@ export const MetricCard = memo(function MetricCard(props: {
     <SurfaceCard compact>
       <Stack spacing={0.5}>
         <SurfaceSectionLabel>{props.label}</SurfaceSectionLabel>
-        <NumericDisplay sx={{fontSize: "1.85rem"}}>{props.value}</NumericDisplay>
+        <NumericDisplay sx={{ fontSize: "1.85rem" }}>
+          {props.value}
+        </NumericDisplay>
         {props.caption ? (
           <Typography color="text.secondary" variant="body2">
             {props.caption}
@@ -387,7 +381,10 @@ export const MetricCard = memo(function MetricCard(props: {
   );
 });
 
-export const StatusBanner = memo(function StatusBanner(props: { message: string; isError?: boolean }) {
+export const StatusBanner = memo(function StatusBanner(props: {
+  message: string;
+  isError?: boolean;
+}) {
   if (!props.message) {
     return null;
   }

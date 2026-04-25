@@ -1,6 +1,11 @@
 /** Repository for problem-session runtime actions triggered by UI surfaces. */
-import {Difficulty, Rating, ReviewLogFields, ReviewMode,} from "../../domain/types";
-import {sendMessage} from "../../extension/runtime/client";
+import {
+  Difficulty,
+  Rating,
+  ReviewLogFields,
+  ReviewMode,
+} from "../../domain/types";
+import { sendMessage } from "../../extension/runtime/client";
 
 /** Upserts the current problem context detected from the LeetCode page. */
 export async function upsertProblemFromPage(input: {
@@ -14,7 +19,7 @@ export async function upsertProblemFromPage(input: {
 
 /** Fetches the persisted problem and study-state context for a slug. */
 export async function getProblemContext(slug: string) {
-  return sendMessage("GET_PROBLEM_CONTEXT", {slug});
+  return sendMessage("GET_PROBLEM_CONTEXT", { slug });
 }
 
 /** Persists a completed review result for the active problem. */
@@ -76,5 +81,5 @@ export async function openProblemPage(target: {
 
 /** Asks the background worker to open an internal extension page. */
 export async function openExtensionPage(path: string) {
-  return sendMessage("OPEN_EXTENSION_PAGE", {path});
+  return sendMessage("OPEN_EXTENSION_PAGE", { path });
 }

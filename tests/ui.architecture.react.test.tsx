@@ -1,14 +1,26 @@
-import {cleanup, fireEvent, render, screen, waitFor,} from "@testing-library/react";
-import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import {defaultReviewMode, deriveQuickRating,} from "../src/domain/fsrs/reviewPolicy";
-import {StudyState} from "../src/domain/types";
-import {CourseQuestionView} from "../src/domain/views";
-import {createMockAppShellPayload} from "../src/ui/mockData";
-import {buildDashboardUrl, readDashboardViewFromSearch,} from "../src/ui/navigation/dashboardRoutes";
-import {filterLibraryRows} from "../src/ui/presentation/library";
-import {AppProviders} from "../src/ui/providers";
-import {DashboardApp} from "../src/ui/screens/dashboard/DashboardApp";
+import {
+  defaultReviewMode,
+  deriveQuickRating,
+} from "../src/domain/fsrs/reviewPolicy";
+import { StudyState } from "../src/domain/types";
+import { CourseQuestionView } from "../src/domain/views";
+import { createMockAppShellPayload } from "../src/ui/mockData";
+import {
+  buildDashboardUrl,
+  readDashboardViewFromSearch,
+} from "../src/ui/navigation/dashboardRoutes";
+import { filterLibraryRows } from "../src/ui/presentation/library";
+import { AppProviders } from "../src/ui/providers";
+import { DashboardApp } from "../src/ui/screens/dashboard/DashboardApp";
 import {
   cloneDraft,
   draftFromStudyState,
@@ -21,7 +33,7 @@ import {
   buildHeaderStatus,
   formatSubmissionDateLabel,
 } from "../src/ui/screens/overlay/controller/headerStatus";
-import {OverlayRoot} from "../src/ui/screens/overlay/OverlayRoot";
+import { OverlayRoot } from "../src/ui/screens/overlay/OverlayRoot";
 
 const sendMessageMock = vi.fn();
 const tabsCreateMock = vi.fn();
@@ -59,16 +71,16 @@ function makeStudyState(nextReviewAt?: string): StudyState {
     attemptHistory: [],
     fsrsCard: nextReviewAt
       ? {
-        difficulty: 4,
-        due: nextReviewAt,
-        elapsedDays: 2,
-        lapses: 0,
-        learningSteps: 0,
-        reps: 1,
-        scheduledDays: 2,
-        stability: 2,
-        state: "Review",
-      }
+          difficulty: 4,
+          due: nextReviewAt,
+          elapsedDays: 2,
+          lapses: 0,
+          learningSteps: 0,
+          reps: 1,
+          scheduledDays: 2,
+          stability: 2,
+          state: "Review",
+        }
       : undefined,
     suspended: false,
     tags: [],
@@ -140,7 +152,7 @@ function makePayload() {
     {
       id: "Blind75",
       name: "Blind 75",
-      chapterOptions: [{id: "arrays-1", title: "Arrays"}],
+      chapterOptions: [{ id: "arrays-1", title: "Arrays" }],
     },
   ];
   payload.library = [
@@ -192,7 +204,7 @@ function deferred<T>() {
     resolve = done;
   });
 
-  return {promise, resolve};
+  return { promise, resolve };
 }
 
 describe("route and selector contracts", () => {
@@ -232,27 +244,27 @@ describe("route and selector contracts", () => {
   it("formats submission dates with calendar-style labels", () => {
     const relativeTo = new Date("2026-04-19T10:00:00");
 
-    expect(
-      formatSubmissionDateLabel("2026-04-19T12:00:00", relativeTo)
-    ).toBe("today");
-    expect(
-      formatSubmissionDateLabel("2026-04-18T12:00:00", relativeTo)
-    ).toBe("yesterday");
-    expect(
-      formatSubmissionDateLabel("2026-04-20T12:00:00", relativeTo)
-    ).toBe("tomorrow");
-    expect(
-      formatSubmissionDateLabel("2026-04-22T12:00:00", relativeTo)
-    ).toBe("this Wednesday");
-    expect(
-      formatSubmissionDateLabel("2026-04-16T12:00:00", relativeTo)
-    ).toBe("last Thursday");
-    expect(
-      formatSubmissionDateLabel("2026-03-01T12:00:00", relativeTo)
-    ).toBe("Mar 1");
-    expect(
-      formatSubmissionDateLabel("2025-12-31T12:00:00", relativeTo)
-    ).toBe("Dec 31, 2025");
+    expect(formatSubmissionDateLabel("2026-04-19T12:00:00", relativeTo)).toBe(
+      "today"
+    );
+    expect(formatSubmissionDateLabel("2026-04-18T12:00:00", relativeTo)).toBe(
+      "yesterday"
+    );
+    expect(formatSubmissionDateLabel("2026-04-20T12:00:00", relativeTo)).toBe(
+      "tomorrow"
+    );
+    expect(formatSubmissionDateLabel("2026-04-22T12:00:00", relativeTo)).toBe(
+      "this Wednesday"
+    );
+    expect(formatSubmissionDateLabel("2026-04-16T12:00:00", relativeTo)).toBe(
+      "last Thursday"
+    );
+    expect(formatSubmissionDateLabel("2026-03-01T12:00:00", relativeTo)).toBe(
+      "Mar 1"
+    );
+    expect(formatSubmissionDateLabel("2025-12-31T12:00:00", relativeTo)).toBe(
+      "Dec 31, 2025"
+    );
   });
 
   it("maps structured log drafts to and from study state", () => {
@@ -316,7 +328,9 @@ describe("route and selector contracts", () => {
     expect(headerStatus.cards[1]?.primary).toBe("tomorrow");
     expect(headerStatus.cards[1]?.tone).toBe("warning");
     expect(buildDueTone("2026-04-19T12:00:00.000Z", relativeTo)).toBe("danger");
-    expect(buildDueTone("2026-04-21T12:00:00.000Z", relativeTo)).toBe("warning");
+    expect(buildDueTone("2026-04-21T12:00:00.000Z", relativeTo)).toBe(
+      "warning"
+    );
     expect(buildDueTone("2026-05-10T12:00:00.000Z", relativeTo)).toBe("accent");
   });
 });
@@ -328,18 +342,18 @@ describe("dashboard navigation", () => {
 
     sendMessageMock.mockImplementation(async (type: string) => {
       if (type === "GET_APP_SHELL_DATA") {
-        return {ok: true, data: payload};
+        return { ok: true, data: payload };
       }
-      return {ok: true, data: {}};
+      return { ok: true, data: {} };
     });
 
     render(
       <AppProviders>
-        <DashboardApp/>
+        <DashboardApp />
       </AppProviders>
     );
 
-    fireEvent.click(await screen.findByRole("button", {name: "Courses"}));
+    fireEvent.click(await screen.findByRole("button", { name: "Courses" }));
 
     await waitFor(() => {
       expect(pushStateSpy).toHaveBeenCalled();
@@ -355,18 +369,18 @@ describe("dashboard navigation", () => {
 
     sendMessageMock.mockImplementation(async (type: string) => {
       if (type === "GET_APP_SHELL_DATA") {
-        return {ok: true, data: payload};
+        return { ok: true, data: payload };
       }
-      return {ok: true, data: {}};
+      return { ok: true, data: {} };
     });
 
     render(
       <AppProviders>
-        <DashboardApp/>
+        <DashboardApp />
       </AppProviders>
     );
 
-    await screen.findByRole("heading", {name: "Dashboard"});
+    await screen.findByRole("heading", { name: "Dashboard" });
     window.history.pushState({}, "", "/dashboard.html?view=library");
     window.dispatchEvent(new PopStateEvent("popstate"));
 
@@ -428,10 +442,10 @@ describe("overlay controller", () => {
         }
 
         if (type === "OPEN_EXTENSION_PAGE") {
-          return Promise.resolve({ok: true, data: {opened: true}});
+          return Promise.resolve({ ok: true, data: { opened: true } });
         }
 
-        return Promise.resolve({ok: true, data: {}});
+        return Promise.resolve({ ok: true, data: {} });
       }
     );
 
@@ -480,7 +494,7 @@ describe("overlay controller", () => {
 
     render(
       <AppProviders>
-        <OverlayRoot documentRef={overlayDocument} windowRef={fakeWindow}/>
+        <OverlayRoot documentRef={overlayDocument} windowRef={fakeWindow} />
       </AppProviders>
     );
 
@@ -497,20 +511,20 @@ describe("overlay controller", () => {
     secondContext.resolve({
       ok: true,
       data: {
-        problem: {title: "Group Anagrams", difficulty: "Medium"},
+        problem: { title: "Group Anagrams", difficulty: "Medium" },
         studyState: null,
       },
     });
 
     fireEvent.click(
-      await screen.findByRole("button", {name: "Expand overlay"})
+      await screen.findByRole("button", { name: "Expand overlay" })
     );
     expect(await screen.findByText("Group Anagrams")).toBeTruthy();
 
     firstContext.resolve({
       ok: true,
       data: {
-        problem: {title: "Two Sum", difficulty: "Easy"},
+        problem: { title: "Two Sum", difficulty: "Easy" },
         studyState: null,
       },
     });
@@ -559,7 +573,7 @@ describe("overlay controller", () => {
             return Promise.resolve({
               ok: true,
               data: {
-                problem: {title: "Counting Bits", difficulty: "Easy"},
+                problem: { title: "Counting Bits", difficulty: "Easy" },
                 studyState: null,
               },
             });
@@ -569,18 +583,18 @@ describe("overlay controller", () => {
             type === "SAVE_REVIEW_RESULT" &&
             payload.slug === "counting-bits"
           ) {
-            return Promise.resolve({ok: true, data: {}});
+            return Promise.resolve({ ok: true, data: {} });
           }
 
           if (type === "GET_APP_SHELL_DATA") {
-            return Promise.resolve({ok: true, data: makePayload()});
+            return Promise.resolve({ ok: true, data: makePayload() });
           }
 
           if (type === "OPEN_EXTENSION_PAGE") {
-            return Promise.resolve({ok: true, data: {opened: true}});
+            return Promise.resolve({ ok: true, data: { opened: true } });
           }
 
-          return Promise.resolve({ok: true, data: {}});
+          return Promise.resolve({ ok: true, data: {} });
         }
       );
 
@@ -629,17 +643,17 @@ describe("overlay controller", () => {
 
       render(
         <AppProviders>
-          <OverlayRoot documentRef={overlayDocument} windowRef={fakeWindow}/>
+          <OverlayRoot documentRef={overlayDocument} windowRef={fakeWindow} />
         </AppProviders>
       );
 
       runPendingTimeouts();
 
       expect(
-        await screen.findByRole("button", {name: "Start timer"})
+        await screen.findByRole("button", { name: "Start timer" })
       ).toBeTruthy();
 
-      fireEvent.click(screen.getByRole("button", {name: "Start timer"}));
+      fireEvent.click(screen.getByRole("button", { name: "Start timer" }));
 
       nowMs = 5000;
       runIntervalTick();
@@ -648,7 +662,7 @@ describe("overlay controller", () => {
         expect(screen.getByText("00:04")).toBeTruthy();
       });
 
-      fireEvent.click(screen.getByRole("button", {name: "Submit"}));
+      fireEvent.click(screen.getByRole("button", { name: "Submit" }));
 
       await waitFor(() => {
         expect(sendMessageMock).toHaveBeenCalledWith(
@@ -664,7 +678,7 @@ describe("overlay controller", () => {
       });
 
       expect(
-        await screen.findByRole("button", {name: "Collapse overlay"})
+        await screen.findByRole("button", { name: "Collapse overlay" })
       ).toBeTruthy();
       expect(screen.getByText("Counting Bits")).toBeTruthy();
       expect(screen.getByText("Assessment")).toBeTruthy();
@@ -713,7 +727,7 @@ describe("overlay controller", () => {
             return Promise.resolve({
               ok: true,
               data: {
-                problem: {title: "Counting Bits", difficulty: "Easy"},
+                problem: { title: "Counting Bits", difficulty: "Easy" },
                 studyState: null,
               },
             });
@@ -723,7 +737,7 @@ describe("overlay controller", () => {
             type === "SAVE_REVIEW_RESULT" &&
             payload.slug === "counting-bits"
           ) {
-            return Promise.resolve({ok: true, data: {}});
+            return Promise.resolve({ ok: true, data: {} });
           }
 
           if (type === "GET_APP_SHELL_DATA") {
@@ -744,14 +758,14 @@ describe("overlay controller", () => {
             nextPayload.popup.recommendedCandidates = [
               nextPayload.popup.recommended!,
             ];
-            return Promise.resolve({ok: true, data: nextPayload});
+            return Promise.resolve({ ok: true, data: nextPayload });
           }
 
           if (type === "OPEN_EXTENSION_PAGE") {
-            return Promise.resolve({ok: true, data: {opened: true}});
+            return Promise.resolve({ ok: true, data: { opened: true } });
           }
 
-          return Promise.resolve({ok: true, data: {}});
+          return Promise.resolve({ ok: true, data: {} });
         }
       );
 
@@ -800,17 +814,17 @@ describe("overlay controller", () => {
 
       render(
         <AppProviders>
-          <OverlayRoot documentRef={overlayDocument} windowRef={fakeWindow}/>
+          <OverlayRoot documentRef={overlayDocument} windowRef={fakeWindow} />
         </AppProviders>
       );
 
       runPendingTimeouts();
 
       expect(
-        await screen.findByRole("button", {name: "Start timer"})
+        await screen.findByRole("button", { name: "Start timer" })
       ).toBeTruthy();
 
-      fireEvent.click(screen.getByRole("button", {name: "Start timer"}));
+      fireEvent.click(screen.getByRole("button", { name: "Start timer" }));
 
       nowMs = 5000;
       runIntervalTick();
@@ -819,7 +833,7 @@ describe("overlay controller", () => {
         expect(screen.getByText("00:04")).toBeTruthy();
       });
 
-      fireEvent.click(screen.getByRole("button", {name: "Submit"}));
+      fireEvent.click(screen.getByRole("button", { name: "Submit" }));
 
       await waitFor(() => {
         expect(sendMessageMock).toHaveBeenCalledWith(
@@ -835,7 +849,7 @@ describe("overlay controller", () => {
       });
 
       expect(await screen.findByText("No next question ready")).toBeTruthy();
-      expect(screen.queryByRole("button", {name: "Open next"})).toBeNull();
+      expect(screen.queryByRole("button", { name: "Open next" })).toBeNull();
     } finally {
       dateNowSpy.mockRestore();
     }
@@ -878,7 +892,7 @@ describe("overlay controller", () => {
             return Promise.resolve({
               ok: true,
               data: {
-                problem: {title: "Counting Bits", difficulty: "Easy"},
+                problem: { title: "Counting Bits", difficulty: "Easy" },
                 studyState: null,
               },
             });
@@ -888,7 +902,7 @@ describe("overlay controller", () => {
             type === "SAVE_REVIEW_RESULT" &&
             payload.slug === "counting-bits"
           ) {
-            return Promise.resolve({ok: true, data: {}});
+            return Promise.resolve({ ok: true, data: {} });
           }
 
           if (type === "GET_APP_SHELL_DATA") {
@@ -916,14 +930,14 @@ describe("overlay controller", () => {
                 alsoCourseNext: false,
               },
             ];
-            return Promise.resolve({ok: true, data: nextPayload});
+            return Promise.resolve({ ok: true, data: nextPayload });
           }
 
           if (type === "OPEN_EXTENSION_PAGE") {
-            return Promise.resolve({ok: true, data: {opened: true}});
+            return Promise.resolve({ ok: true, data: { opened: true } });
           }
 
-          return Promise.resolve({ok: true, data: {}});
+          return Promise.resolve({ ok: true, data: {} });
         }
       );
 
@@ -972,17 +986,17 @@ describe("overlay controller", () => {
 
       render(
         <AppProviders>
-          <OverlayRoot documentRef={overlayDocument} windowRef={fakeWindow}/>
+          <OverlayRoot documentRef={overlayDocument} windowRef={fakeWindow} />
         </AppProviders>
       );
 
       runPendingTimeouts();
 
       expect(
-        await screen.findByRole("button", {name: "Start timer"})
+        await screen.findByRole("button", { name: "Start timer" })
       ).toBeTruthy();
 
-      fireEvent.click(screen.getByRole("button", {name: "Start timer"}));
+      fireEvent.click(screen.getByRole("button", { name: "Start timer" }));
 
       nowMs = 5000;
       runIntervalTick();
@@ -991,7 +1005,7 @@ describe("overlay controller", () => {
         expect(screen.getByText("00:04")).toBeTruthy();
       });
 
-      fireEvent.click(screen.getByRole("button", {name: "Fail review"}));
+      fireEvent.click(screen.getByRole("button", { name: "Fail review" }));
 
       await waitFor(() => {
         expect(sendMessageMock).toHaveBeenCalledWith(
@@ -1007,43 +1021,58 @@ describe("overlay controller", () => {
       });
 
       expect(
-        await screen.findByRole("button", {name: "Collapse overlay"})
+        await screen.findByRole("button", { name: "Collapse overlay" })
       ).toBeTruthy();
       expect(screen.getByText("Counting Bits")).toBeTruthy();
       expect(screen.getByText("Assessment")).toBeTruthy();
       expect(screen.getByText("00:04")).toBeTruthy();
       expect(
-        (screen.getByRole("button", {name: "Easy Fast"}) as HTMLButtonElement)
+        (screen.getByRole("button", { name: "Easy Fast" }) as HTMLButtonElement)
           .disabled
       ).toBe(true);
       expect(
-        (screen.getByRole("button", {name: "Good Stable"}) as HTMLButtonElement)
-          .disabled
+        (
+          screen.getByRole("button", {
+            name: "Good Stable",
+          }) as HTMLButtonElement
+        ).disabled
       ).toBe(true);
       expect(
-        (screen.getByRole("button", {name: "Hard Lagging"}) as HTMLButtonElement)
-          .disabled
+        (
+          screen.getByRole("button", {
+            name: "Hard Lagging",
+          }) as HTMLButtonElement
+        ).disabled
       ).toBe(true);
       expect(
-        (screen.getByRole("button", {name: "Again Failed"}) as HTMLButtonElement)
-          .disabled
+        (
+          screen.getByRole("button", {
+            name: "Again Failed",
+          }) as HTMLButtonElement
+        ).disabled
       ).toBe(false);
       expect(screen.getByText("Recommended Now")).toBeTruthy();
       expect(screen.getByText("Group Anagrams")).toBeTruthy();
 
-      fireEvent.click(screen.getByRole("button", {name: "Restart"}));
+      fireEvent.click(screen.getByRole("button", { name: "Restart" }));
 
       expect(
-        (screen.getByRole("button", {name: "Easy Fast"}) as HTMLButtonElement)
+        (screen.getByRole("button", { name: "Easy Fast" }) as HTMLButtonElement)
           .disabled
       ).toBe(false);
       expect(
-        (screen.getByRole("button", {name: "Good Stable"}) as HTMLButtonElement)
-          .disabled
+        (
+          screen.getByRole("button", {
+            name: "Good Stable",
+          }) as HTMLButtonElement
+        ).disabled
       ).toBe(false);
       expect(
-        (screen.getByRole("button", {name: "Hard Lagging"}) as HTMLButtonElement)
-          .disabled
+        (
+          screen.getByRole("button", {
+            name: "Hard Lagging",
+          }) as HTMLButtonElement
+        ).disabled
       ).toBe(false);
     } finally {
       dateNowSpy.mockRestore();
@@ -1087,16 +1116,13 @@ describe("overlay controller", () => {
           return Promise.resolve({
             ok: true,
             data: {
-              problem: {title: "Counting Bits", difficulty: "Easy"},
+              problem: { title: "Counting Bits", difficulty: "Easy" },
               studyState: currentState,
             },
           });
         }
 
-        if (
-          type === "SAVE_REVIEW_RESULT" &&
-          payload.slug === "counting-bits"
-        ) {
+        if (type === "SAVE_REVIEW_RESULT" && payload.slug === "counting-bits") {
           currentState = {
             attemptHistory: [
               {
@@ -1136,7 +1162,10 @@ describe("overlay controller", () => {
             timeComplexity: payload.timeComplexity as string,
           };
 
-          return Promise.resolve({ok: true, data: {studyState: currentState}});
+          return Promise.resolve({
+            ok: true,
+            data: { studyState: currentState },
+          });
         }
 
         if (
@@ -1168,18 +1197,21 @@ describe("overlay controller", () => {
             timeComplexity: payload.timeComplexity as string,
           };
 
-          return Promise.resolve({ok: true, data: {studyState: currentState}});
+          return Promise.resolve({
+            ok: true,
+            data: { studyState: currentState },
+          });
         }
 
         if (type === "GET_APP_SHELL_DATA") {
-          return Promise.resolve({ok: true, data: nextPayload});
+          return Promise.resolve({ ok: true, data: nextPayload });
         }
 
         if (type === "OPEN_EXTENSION_PAGE") {
-          return Promise.resolve({ok: true, data: {opened: true}});
+          return Promise.resolve({ ok: true, data: { opened: true } });
         }
 
-        return Promise.resolve({ok: true, data: {}});
+        return Promise.resolve({ ok: true, data: {} });
       }
     );
 
@@ -1222,33 +1254,33 @@ describe("overlay controller", () => {
 
     render(
       <AppProviders>
-        <OverlayRoot documentRef={overlayDocument} windowRef={fakeWindow}/>
+        <OverlayRoot documentRef={overlayDocument} windowRef={fakeWindow} />
       </AppProviders>
     );
 
     runPendingTimeouts();
 
     fireEvent.click(
-      await screen.findByRole("button", {name: "Expand overlay"})
+      await screen.findByRole("button", { name: "Expand overlay" })
     );
     expect(screen.getByText("No submissions yet")).toBeTruthy();
     fireEvent.change(screen.getByLabelText("Interview pattern"), {
-      target: {value: "Hash map lookup"},
+      target: { value: "Hash map lookup" },
     });
     fireEvent.change(screen.getByLabelText("Time complexity"), {
-      target: {value: "O(n)"},
+      target: { value: "O(n)" },
     });
     fireEvent.change(screen.getByLabelText("Space complexity"), {
-      target: {value: "O(n)"},
+      target: { value: "O(n)" },
     });
     fireEvent.change(screen.getByLabelText("Languages used"), {
-      target: {value: "TypeScript"},
+      target: { value: "TypeScript" },
     });
     fireEvent.change(screen.getByLabelText("Notes"), {
-      target: {value: "Track complements as you scan."},
+      target: { value: "Track complements as you scan." },
     });
 
-    fireEvent.click(screen.getByRole("button", {name: "Submit"}));
+    fireEvent.click(screen.getByRole("button", { name: "Submit" }));
 
     await waitFor(() => {
       expect(sendMessageMock).toHaveBeenCalledWith(
@@ -1264,7 +1296,7 @@ describe("overlay controller", () => {
     });
 
     expect(
-      (screen.getByRole("button", {name: "Submit"}) as HTMLButtonElement)
+      (screen.getByRole("button", { name: "Submit" }) as HTMLButtonElement)
         .disabled
     ).toBe(true);
     expect(screen.getByText("Last submitted")).toBeTruthy();
@@ -1272,23 +1304,23 @@ describe("overlay controller", () => {
     expect(screen.getByText("Next In Study Mode")).toBeTruthy();
     expect(screen.getByText("Contains Duplicate")).toBeTruthy();
     expect(
-      (screen.getByRole("button", {name: "Restart"}) as HTMLButtonElement)
+      (screen.getByRole("button", { name: "Restart" }) as HTMLButtonElement)
         .disabled
     ).toBe(false);
     expect(
-      (screen.getByRole("button", {name: "Update"}) as HTMLButtonElement)
+      (screen.getByRole("button", { name: "Update" }) as HTMLButtonElement)
         .disabled
     ).toBe(true);
 
     fireEvent.change(screen.getByLabelText("Interview pattern"), {
-      target: {value: "Sorted two pointers"},
+      target: { value: "Sorted two pointers" },
     });
 
     expect(
-      (screen.getByRole("button", {name: "Update"}) as HTMLButtonElement)
+      (screen.getByRole("button", { name: "Update" }) as HTMLButtonElement)
         .disabled
     ).toBe(false);
-    fireEvent.click(screen.getByRole("button", {name: "Update"}));
+    fireEvent.click(screen.getByRole("button", { name: "Update" }));
 
     await waitFor(() => {
       expect(sendMessageMock).toHaveBeenCalledWith(
@@ -1309,22 +1341,22 @@ describe("overlay controller", () => {
     expect(persistedState.attemptHistory.length).toBe(1);
 
     fireEvent.change(screen.getByLabelText("Interview pattern"), {
-      target: {value: "Binary search"},
+      target: { value: "Binary search" },
     });
-    fireEvent.click(screen.getByRole("button", {name: "Restart"}));
+    fireEvent.click(screen.getByRole("button", { name: "Restart" }));
 
     expect(
       (screen.getByLabelText("Interview pattern") as HTMLInputElement).value
     ).toBe("Sorted two pointers");
     expect(
-      (screen.getByRole("button", {name: "Submit"}) as HTMLButtonElement)
+      (screen.getByRole("button", { name: "Submit" }) as HTMLButtonElement)
         .disabled
     ).toBe(false);
     await waitFor(() => {
       expect(screen.queryByText("Next In Study Mode")).toBeNull();
     });
     expect(
-      (screen.getByRole("button", {name: "Update"}) as HTMLButtonElement)
+      (screen.getByRole("button", { name: "Update" }) as HTMLButtonElement)
         .disabled
     ).toBe(true);
     expect(
@@ -1351,7 +1383,10 @@ describe("overlay controller", () => {
 
     try {
       sendMessageMock.mockImplementation(
-        (type: string, payload: Record<string, unknown> & { slug?: string }) => {
+        (
+          type: string,
+          payload: Record<string, unknown> & { slug?: string }
+        ) => {
           if (type === "UPSERT_PROBLEM_FROM_PAGE") {
             return Promise.resolve({
               ok: true,
@@ -1379,7 +1414,7 @@ describe("overlay controller", () => {
             return Promise.resolve({
               ok: true,
               data: {
-                problem: {title: "Counting Bits", difficulty: "Easy"},
+                problem: { title: "Counting Bits", difficulty: "Easy" },
                 studyState: currentState,
               },
             });
@@ -1423,14 +1458,17 @@ describe("overlay controller", () => {
               tags: [],
             };
 
-            return Promise.resolve({ok: true, data: {studyState: currentState}});
+            return Promise.resolve({
+              ok: true,
+              data: { studyState: currentState },
+            });
           }
 
           if (type === "GET_APP_SHELL_DATA") {
-            return Promise.resolve({ok: true, data: nextPayload});
+            return Promise.resolve({ ok: true, data: nextPayload });
           }
 
-          return Promise.resolve({ok: true, data: {}});
+          return Promise.resolve({ ok: true, data: {} });
         }
       );
 
@@ -1479,14 +1517,16 @@ describe("overlay controller", () => {
 
       render(
         <AppProviders>
-          <OverlayRoot documentRef={overlayDocument} windowRef={fakeWindow}/>
+          <OverlayRoot documentRef={overlayDocument} windowRef={fakeWindow} />
         </AppProviders>
       );
 
       runPendingTimeouts();
 
-      fireEvent.click(await screen.findByRole("button", {name: "Expand overlay"}));
-      fireEvent.click(screen.getByRole("button", {name: "Start"}));
+      fireEvent.click(
+        await screen.findByRole("button", { name: "Expand overlay" })
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Start" }));
 
       nowMs = 5000;
       runIntervalTick();
@@ -1495,7 +1535,7 @@ describe("overlay controller", () => {
         expect(screen.getByText("00:04")).toBeTruthy();
       });
 
-      fireEvent.click(screen.getByRole("button", {name: "Submit"}));
+      fireEvent.click(screen.getByRole("button", { name: "Submit" }));
 
       await waitFor(() => {
         expect(sendMessageMock).toHaveBeenCalledWith(
@@ -1510,13 +1550,13 @@ describe("overlay controller", () => {
       expect(screen.getByText("Next In Study Mode")).toBeTruthy();
 
       nowMs = 9000;
-      fireEvent.click(screen.getByRole("button", {name: "Start"}));
+      fireEvent.click(screen.getByRole("button", { name: "Start" }));
       runPendingTimeouts();
       runIntervalTick();
 
       await waitFor(() => {
         expect(
-          (screen.getByRole("button", {name: "Submit"}) as HTMLButtonElement)
+          (screen.getByRole("button", { name: "Submit" }) as HTMLButtonElement)
             .disabled
         ).toBe(false);
       });
@@ -1578,7 +1618,7 @@ describe("overlay controller", () => {
           return Promise.resolve({
             ok: true,
             data: {
-              problem: {title: "Counting Bits", difficulty: "Easy"},
+              problem: { title: "Counting Bits", difficulty: "Easy" },
               studyState: currentState,
             },
           });
@@ -1595,10 +1635,13 @@ describe("overlay controller", () => {
             tags: [],
           };
 
-          return Promise.resolve({ok: true, data: {studyState: currentState}});
+          return Promise.resolve({
+            ok: true,
+            data: { studyState: currentState },
+          });
         }
 
-        return Promise.resolve({ok: true, data: {}});
+        return Promise.resolve({ ok: true, data: {} });
       }
     );
 
@@ -1635,15 +1678,17 @@ describe("overlay controller", () => {
 
     render(
       <AppProviders>
-        <OverlayRoot documentRef={overlayDocument} windowRef={fakeWindow}/>
+        <OverlayRoot documentRef={overlayDocument} windowRef={fakeWindow} />
       </AppProviders>
     );
 
     runPendingTimeouts();
 
-    fireEvent.click(await screen.findByRole("button", {name: "Expand overlay"}));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Expand overlay" })
+    );
     fireEvent.change(screen.getByLabelText("Notes"), {
-      target: {value: "Remember parity shortcut"},
+      target: { value: "Remember parity shortcut" },
     });
 
     fireEvent.pointerDown(document.body);
@@ -1658,12 +1703,12 @@ describe("overlay controller", () => {
       );
     });
 
-    expect(screen.getByRole("button", {name: "Expand overlay"})).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Expand overlay" })).toBeTruthy();
     expect(
       sendMessageMock.mock.calls.some(([type]) => type === "SAVE_REVIEW_RESULT")
     ).toBe(false);
 
-    fireEvent.click(screen.getByRole("button", {name: "Expand overlay"}));
+    fireEvent.click(screen.getByRole("button", { name: "Expand overlay" }));
     expect(screen.getByDisplayValue("Remember parity shortcut")).toBeTruthy();
   });
 
@@ -1702,7 +1747,7 @@ describe("overlay controller", () => {
           return Promise.resolve({
             ok: true,
             data: {
-              problem: {title: "Counting Bits", difficulty: "Easy"},
+              problem: { title: "Counting Bits", difficulty: "Easy" },
               studyState: {
                 attemptHistory: [],
                 notes: "",
@@ -1713,7 +1758,7 @@ describe("overlay controller", () => {
           });
         }
 
-        return Promise.resolve({ok: true, data: {}});
+        return Promise.resolve({ ok: true, data: {} });
       }
     );
 
@@ -1750,17 +1795,19 @@ describe("overlay controller", () => {
 
     render(
       <AppProviders>
-        <OverlayRoot documentRef={overlayDocument} windowRef={fakeWindow}/>
+        <OverlayRoot documentRef={overlayDocument} windowRef={fakeWindow} />
       </AppProviders>
     );
 
     runPendingTimeouts();
 
-    fireEvent.click(await screen.findByRole("button", {name: "Hide overlay"}));
-    expect(screen.getByRole("button", {name: "Show overlay"})).toBeTruthy();
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Hide overlay" })
+    );
+    expect(screen.getByRole("button", { name: "Show overlay" })).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", {name: "Show overlay"}));
-    expect(screen.getByRole("button", {name: "Expand overlay"})).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Show overlay" }));
+    expect(screen.getByRole("button", { name: "Expand overlay" })).toBeTruthy();
   });
 
   it("docks the overlay from the expanded view and preserves drafts", async () => {
@@ -1798,7 +1845,7 @@ describe("overlay controller", () => {
           return Promise.resolve({
             ok: true,
             data: {
-              problem: {title: "Counting Bits", difficulty: "Easy"},
+              problem: { title: "Counting Bits", difficulty: "Easy" },
               studyState: {
                 attemptHistory: [],
                 notes: "",
@@ -1809,7 +1856,7 @@ describe("overlay controller", () => {
           });
         }
 
-        return Promise.resolve({ok: true, data: {}});
+        return Promise.resolve({ ok: true, data: {} });
       }
     );
 
@@ -1846,17 +1893,19 @@ describe("overlay controller", () => {
 
     render(
       <AppProviders>
-        <OverlayRoot documentRef={overlayDocument} windowRef={fakeWindow}/>
+        <OverlayRoot documentRef={overlayDocument} windowRef={fakeWindow} />
       </AppProviders>
     );
 
     runPendingTimeouts();
 
-    fireEvent.click(await screen.findByRole("button", {name: "Expand overlay"}));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Expand overlay" })
+    );
     fireEvent.change(screen.getByLabelText("Notes"), {
-      target: {value: "Dock this draft"},
+      target: { value: "Dock this draft" },
     });
-    fireEvent.click(screen.getByRole("button", {name: "Hide overlay"}));
+    fireEvent.click(screen.getByRole("button", { name: "Hide overlay" }));
 
     await waitFor(() => {
       expect(sendMessageMock).toHaveBeenCalledWith(
@@ -1868,10 +1917,10 @@ describe("overlay controller", () => {
       );
     });
 
-    expect(screen.getByRole("button", {name: "Show overlay"})).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Show overlay" })).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", {name: "Show overlay"}));
-    expect(screen.getByRole("button", {name: "Expand overlay"})).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Show overlay" }));
+    expect(screen.getByRole("button", { name: "Expand overlay" })).toBeTruthy();
   });
 
   it("still collapses when the collapse draft save fails", async () => {
@@ -1912,7 +1961,7 @@ describe("overlay controller", () => {
           return Promise.resolve({
             ok: true,
             data: {
-              problem: {title: "Counting Bits", difficulty: "Easy"},
+              problem: { title: "Counting Bits", difficulty: "Easy" },
               studyState: {
                 attemptHistory: [],
                 notes: "",
@@ -1933,7 +1982,7 @@ describe("overlay controller", () => {
           });
         }
 
-        return Promise.resolve({ok: true, data: {}});
+        return Promise.resolve({ ok: true, data: {} });
       }
     );
 
@@ -1970,15 +2019,17 @@ describe("overlay controller", () => {
 
     render(
       <AppProviders>
-        <OverlayRoot documentRef={overlayDocument} windowRef={fakeWindow}/>
+        <OverlayRoot documentRef={overlayDocument} windowRef={fakeWindow} />
       </AppProviders>
     );
 
     runPendingTimeouts();
 
-    fireEvent.click(await screen.findByRole("button", {name: "Expand overlay"}));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Expand overlay" })
+    );
     fireEvent.change(screen.getByLabelText("Notes"), {
-      target: {value: "Needs refresh"},
+      target: { value: "Needs refresh" },
     });
 
     fireEvent.pointerDown(document.body);
@@ -1993,7 +2044,7 @@ describe("overlay controller", () => {
       );
     });
 
-    expect(screen.getByRole("button", {name: "Expand overlay"})).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Expand overlay" })).toBeTruthy();
     expect(screen.getByText("Failed to save log draft.")).toBeTruthy();
   });
 });

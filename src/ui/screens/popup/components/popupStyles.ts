@@ -1,6 +1,6 @@
-import {alpha} from "@mui/material/styles";
+import { alpha } from "@mui/material/styles";
 
-import {kineticTokens} from "../../../theme";
+import { kineticTokens } from "../../../theme";
 
 export const popupShellSx = {
   backgroundColor: alpha(kineticTokens.backgroundAlt, 0.96),

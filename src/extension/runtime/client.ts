@@ -1,5 +1,10 @@
 /** Typed runtime client used by repositories and entrypoints inside the extension. */
-import {MessageRequestMap, MessageResponseMap, MessageType, RuntimeMessage,} from "./contracts";
+import {
+  MessageRequestMap,
+  MessageResponseMap,
+  MessageType,
+  RuntimeMessage,
+} from "./contracts";
 
 export interface RuntimeResponse<T = unknown> {
   ok: boolean;
@@ -23,10 +28,7 @@ function runtimeErrorMessage(error: unknown): string {
 export async function sendMessage<
   T extends MessageType,
   R = MessageResponseMap[T],
->(
-  type: T,
-  payload: MessageRequestMap[T]
-): Promise<RuntimeResponse<R>> {
+>(type: T, payload: MessageRequestMap[T]): Promise<RuntimeResponse<R>> {
   const message: RuntimeMessage<T> = {
     type,
     payload,

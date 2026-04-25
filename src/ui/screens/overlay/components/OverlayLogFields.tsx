@@ -4,20 +4,21 @@ import InputAdornment from "@mui/material/InputAdornment";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 
-import {SurfaceSectionLabel} from "../../../components";
-import {OverlayDraftLogFields, OverlayLogSectionViewModel} from "../overlayPanel.types";
+import { SurfaceSectionLabel } from "../../../components";
+import {
+  OverlayDraftLogFields,
+  OverlayLogSectionViewModel,
+} from "../overlayPanel.types";
 
-function DraftField(
-  props: {
-    ariaLabel: string;
-    field: keyof OverlayDraftLogFields;
-    label: string;
-    name: string;
-    log: OverlayLogSectionViewModel;
-    multiline?: boolean;
-    rows?: number;
-  }
-) {
+function DraftField(props: {
+  ariaLabel: string;
+  field: keyof OverlayDraftLogFields;
+  label: string;
+  name: string;
+  log: OverlayLogSectionViewModel;
+  multiline?: boolean;
+  rows?: number;
+}) {
   const hasValue = props.log.draft[props.field].trim().length > 0;
 
   return (
@@ -38,7 +39,7 @@ function DraftField(
               }}
               size="small"
             >
-              <ClearRounded fontSize="small"/>
+              <ClearRounded fontSize="small" />
             </IconButton>
           </InputAdornment>
         ) : undefined,
@@ -62,11 +63,7 @@ function DraftField(
   );
 }
 
-export function OverlayLogFields(
-  props: {
-    log: OverlayLogSectionViewModel;
-  }
-) {
+export function OverlayLogFields(props: { log: OverlayLogSectionViewModel }) {
   return (
     <Stack spacing={1.5}>
       <SurfaceSectionLabel>Log</SurfaceSectionLabel>

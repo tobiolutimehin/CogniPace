@@ -1,13 +1,16 @@
 /** Popup-local state and actions for the recommendation-first surface. */
-import {startTransition, useMemo, useRef, useState} from "react";
+import { startTransition, useMemo, useRef, useState } from "react";
 
-import {openDashboardPage, openSettingsPage,} from "../../../data/repositories/extensionNavigationRepository";
-import {openProblemPage} from "../../../data/repositories/problemSessionRepository";
-import {updateSettings} from "../../../data/repositories/settingsRepository";
-import {StudyMode} from "../../../domain/types";
-import {RecommendedProblemView} from "../../../domain/views";
-import {createMockAppShellPayload} from "../../mockData";
-import {useAppShellQuery} from "../../state/useAppShellQuery";
+import {
+  openDashboardPage,
+  openSettingsPage,
+} from "../../../data/repositories/extensionNavigationRepository";
+import { openProblemPage } from "../../../data/repositories/problemSessionRepository";
+import { updateSettings } from "../../../data/repositories/settingsRepository";
+import { StudyMode } from "../../../domain/types";
+import { RecommendedProblemView } from "../../../domain/views";
+import { createMockAppShellPayload } from "../../mockData";
+import { useAppShellQuery } from "../../state/useAppShellQuery";
 
 function currentRecommended(
   candidates: RecommendedProblemView[],
@@ -35,7 +38,7 @@ function popupErrorMessage(error: unknown): string {
 
 /** Coordinates popup data loading, recommendation rotation, and user actions. */
 export function usePopupController() {
-  const {load, payload, setPayload, setStatus, status} = useAppShellQuery(
+  const { load, payload, setPayload, setStatus, status } = useAppShellQuery(
     createMockAppShellPayload()
   );
   const [recommendedIndex, setRecommendedIndex] = useState(0);
@@ -101,7 +104,7 @@ export function usePopupController() {
 
     let response: Awaited<ReturnType<typeof updateSettings>>;
     try {
-      response = await updateSettings({studyMode: mode});
+      response = await updateSettings({ studyMode: mode });
     } catch (error) {
       response = {
         ok: false,

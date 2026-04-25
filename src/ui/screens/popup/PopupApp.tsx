@@ -4,8 +4,8 @@ import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 
-import {InlineStatusRegion} from "../../components";
-import {kineticTokens} from "../../theme";
+import { InlineStatusRegion } from "../../components";
+import { kineticTokens } from "../../theme";
 
 import {
   CoursePanelCompleted,
@@ -13,16 +13,21 @@ import {
   CoursePanelFreestyle,
   CoursePanelStudyPlan,
 } from "./components/PopupCourseSection";
-import {PopupHeader} from "./components/PopupHeader";
-import {PopupMetricTile} from "./components/PopupMetricTile";
-import {RecommendationActive, RecommendationEmpty,} from "./components/PopupRecommendationSection";
-import {popupShellSx} from "./components/popupStyles";
-import {usePopupController} from "./usePopupController";
+import { PopupHeader } from "./components/PopupHeader";
+import { PopupMetricTile } from "./components/PopupMetricTile";
+import {
+  RecommendationActive,
+  RecommendationEmpty,
+} from "./components/PopupRecommendationSection";
+import { popupShellSx } from "./components/popupStyles";
+import { usePopupController } from "./usePopupController";
 
 export function PopupApp() {
   const controller = usePopupController();
   const recommendationStatus =
-    controller.status.scope === "recommendation" ? controller.status : undefined;
+    controller.status.scope === "recommendation"
+      ? controller.status
+      : undefined;
   const courseStatus =
     controller.status.scope === "course" ? controller.status : undefined;
   const surfaceStatus =
@@ -62,7 +67,7 @@ export function PopupApp() {
           }}
         />
 
-        <Box sx={{p: 1.25}}>
+        <Box sx={{ p: 1.25 }}>
           <Stack spacing={1.2}>
             {surfaceStatus?.message ? (
               <InlineStatusRegion

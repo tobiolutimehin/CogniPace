@@ -1,7 +1,11 @@
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
-import {NumericDisplay, SurfaceCard, SurfaceSectionLabel} from "../../../components";
+import {
+  NumericDisplay,
+  SurfaceCard,
+  SurfaceSectionLabel,
+} from "../../../components";
 
 export interface PopupMetricTileProps {
   accent?: string;

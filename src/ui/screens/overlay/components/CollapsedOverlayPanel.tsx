@@ -8,19 +8,22 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
-import {alpha} from "@mui/material/styles";
+import { alpha } from "@mui/material/styles";
 
-import {FieldAssistRow, NumericDisplay, SurfaceIconButton, SurfaceTooltip} from "../../../components";
-import {kineticTokens} from "../../../theme";
-import {CollapsedOverlayViewModel} from "../overlayPanel.types";
+import {
+  FieldAssistRow,
+  NumericDisplay,
+  SurfaceIconButton,
+  SurfaceTooltip,
+} from "../../../components";
+import { kineticTokens } from "../../../theme";
+import { CollapsedOverlayViewModel } from "../overlayPanel.types";
 
-import {OverlayFeedbackSurface} from "./OverlayFeedbackSurface";
+import { OverlayFeedbackSurface } from "./OverlayFeedbackSurface";
 
-export function CollapsedOverlayPanel(
-  props: {
-    model: CollapsedOverlayViewModel;
-  }
-) {
+export function CollapsedOverlayPanel(props: {
+  model: CollapsedOverlayViewModel;
+}) {
   return (
     <Paper
       sx={{
@@ -30,7 +33,7 @@ export function CollapsedOverlayPanel(
         width: 408,
       }}
     >
-      <Stack spacing={1.1} sx={{p: 1.75}}>
+      <Stack spacing={1.1} sx={{ p: 1.75 }}>
         <Stack
           alignItems="center"
           direction="row"
@@ -43,7 +46,7 @@ export function CollapsedOverlayPanel(
                 aria-label="Expand overlay"
                 onClick={props.model.actions.onExpand}
               >
-                <KeyboardArrowUpRounded fontSize="small"/>
+                <KeyboardArrowUpRounded fontSize="small" />
               </SurfaceIconButton>
             </SurfaceTooltip>
             <SurfaceTooltip title="Hide overlay">
@@ -51,7 +54,7 @@ export function CollapsedOverlayPanel(
                 aria-label="Hide overlay"
                 onClick={props.model.actions.onHide}
               >
-                <VisibilityOffRounded fontSize="small"/>
+                <VisibilityOffRounded fontSize="small" />
               </SurfaceIconButton>
             </SurfaceTooltip>
             <Box
@@ -91,9 +94,9 @@ export function CollapsedOverlayPanel(
                   }}
                 >
                   {props.model.timer.isRunning ? (
-                    <PauseRounded fontSize="small"/>
+                    <PauseRounded fontSize="small" />
                   ) : (
-                    <PlayArrowRounded fontSize="small"/>
+                    <PlayArrowRounded fontSize="small" />
                   )}
                 </SurfaceIconButton>
               </span>
@@ -105,7 +108,7 @@ export function CollapsedOverlayPanel(
                   disabled={!props.model.timer.canReset}
                   onClick={props.model.timer.onReset}
                 >
-                  <RestartAltRounded fontSize="small"/>
+                  <RestartAltRounded fontSize="small" />
                 </SurfaceIconButton>
               </span>
             </SurfaceTooltip>
@@ -137,17 +140,20 @@ export function CollapsedOverlayPanel(
                     },
                   }}
                 >
-                  <CancelRounded fontSize="small"/>
+                  <CancelRounded fontSize="small" />
                 </SurfaceIconButton>
               </span>
             </SurfaceTooltip>
           </Stack>
         </Stack>
-        <FieldAssistRow id={props.model.assist.id} tone={props.model.assist.tone}>
+        <FieldAssistRow
+          id={props.model.assist.id}
+          tone={props.model.assist.tone}
+        >
           {props.model.assist.message}
         </FieldAssistRow>
         {props.model.feedback ? (
-          <OverlayFeedbackSurface feedback={props.model.feedback}/>
+          <OverlayFeedbackSurface feedback={props.model.feedback} />
         ) : null}
       </Stack>
     </Paper>

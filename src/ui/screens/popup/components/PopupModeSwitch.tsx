@@ -2,12 +2,12 @@ import CodeRounded from "@mui/icons-material/CodeRounded";
 import SchoolRounded from "@mui/icons-material/SchoolRounded";
 import ButtonBase from "@mui/material/ButtonBase";
 import Stack from "@mui/material/Stack";
-import {alpha} from "@mui/material/styles";
+import { alpha } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 
-import {StudyMode} from "../../../../domain/types";
-import {SurfaceCard} from "../../../components";
-import {kineticTokens} from "../../../theme";
+import { StudyMode } from "../../../../domain/types";
+import { SurfaceCard } from "../../../components";
+import { kineticTokens } from "../../../theme";
 
 interface PopupModeOptionProps {
   active: boolean;
@@ -24,9 +24,7 @@ function PopupModeOption(props: PopupModeOptionProps) {
       aria-pressed={props.active}
       onClick={props.onClick}
       sx={{
-        backgroundColor: props.active
-          ? kineticTokens.accent
-          : "transparent",
+        backgroundColor: props.active ? kineticTokens.accent : "transparent",
         borderRadius: 1.1,
         color: props.active ? "#2b1700" : kineticTokens.softText,
         display: "flex",
@@ -48,8 +46,8 @@ function PopupModeOption(props: PopupModeOptionProps) {
         },
       }}
     >
-      <Stack alignItems="center" spacing={0.55} sx={{width: "100%"}}>
-        <Icon aria-hidden="true" fontSize="small"/>
+      <Stack alignItems="center" spacing={0.55} sx={{ width: "100%" }}>
+        <Icon aria-hidden="true" fontSize="small" />
         <Typography
           sx={{
             fontSize: "0.68rem",

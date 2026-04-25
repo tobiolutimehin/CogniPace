@@ -1,25 +1,37 @@
 import assert from "node:assert/strict";
 
-import {createEmptyCard} from "ts-fsrs";
+import { createEmptyCard } from "ts-fsrs";
 
-import {normalizeSlug} from "../src/domain/problem/slug";
-import {openProblemPage} from "../src/extension/background/handlers/problemHandlers";
-import {sanitizeImportPayload} from "../src/shared/backup";
-import {createDefaultStudyState, CURRENT_STORAGE_SCHEMA_VERSION, DEFAULT_SETTINGS,} from "../src/shared/constants";
-import {buildActiveCourseView, syncCourseProgress,} from "../src/shared/courses";
-import {listStudyPlans} from "../src/shared/curatedSets";
-import {buildTodayQueue} from "../src/shared/queue";
-import {buildRecommendedCandidates} from "../src/shared/recommendations";
+import { normalizeSlug } from "../src/domain/problem/slug";
+import { openProblemPage } from "../src/extension/background/handlers/problemHandlers";
+import { sanitizeImportPayload } from "../src/shared/backup";
+import {
+  createDefaultStudyState,
+  CURRENT_STORAGE_SCHEMA_VERSION,
+  DEFAULT_SETTINGS,
+} from "../src/shared/constants";
+import {
+  buildActiveCourseView,
+  syncCourseProgress,
+} from "../src/shared/courses";
+import { listStudyPlans } from "../src/shared/curatedSets";
+import { buildTodayQueue } from "../src/shared/queue";
+import { buildRecommendedCandidates } from "../src/shared/recommendations";
 import {
   assertAuthorizedRuntimeMessage,
   canonicalProblemUrlForOpen,
   validateExtensionPagePath,
   validateRuntimeMessage,
 } from "../src/shared/runtimeValidation";
-import {applyReview, overrideLastReview} from "../src/shared/scheduler";
-import {normalizeStoredAppData} from "../src/shared/storage";
-import {getFsrsScheduler, getStudyStateSummary, serializeFsrsCard, toFsrsRating,} from "../src/shared/studyState";
-import {Problem, Rating, StudyState} from "../src/shared/types";
+import { applyReview, overrideLastReview } from "../src/shared/scheduler";
+import { normalizeStoredAppData } from "../src/shared/storage";
+import {
+  getFsrsScheduler,
+  getStudyStateSummary,
+  serializeFsrsCard,
+  toFsrsRating,
+} from "../src/shared/studyState";
+import { Problem, Rating, StudyState } from "../src/shared/types";
 
 function makeProblem(
   slug: string,
@@ -73,12 +85,12 @@ function makeLegacyReviewedFixture(
     ...createDefaultStudyState(),
     attemptHistory: withHistory
       ? [
-        {
-          reviewedAt: "2026-03-10T00:00:00.000Z",
-          rating: 2,
-          mode: "FULL_SOLVE",
-        },
-      ]
+          {
+            reviewedAt: "2026-03-10T00:00:00.000Z",
+            rating: 2,
+            mode: "FULL_SOLVE",
+          },
+        ]
       : [],
     lastRating: 2,
     status: "REVIEWING",
@@ -264,7 +276,7 @@ function testEarlyRepeatFollowsRawFsrsOutput(): void {
   });
   rawCard = scheduler.repeat(rawCard, new Date("2026-03-25T15:00:00.000Z"))[
     toFsrsRating(2)
-    ].card;
+  ].card;
 
   const second = applyReview({
     state: first,
@@ -275,7 +287,7 @@ function testEarlyRepeatFollowsRawFsrsOutput(): void {
   });
   rawCard = scheduler.repeat(rawCard, new Date("2026-03-25T18:00:00.000Z"))[
     toFsrsRating(2)
-    ].card;
+  ].card;
 
   const firstDue = new Date(getStudyStateSummary(first).nextReviewAt!);
   const secondDue = new Date(getStudyStateSummary(second).nextReviewAt!);
@@ -534,21 +546,18 @@ async function testOpenProblemPageReusesCurrentProblemTab(): Promise<void> {
           id: number,
           properties: chrome.tabs.UpdateProperties
         ) => {
-          updatedTabs.push({id, properties});
-          return {id, ...properties} as chrome.tabs.Tab;
+          updatedTabs.push({ id, properties });
+          return { id, ...properties } as chrome.tabs.Tab;
         },
       },
     } as Partial<typeof chrome>,
   });
 
   try {
-    await openProblemPage(
-      {slug: " Two-Sum "},
-      {
-        tab: {id: 7},
-        url: "https://leetcode.com/problems/two-sum/",
-      } as chrome.runtime.MessageSender
-    );
+    await openProblemPage({ slug: " Two-Sum " }, {
+      tab: { id: 7 },
+      url: "https://leetcode.com/problems/two-sum/",
+    } as chrome.runtime.MessageSender);
   } finally {
     Object.defineProperty(globalThis, "chrome", {
       configurable: true,
@@ -559,7 +568,7 @@ async function testOpenProblemPageReusesCurrentProblemTab(): Promise<void> {
   assert.deepEqual(updatedTabs, [
     {
       id: 7,
-      properties: {url: "https://leetcode.com/problems/two-sum/"},
+      properties: { url: "https://leetcode.com/problems/two-sum/" },
     },
   ]);
   assert.equal(createdTabs.length, 0);
@@ -585,23 +594,20 @@ async function testOpenProblemPageOpensNewTabFromExtensionPageSender(): Promise<
           id: number,
           properties: chrome.tabs.UpdateProperties
         ) => {
-          updatedTabs.push({id, properties});
-          return {id, ...properties} as chrome.tabs.Tab;
+          updatedTabs.push({ id, properties });
+          return { id, ...properties } as chrome.tabs.Tab;
         },
       },
     } as Partial<typeof chrome>,
   });
 
   try {
-    await openProblemPage(
-      {slug: "two-sum"},
-      {
-        tab: {
-          id: 11,
-          url: "chrome-extension://test-extension/dashboard.html?view=library",
-        },
-      } as chrome.runtime.MessageSender
-    );
+    await openProblemPage({ slug: "two-sum" }, {
+      tab: {
+        id: 11,
+        url: "chrome-extension://test-extension/dashboard.html?view=library",
+      },
+    } as chrome.runtime.MessageSender);
   } finally {
     Object.defineProperty(globalThis, "chrome", {
       configurable: true,
@@ -610,7 +616,7 @@ async function testOpenProblemPageOpensNewTabFromExtensionPageSender(): Promise<
   }
 
   assert.deepEqual(createdTabs, [
-    {url: "https://leetcode.com/problems/two-sum/"},
+    { url: "https://leetcode.com/problems/two-sum/" },
   ]);
   assert.equal(updatedTabs.length, 0);
 }
@@ -786,7 +792,8 @@ function testSafeOpenHelpersUseCanonicalTargets(): void {
     /invalid dashboard path/i
   );
   assert.throws(
-    () => validateExtensionPagePath("dashboard.html?view=settings&view=analytics"),
+    () =>
+      validateExtensionPagePath("dashboard.html?view=settings&view=analytics"),
     /invalid dashboard path/i
   );
   assert.throws(
@@ -801,7 +808,9 @@ function testSafeOpenHelpersUseCanonicalTargets(): void {
 
 function testProblemSlugNormalizationAcceptsUrlsAndSlugNoise(): void {
   assert.equal(
-    normalizeSlug(" https://leetcode.com/problems/Two-Sum/?envType=study-plan-v2 "),
+    normalizeSlug(
+      " https://leetcode.com/problems/Two-Sum/?envType=study-plan-v2 "
+    ),
     "two-sum"
   );
   assert.equal(normalizeSlug("Problems/merge-intervals/"), "merge-intervals");

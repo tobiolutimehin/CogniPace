@@ -3,16 +3,8 @@
   "name": "CogniPace",
   "description": "Deliberate LeetCode practice with spaced repetition and curated paths.",
   "version": "0.1.0",
-  "permissions": [
-    "storage",
-    "alarms",
-    "notifications",
-    "tabs"
-  ],
-  "host_permissions": [
-    "https://leetcode.com/*",
-    "https://www.leetcode.com/*"
-  ],
+  "permissions": ["storage", "alarms", "notifications", "tabs"],
+  "host_permissions": ["https://leetcode.com/*", "https://www.leetcode.com/*"],
   "background": {
     "service_worker": "background.js"
   },
@@ -26,9 +18,7 @@
         "https://leetcode.com/problems/*",
         "https://www.leetcode.com/problems/*"
       ],
-      "js": [
-        "content.js"
-      ],
+      "js": ["content.js"],
       "run_at": "document_idle"
     }
   ],

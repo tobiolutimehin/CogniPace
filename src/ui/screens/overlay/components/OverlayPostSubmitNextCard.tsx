@@ -1,18 +1,16 @@
 import Collapse from "@mui/material/Collapse";
 import Fade from "@mui/material/Fade";
 import Stack from "@mui/material/Stack";
-import {useEffect, useRef} from "react";
+import { useEffect, useRef } from "react";
 
-import {FieldAssistRow, SurfaceCard} from "../../../components";
-import {CourseNextCard} from "../../../features/courses/CourseNextCard";
-import {RecommendedProblemCard} from "../../../features/recommended/RecommendedProblemCard";
-import {OverlayPostSubmitNextViewModel} from "../overlayPanel.types";
+import { FieldAssistRow, SurfaceCard } from "../../../components";
+import { CourseNextCard } from "../../../features/courses/CourseNextCard";
+import { RecommendedProblemCard } from "../../../features/recommended/RecommendedProblemCard";
+import { OverlayPostSubmitNextViewModel } from "../overlayPanel.types";
 
-export function OverlayPostSubmitNextCard(
-  props: {
-    nextTarget: OverlayPostSubmitNextViewModel | null;
-  }
-) {
+export function OverlayPostSubmitNextCard(props: {
+  nextTarget: OverlayPostSubmitNextViewModel | null;
+}) {
   const sectionRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -22,7 +20,7 @@ export function OverlayPostSubmitNextCard(
     }
 
     if (typeof section.scrollIntoView === "function") {
-      section.scrollIntoView({block: "nearest"});
+      section.scrollIntoView({ block: "nearest" });
     }
   }, [props.nextTarget]);
 
@@ -54,7 +52,9 @@ export function OverlayPostSubmitNextCard(
             <SurfaceCard compact label="Next Up" title={props.nextTarget.title}>
               <Stack spacing={1}>
                 <FieldAssistRow
-                  tone={props.nextTarget.kind === "loading" ? "accent" : "default"}
+                  tone={
+                    props.nextTarget.kind === "loading" ? "accent" : "default"
+                  }
                 >
                   {props.nextTarget.message}
                 </FieldAssistRow>

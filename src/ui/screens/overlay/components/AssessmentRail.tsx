@@ -1,13 +1,16 @@
 import Stack from "@mui/material/Stack";
-import {alpha} from "@mui/material/styles";
+import { alpha } from "@mui/material/styles";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 
-import {Rating} from "../../../../domain/types";
-import {FieldAssistRow, SurfaceSectionLabel} from "../../../components";
-import {kineticTokens} from "../../../theme";
-import {OverlayAssessmentSectionViewModel, OverlayAssistViewModel} from "../overlayPanel.types";
+import { Rating } from "../../../../domain/types";
+import { FieldAssistRow, SurfaceSectionLabel } from "../../../components";
+import { kineticTokens } from "../../../theme";
+import {
+  OverlayAssessmentSectionViewModel,
+  OverlayAssistViewModel,
+} from "../overlayPanel.types";
 
 interface AssessmentOption {
   color: string;
@@ -56,7 +59,8 @@ function assessmentToggleSx(color: string) {
     px: 1.1,
     py: 1.05,
     textAlign: "center",
-    transition: "background-color 160ms ease, border-color 160ms ease, color 160ms ease",
+    transition:
+      "background-color 160ms ease, border-color 160ms ease, color 160ms ease",
     "& .assessment-label": {
       color: alpha(color, 0.92),
     },
@@ -94,12 +98,10 @@ function assessmentToggleSx(color: string) {
   } as const;
 }
 
-export function AssessmentRail(
-  props: {
-    assessment: OverlayAssessmentSectionViewModel;
-    assist: OverlayAssistViewModel;
-  }
-) {
+export function AssessmentRail(props: {
+  assessment: OverlayAssessmentSectionViewModel;
+  assist: OverlayAssistViewModel;
+}) {
   return (
     <Stack spacing={1.15}>
       <SurfaceSectionLabel>Assessment</SurfaceSectionLabel>
@@ -141,7 +143,7 @@ export function AssessmentRail(
             <Stack
               alignItems="center"
               spacing={0.25}
-              sx={{justifyContent: "center", width: "100%"}}
+              sx={{ justifyContent: "center", width: "100%" }}
             >
               <Typography className="assessment-label" variant="button">
                 {option.label}

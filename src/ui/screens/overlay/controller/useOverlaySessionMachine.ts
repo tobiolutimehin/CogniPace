@@ -1,16 +1,26 @@
-import {useCallback, useState} from "react";
+import { useCallback, useState } from "react";
 
 import {
   overrideLastReviewResult,
   saveOverlayLogDraft,
   saveReviewResult,
 } from "../../../../data/repositories/problemSessionRepository";
-import {defaultReviewMode} from "../../../../domain/fsrs/reviewPolicy";
-import {Difficulty, Rating, ReviewMode, StudyState} from "../../../../domain/types";
-import {OverlayDraftLogFields} from "../overlayPanel.types";
+import { defaultReviewMode } from "../../../../domain/fsrs/reviewPolicy";
+import {
+  Difficulty,
+  Rating,
+  ReviewMode,
+  StudyState,
+} from "../../../../domain/types";
+import { OverlayDraftLogFields } from "../overlayPanel.types";
 
-import {cloneDraft, draftFromStudyState, emptyDraft, reviewPayloadFromDraft,} from "./draftFields";
-import {OverlayTimerController} from "./useOverlayTimer";
+import {
+  cloneDraft,
+  draftFromStudyState,
+  emptyDraft,
+  reviewPayloadFromDraft,
+} from "./draftFields";
+import { OverlayTimerController } from "./useOverlayTimer";
 
 interface SubmittedSessionSnapshot {
   draft: OverlayDraftLogFields;
@@ -69,10 +79,8 @@ interface OverlaySessionMachineArgs {
   windowRef: Window;
 }
 
-export function useOverlaySessionMachine(
-  args: OverlaySessionMachineArgs
-) {
-  const {timer, windowRef} = args;
+export function useOverlaySessionMachine(args: OverlaySessionMachineArgs) {
+  const { timer, windowRef } = args;
   const [state, setState] = useState<OverlaySessionState>(
     initialOverlaySessionState
   );
@@ -114,7 +122,7 @@ export function useOverlaySessionMachine(
   }, [timer]);
 
   const activateProblem = useCallback(
-    ({difficulty, slug, title}: ActivateOverlayProblemArgs) => {
+    ({ difficulty, slug, title }: ActivateOverlayProblemArgs) => {
       timer.reset();
       setState((current) => ({
         ...current,
@@ -137,7 +145,12 @@ export function useOverlaySessionMachine(
   );
 
   const applyProblemContext = useCallback(
-    ({difficulty, slug, studyState, title}: ApplyOverlayProblemContextArgs) => {
+    ({
+      difficulty,
+      slug,
+      studyState,
+      title,
+    }: ApplyOverlayProblemContextArgs) => {
       const nextDraft = draftFromStudyState(studyState);
 
       setState((current) => ({
@@ -148,10 +161,7 @@ export function useOverlaySessionMachine(
         persistedDraft: nextDraft,
         draftContextSlug:
           current.draftContextSlug !== slug ? slug : current.draftContextSlug,
-        draft:
-          current.draftContextSlug !== slug
-            ? nextDraft
-            : current.draft,
+        draft: current.draftContextSlug !== slug ? nextDraft : current.draft,
         feedbackIsError: false,
         feedbackMessage: "",
         selectedRating:
@@ -259,10 +269,7 @@ export function useOverlaySessionMachine(
   );
 
   const persistDraft = useCallback(
-    async (
-      slug: string,
-      draft: OverlayDraftLogFields
-    ): Promise<boolean> => {
+    async (slug: string, draft: OverlayDraftLogFields): Promise<boolean> => {
       const response = await saveOverlayLogDraft({
         slug,
         ...reviewPayloadFromDraft(draft),
@@ -277,9 +284,9 @@ export function useOverlaySessionMachine(
         ...current,
         currentState: current.currentState
           ? {
-            ...current.currentState,
-            ...reviewPayloadFromDraft(draft),
-          }
+              ...current.currentState,
+              ...reviewPayloadFromDraft(draft),
+            }
           : current.currentState,
         persistedDraft: cloneDraft(draft),
       }));
@@ -323,11 +330,11 @@ export function useOverlaySessionMachine(
         ...current,
         currentState: current.currentState
           ? {
-            ...current.currentState,
-            ...reviewPayloadFromDraft(draftSnapshot),
-            lastRating: rating,
-            lastSolveTimeMs: solveTimeMs,
-          }
+              ...current.currentState,
+              ...reviewPayloadFromDraft(draftSnapshot),
+              lastRating: rating,
+              lastSolveTimeMs: solveTimeMs,
+            }
           : current.currentState,
         failureLocked: options?.lockFailureRating === true,
         persistedDraft: draftSnapshot,
@@ -374,18 +381,18 @@ export function useOverlaySessionMachine(
       ...current,
       currentState: current.currentState
         ? {
-          ...current.currentState,
-          ...reviewPayloadFromDraft(draftSnapshot),
-          lastRating: state.selectedRating,
-        }
+            ...current.currentState,
+            ...reviewPayloadFromDraft(draftSnapshot),
+            lastRating: state.selectedRating,
+          }
         : current.currentState,
       persistedDraft: draftSnapshot,
       submittedSession: current.submittedSession
         ? {
-          ...current.submittedSession,
-          draft: draftSnapshot,
-          rating: state.selectedRating,
-        }
+            ...current.submittedSession,
+            draft: draftSnapshot,
+            rating: state.selectedRating,
+          }
         : null,
     }));
 

@@ -1,12 +1,12 @@
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import Paper from "@mui/material/Paper";
-import {alpha} from "@mui/material/styles";
-import {type PointerEvent, useRef, useState} from "react";
+import { alpha } from "@mui/material/styles";
+import { type PointerEvent, useRef, useState } from "react";
 
-import {BrandMark, SurfaceTooltip} from "../../../components";
-import {kineticTokens} from "../../../theme";
-import {DockedOverlayViewModel} from "../overlayPanel.types";
+import { BrandMark, SurfaceTooltip } from "../../../components";
+import { kineticTokens } from "../../../theme";
+import { DockedOverlayViewModel } from "../overlayPanel.types";
 
 const DOCK_BOTTOM_OFFSET_PX = 10;
 const DOCK_MARGIN_TOP_PX = 16;
@@ -37,11 +37,7 @@ function isActivePointer(
   );
 }
 
-export function DockedOverlayPanel(
-  props: {
-    model: DockedOverlayViewModel;
-  }
-) {
+export function DockedOverlayPanel(props: { model: DockedOverlayViewModel }) {
   const activePointerIdRef = useRef<number | null>(null);
   const dockOffsetRef = useRef(0);
   const dragStartYRef = useRef(0);
@@ -72,7 +68,7 @@ export function DockedOverlayPanel(
   return (
     <Paper
       data-testid="docked-overlay-panel"
-      style={{transform: `translateY(${dockOffsetY}px)`}}
+      style={{ transform: `translateY(${dockOffsetY}px)` }}
       sx={{
         border: (theme) => `1px solid ${theme.palette.divider}`,
         borderRadius: "18px 0 0 18px",
@@ -128,7 +124,10 @@ export function DockedOverlayPanel(
             }
 
             const totalDeltaY = clientY - dragStartYRef.current;
-            if (!wasDraggedRef.current && Math.abs(totalDeltaY) < DRAG_THRESHOLD_PX) {
+            if (
+              !wasDraggedRef.current &&
+              Math.abs(totalDeltaY) < DRAG_THRESHOLD_PX
+            ) {
               return;
             }
 
@@ -189,7 +188,7 @@ export function DockedOverlayPanel(
               transform: "scale(0.88)",
             }}
           >
-            <BrandMark/>
+            <BrandMark />
           </Box>
         </ButtonBase>
       </SurfaceTooltip>

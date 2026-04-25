@@ -1,8 +1,8 @@
 import CssBaseline from "@mui/material/CssBaseline";
-import {createTheme, ThemeProvider} from "@mui/material/styles";
-import {ReactNode, useMemo} from "react";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { ReactNode, useMemo } from "react";
 
-import {kineticTheme} from "./theme";
+import { kineticTheme } from "./theme";
 
 export function AppProviders(props: {
   children?: ReactNode;
@@ -36,7 +36,7 @@ export function AppProviders(props: {
 
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline enableColorScheme/>
+      <CssBaseline enableColorScheme />
       {props.children}
     </ThemeProvider>
   );

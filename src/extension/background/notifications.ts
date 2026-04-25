@@ -1,6 +1,6 @@
 /** Notification helpers and quiet-hour policy for the background worker. */
-import {getAppData} from "../../data/repositories/appDataRepository";
-import {buildTodayQueue} from "../../domain/queue/buildTodayQueue";
+import { getAppData } from "../../data/repositories/appDataRepository";
+import { buildTodayQueue } from "../../domain/queue/buildTodayQueue";
 
 function inQuietHours(
   startHour: number,

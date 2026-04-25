@@ -1,19 +1,25 @@
-import {cleanup, fireEvent, render, screen, waitFor, within,} from "@testing-library/react";
-import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
+import {
+  cleanup,
+  fireEvent,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import {StudyState} from "../src/domain/types";
-import {CourseQuestionView} from "../src/domain/views";
-import {createMockAppShellPayload} from "../src/ui/mockData";
-import {AppProviders} from "../src/ui/providers";
-import {DashboardApp} from "../src/ui/screens/dashboard/DashboardApp";
-import {OverlayPanel} from "../src/ui/screens/overlay/OverlayPanel";
+import { StudyState } from "../src/domain/types";
+import { CourseQuestionView } from "../src/domain/views";
+import { renderWithProviders as render } from "../src/test-utils/render";
+import { createMockAppShellPayload } from "../src/ui/mockData";
+import { DashboardApp } from "../src/ui/screens/dashboard/DashboardApp";
+import { OverlayPanel } from "../src/ui/screens/overlay/OverlayPanel";
 import {
   CollapsedOverlayViewModel,
   DockedOverlayViewModel,
   ExpandedOverlayViewModel,
   OverlayRenderModel,
 } from "../src/ui/screens/overlay/overlayPanel.types";
-import {PopupApp} from "../src/ui/screens/popup/PopupApp";
+import { PopupApp } from "../src/ui/screens/popup/PopupApp";
 
 const sendMessageMock = vi.fn();
 const tabsCreateMock = vi.fn();
@@ -50,16 +56,16 @@ function makeStudyState(nextReviewAt?: string): StudyState {
     attemptHistory: [],
     fsrsCard: nextReviewAt
       ? {
-        difficulty: 4,
-        due: nextReviewAt,
-        elapsedDays: 2,
-        lapses: 0,
-        learningSteps: 0,
-        reps: 1,
-        scheduledDays: 2,
-        stability: 2,
-        state: "Review",
-      }
+          difficulty: 4,
+          due: nextReviewAt,
+          elapsedDays: 2,
+          lapses: 0,
+          learningSteps: 0,
+          reps: 1,
+          scheduledDays: 2,
+          stability: 2,
+          state: "Review",
+        }
       : undefined,
     suspended: false,
     tags: [],
@@ -207,8 +213,8 @@ function makePayload() {
       id: "Blind75",
       name: "Blind 75",
       chapterOptions: [
-        {id: "arrays-1", title: "Arrays"},
-        {id: "graphs-1", title: "Graphs"},
+        { id: "arrays-1", title: "Arrays" },
+        { id: "graphs-1", title: "Graphs" },
       ],
     },
   ];
@@ -267,7 +273,7 @@ function deferred<T>() {
     reject = rejectPromise;
   });
 
-  return {promise, reject, resolve};
+  return { promise, reject, resolve };
 }
 
 describe("PopupApp", () => {
@@ -276,32 +282,28 @@ describe("PopupApp", () => {
     sendMessageMock.mockImplementation(
       async (type: string, request: unknown) => {
         if (type === "GET_APP_SHELL_DATA") {
-          return {ok: true, data: payload};
+          return { ok: true, data: payload };
         }
         if (type === "OPEN_PROBLEM_PAGE") {
-          return {ok: true, data: {opened: true}, request};
+          return { ok: true, data: { opened: true }, request };
         }
-        return {ok: true, data: {}};
+        return { ok: true, data: {} };
       }
     );
 
-    render(
-      <AppProviders>
-        <PopupApp/>
-      </AppProviders>
-    );
+    render(<PopupApp />);
 
     expect(await screen.findByText("Two Sum")).toBeTruthy();
-    expect(screen.getByRole("button", {name: "Refresh popup"})).toBeTruthy();
-    expect(screen.getByRole("button", {name: "Open settings"})).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Refresh popup" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Open settings" })).toBeTruthy();
     expect(
-      screen.getByRole("button", {name: "Start freestyle mode"})
+      screen.getByRole("button", { name: "Start freestyle mode" })
     ).toBeTruthy();
     expect(screen.queryByText(/Next review day:/i)).toBeNull();
     expect(
-      screen.getByRole("button", {name: "Shuffle recommendation"})
+      screen.getByRole("button", { name: "Shuffle recommendation" })
     ).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", {name: "Open Problem"}));
+    fireEvent.click(screen.getByRole("button", { name: "Open Problem" }));
 
     await waitFor(() => {
       expect(sendMessageMock).toHaveBeenCalledWith("OPEN_PROBLEM_PAGE", {
@@ -316,22 +318,18 @@ describe("PopupApp", () => {
     const payload = makePayload();
     sendMessageMock.mockImplementation(async (type: string) => {
       if (type === "GET_APP_SHELL_DATA") {
-        return {ok: true, data: payload};
+        return { ok: true, data: payload };
       }
-      return {ok: true, data: {}};
+      return { ok: true, data: {} };
     });
 
-    render(
-      <AppProviders>
-        <PopupApp/>
-      </AppProviders>
-    );
+    render(<PopupApp />);
 
     expect(await screen.findByText("Two Sum")).toBeTruthy();
     expect(screen.getByText("Contains Duplicate")).toBeTruthy();
 
     fireEvent.click(
-      screen.getByRole("button", {name: "Shuffle recommendation"})
+      screen.getByRole("button", { name: "Shuffle recommendation" })
     );
 
     expect(await screen.findByText("Group Anagrams")).toBeTruthy();
@@ -342,20 +340,16 @@ describe("PopupApp", () => {
     const payload = makePayload();
     sendMessageMock.mockImplementation(async (type: string) => {
       if (type === "GET_APP_SHELL_DATA") {
-        return {ok: true, data: payload};
+        return { ok: true, data: payload };
       }
-      return {ok: true, data: {}};
+      return { ok: true, data: {} };
     });
 
-    render(
-      <AppProviders>
-        <PopupApp/>
-      </AppProviders>
-    );
+    render(<PopupApp />);
 
     expect(await screen.findByText("Blind 75")).toBeTruthy();
     fireEvent.click(
-      screen.getByRole("button", {name: "Open courses dashboard"})
+      screen.getByRole("button", { name: "Open courses dashboard" })
     );
 
     expect(tabsCreateMock).toHaveBeenCalledWith({
@@ -368,23 +362,19 @@ describe("PopupApp", () => {
     sendMessageMock.mockImplementation(
       async (type: string, request: unknown) => {
         if (type === "GET_APP_SHELL_DATA") {
-          return {ok: true, data: payload};
+          return { ok: true, data: payload };
         }
         if (type === "OPEN_PROBLEM_PAGE") {
-          return {ok: true, data: {opened: true}, request};
+          return { ok: true, data: { opened: true }, request };
         }
-        return {ok: true, data: {}};
+        return { ok: true, data: {} };
       }
     );
 
-    render(
-      <AppProviders>
-        <PopupApp/>
-      </AppProviders>
-    );
+    render(<PopupApp />);
 
     expect(await screen.findByText("Contains Duplicate")).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", {name: "Continue path"}));
+    fireEvent.click(screen.getByRole("button", { name: "Continue path" }));
 
     await waitFor(() => {
       expect(sendMessageMock).toHaveBeenCalledWith("OPEN_PROBLEM_PAGE", {
@@ -404,30 +394,26 @@ describe("PopupApp", () => {
 
     sendMessageMock.mockImplementation((type: string) => {
       if (type === "GET_APP_SHELL_DATA") {
-        return Promise.resolve({ok: true, data: payload});
+        return Promise.resolve({ ok: true, data: payload });
       }
       if (type === "UPDATE_SETTINGS") {
         return updateResponse.promise;
       }
-      return Promise.resolve({ok: true, data: {}});
+      return Promise.resolve({ ok: true, data: {} });
     });
 
-    render(
-      <AppProviders>
-        <PopupApp/>
-      </AppProviders>
-    );
+    render(<PopupApp />);
 
     expect(await screen.findByText("Two Sum")).toBeTruthy();
     fireEvent.click(
-      screen.getByRole("button", {name: "Start freestyle mode"})
+      screen.getByRole("button", { name: "Start freestyle mode" })
     );
 
     expect(await screen.findByText("You are in free style mode")).toBeTruthy();
     await waitFor(() => {
       expect(sendMessageMock).toHaveBeenCalledWith(
         "UPDATE_SETTINGS",
-        expect.objectContaining({studyMode: "freestyle"})
+        expect.objectContaining({ studyMode: "freestyle" })
       );
     });
 
@@ -454,37 +440,33 @@ describe("PopupApp", () => {
 
     sendMessageMock.mockImplementation((type: string) => {
       if (type === "GET_APP_SHELL_DATA") {
-        return Promise.resolve({ok: true, data: payload});
+        return Promise.resolve({ ok: true, data: payload });
       }
       if (type === "UPDATE_SETTINGS") {
         return updateResponse.promise;
       }
-      return Promise.resolve({ok: true, data: {}});
+      return Promise.resolve({ ok: true, data: {} });
     });
 
-    render(
-      <AppProviders>
-        <PopupApp/>
-      </AppProviders>
-    );
+    render(<PopupApp />);
 
     expect(await screen.findByText("Two Sum")).toBeTruthy();
     expect(screen.getByText("You are in free style mode")).toBeTruthy();
     expect(screen.queryByText("Blind 75")).toBeNull();
-    expect(screen.queryByRole("button", {name: "Continue path"})).toBeNull();
+    expect(screen.queryByRole("button", { name: "Continue path" })).toBeNull();
     expect(
-      screen.getByRole("button", {name: "Start study mode"})
+      screen.getByRole("button", { name: "Start study mode" })
     ).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", {name: "Start study mode"}));
+    fireEvent.click(screen.getByRole("button", { name: "Start study mode" }));
 
     expect(await screen.findByText("Blind 75")).toBeTruthy();
-    expect(screen.getByRole("button", {name: "Continue path"})).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Continue path" })).toBeTruthy();
 
     await waitFor(() => {
       expect(sendMessageMock).toHaveBeenCalledWith(
         "UPDATE_SETTINGS",
-        expect.objectContaining({studyMode: "studyPlan"})
+        expect.objectContaining({ studyMode: "studyPlan" })
       );
     });
 
@@ -509,27 +491,20 @@ describe("PopupApp", () => {
     }>();
 
     sendMessageMock.mockImplementation(
-      (
-        type: string,
-        request?: { studyMode?: "freestyle" | "studyPlan" }
-      ) => {
+      (type: string, request?: { studyMode?: "freestyle" | "studyPlan" }) => {
         if (type === "GET_APP_SHELL_DATA") {
-          return Promise.resolve({ok: true, data: payload});
+          return Promise.resolve({ ok: true, data: payload });
         }
 
         if (type === "UPDATE_SETTINGS" && request?.studyMode === "freestyle") {
           return updateResponse.promise;
         }
 
-        return Promise.resolve({ok: true, data: {}});
+        return Promise.resolve({ ok: true, data: {} });
       }
     );
 
-    render(
-      <AppProviders>
-        <PopupApp/>
-      </AppProviders>
-    );
+    render(<PopupApp />);
 
     expect(await screen.findByText("Blind 75")).toBeTruthy();
 
@@ -547,9 +522,7 @@ describe("PopupApp", () => {
       ).disabled
     ).toBe(true);
 
-    fireEvent.click(
-      screen.getByRole("button", {name: "Start study mode"})
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Start study mode" }));
 
     let updateCalls = sendMessageMock.mock.calls.filter(
       ([type]) => type === "UPDATE_SETTINGS"
@@ -580,23 +553,19 @@ describe("PopupApp", () => {
 
     sendMessageMock.mockImplementation((type: string) => {
       if (type === "GET_APP_SHELL_DATA") {
-        return Promise.resolve({ok: true, data: payload});
+        return Promise.resolve({ ok: true, data: payload });
       }
       if (type === "UPDATE_SETTINGS") {
         return updateResponse.promise;
       }
-      return Promise.resolve({ok: true, data: {}});
+      return Promise.resolve({ ok: true, data: {} });
     });
 
-    render(
-      <AppProviders>
-        <PopupApp/>
-      </AppProviders>
-    );
+    render(<PopupApp />);
 
     expect(await screen.findByText("Blind 75")).toBeTruthy();
     fireEvent.click(
-      screen.getByRole("button", {name: "Start freestyle mode"})
+      screen.getByRole("button", { name: "Start freestyle mode" })
     );
 
     expect(await screen.findByText("You are in free style mode")).toBeTruthy();
@@ -624,23 +593,19 @@ describe("PopupApp", () => {
 
     sendMessageMock.mockImplementation((type: string) => {
       if (type === "GET_APP_SHELL_DATA") {
-        return Promise.resolve({ok: true, data: payload});
+        return Promise.resolve({ ok: true, data: payload });
       }
       if (type === "UPDATE_SETTINGS") {
         return updateResponse.promise;
       }
-      return Promise.resolve({ok: true, data: {}});
+      return Promise.resolve({ ok: true, data: {} });
     });
 
-    render(
-      <AppProviders>
-        <PopupApp/>
-      </AppProviders>
-    );
+    render(<PopupApp />);
 
     expect(await screen.findByText("Blind 75")).toBeTruthy();
     fireEvent.click(
-      screen.getByRole("button", {name: "Start freestyle mode"})
+      screen.getByRole("button", { name: "Start freestyle mode" })
     );
 
     expect(await screen.findByText("You are in free style mode")).toBeTruthy();
@@ -659,16 +624,12 @@ describe("PopupApp", () => {
 
     sendMessageMock.mockImplementation(async (type: string) => {
       if (type === "GET_APP_SHELL_DATA") {
-        return {ok: true, data: payload};
+        return { ok: true, data: payload };
       }
-      return {ok: true, data: {}};
+      return { ok: true, data: {} };
     });
 
-    render(
-      <AppProviders>
-        <PopupApp/>
-      </AppProviders>
-    );
+    render(<PopupApp />);
 
     expect(await screen.findByText("Queue Clear")).toBeTruthy();
   });
@@ -681,16 +642,12 @@ describe("PopupApp", () => {
 
     sendMessageMock.mockImplementation(async (type: string) => {
       if (type === "GET_APP_SHELL_DATA") {
-        return {ok: true, data: payload};
+        return { ok: true, data: payload };
       }
-      return {ok: true, data: {}};
+      return { ok: true, data: {} };
     });
 
-    render(
-      <AppProviders>
-        <PopupApp/>
-      </AppProviders>
-    );
+    render(<PopupApp />);
 
     expect(await screen.findByText("No Active Course")).toBeTruthy();
   });
@@ -699,16 +656,12 @@ describe("PopupApp", () => {
     const payload = makePayload();
     sendMessageMock.mockImplementation(async (type: string) => {
       if (type === "GET_APP_SHELL_DATA") {
-        return {ok: true, data: payload};
+        return { ok: true, data: payload };
       }
-      return {ok: true, data: {}};
+      return { ok: true, data: {} };
     });
 
-    render(
-      <AppProviders>
-        <PopupApp/>
-      </AppProviders>
-    );
+    render(<PopupApp />);
 
     expect(await screen.findByText("Blind 75")).toBeTruthy();
     expect(screen.queryByText("Arrays")).toBeNull();
@@ -726,16 +679,12 @@ describe("PopupApp", () => {
 
     sendMessageMock.mockImplementation(async (type: string) => {
       if (type === "GET_APP_SHELL_DATA") {
-        return {ok: true, data: payload};
+        return { ok: true, data: payload };
       }
-      return {ok: true, data: {}};
+      return { ok: true, data: {} };
     });
 
-    render(
-      <AppProviders>
-        <PopupApp/>
-      </AppProviders>
-    );
+    render(<PopupApp />);
 
     expect(await screen.findByText(/Course complete\./)).toBeTruthy();
   });
@@ -746,31 +695,27 @@ describe("DashboardApp", () => {
     const payload = makePayload();
     sendMessageMock.mockImplementation(async (type: string) => {
       if (type === "GET_APP_SHELL_DATA") {
-        return {ok: true, data: payload};
+        return { ok: true, data: payload };
       }
-      return {ok: true, data: {}};
+      return { ok: true, data: {} };
     });
 
-    render(
-      <AppProviders>
-        <DashboardApp/>
-      </AppProviders>
-    );
+    render(<DashboardApp />);
 
     expect(
-      await screen.findByRole("heading", {name: "Dashboard"})
+      await screen.findByRole("heading", { name: "Dashboard" })
     ).toBeTruthy();
     expect(
-      screen.getByRole("button", {name: "Refresh dashboard"})
+      screen.getByRole("button", { name: "Refresh dashboard" })
     ).toBeTruthy();
     expect(
-      screen.getAllByRole("button", {name: "Open settings"}).length
+      screen.getAllByRole("button", { name: "Open settings" }).length
     ).toBeGreaterThan(0);
-    fireEvent.click(screen.getByRole("button", {name: "Library"}));
+    fireEvent.click(screen.getByRole("button", { name: "Library" }));
 
     expect(await screen.findByText("All Tracked Problems")).toBeTruthy();
     fireEvent.change(screen.getByLabelText("Search title or slug"), {
-      target: {value: "merge"},
+      target: { value: "merge" },
     });
 
     await waitFor(() => {
@@ -783,28 +728,24 @@ describe("DashboardApp", () => {
     const payload = makePayload();
     sendMessageMock.mockImplementation(async (type: string) => {
       if (type === "GET_APP_SHELL_DATA") {
-        return {ok: true, data: payload};
+        return { ok: true, data: payload };
       }
       if (type === "UPDATE_SETTINGS") {
-        return {ok: true, data: {}};
+        return { ok: true, data: {} };
       }
-      return {ok: true, data: {}};
+      return { ok: true, data: {} };
     });
 
-    render(
-      <AppProviders>
-        <DashboardApp/>
-      </AppProviders>
-    );
+    render(<DashboardApp />);
 
-    fireEvent.click(await screen.findByRole("button", {name: "Settings"}));
+    fireEvent.click(await screen.findByRole("button", { name: "Settings" }));
     expect(
-      screen.getByRole("button", {name: "Information about Target Retention"})
+      screen.getByRole("button", { name: "Information about Target Retention" })
     ).toBeTruthy();
     fireEvent.change(await screen.findByLabelText("Daily New"), {
-      target: {value: "9"},
+      target: { value: "9" },
     });
-    fireEvent.click(screen.getByRole("button", {name: "Save Settings"}));
+    fireEvent.click(screen.getByRole("button", { name: "Save Settings" }));
 
     await waitFor(() => {
       expect(sendMessageMock).toHaveBeenCalledWith(
@@ -855,10 +796,10 @@ describe("OverlayPanel", () => {
       overrides.feedback === null
         ? null
         : {
-          isError: false,
-          message: "Last reviewed today.",
-          ...(overrides.feedback ?? {}),
-        };
+            isError: false,
+            message: "Last reviewed today.",
+            ...(overrides.feedback ?? {}),
+          };
 
     return {
       model: {
@@ -956,10 +897,10 @@ describe("OverlayPanel", () => {
       overrides.feedback === null
         ? null
         : {
-          isError: false,
-          message: "",
-          ...(overrides.feedback ?? {}),
-        };
+            isError: false,
+            message: "",
+            ...(overrides.feedback ?? {}),
+          };
 
     return {
       model: {
@@ -1009,11 +950,7 @@ describe("OverlayPanel", () => {
   }
 
   function renderOverlayPanel(renderModel = makeExpandedRenderModel()) {
-    return render(
-      <AppProviders>
-        <OverlayPanel renderModel={renderModel}/>
-      </AppProviders>
-    );
+    return render(<OverlayPanel renderModel={renderModel} />);
   }
 
   function firePointerEvent(
@@ -1038,7 +975,7 @@ describe("OverlayPanel", () => {
     const onSelectRating = vi.fn();
     const onChangeDraft = vi.fn();
 
-    const {rerender} = renderOverlayPanel(
+    const { rerender } = renderOverlayPanel(
       makeExpandedRenderModel({
         assessment: {
           onSelectRating,
@@ -1049,9 +986,9 @@ describe("OverlayPanel", () => {
       })
     );
 
-    expect(screen.getByRole("button", {name: "Open settings"})).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Open settings" })).toBeTruthy();
     expect(
-      screen.getByRole("button", {name: "Collapse overlay"})
+      screen.getByRole("button", { name: "Collapse overlay" })
     ).toBeTruthy();
     expect(screen.getByText("Recall review")).toBeTruthy();
     expect(screen.getByText("Last submitted")).toBeTruthy();
@@ -1059,7 +996,7 @@ describe("OverlayPanel", () => {
     expect(screen.getByText("Next due")).toBeTruthy();
     expect(screen.getByText("Mar 30")).toBeTruthy();
     const assessmentButtons = within(
-      screen.getByRole("group", {name: "Review assessment"})
+      screen.getByRole("group", { name: "Review assessment" })
     ).getAllByRole("button");
     expect(assessmentButtons).toHaveLength(4);
     expect(assessmentButtons[0]?.textContent).toMatch(/Easy\s*Fast/);
@@ -1068,37 +1005,30 @@ describe("OverlayPanel", () => {
     expect(assessmentButtons[3]?.textContent).toMatch(/Again\s*Failed/);
     expect(
       screen
-        .getByRole("button", {name: "Good Stable"})
+        .getByRole("button", { name: "Good Stable" })
         .getAttribute("aria-pressed")
     ).toBe("true");
 
-    fireEvent.click(screen.getByRole("button", {name: "Easy Fast"}));
-    fireEvent.click(screen.getByRole("button", {name: "Hard Lagging"}));
-    fireEvent.click(screen.getByRole("button", {name: "Again Failed"}));
+    fireEvent.click(screen.getByRole("button", { name: "Easy Fast" }));
+    fireEvent.click(screen.getByRole("button", { name: "Hard Lagging" }));
+    fireEvent.click(screen.getByRole("button", { name: "Again Failed" }));
 
     rerender(
-      <AppProviders>
-        <OverlayPanel
-          renderModel={makeExpandedRenderModel({
-            assessment: {
-              onSelectRating,
-              selectedRating: 0,
-            },
-            log: {
-              onChange: onChangeDraft,
-            },
-          })}
-        />
-      </AppProviders>
+      <OverlayPanel
+        renderModel={makeExpandedRenderModel({
+          assessment: { onSelectRating, selectedRating: 0 },
+          log: { onChange: onChangeDraft },
+        })}
+      />
     );
 
-    fireEvent.click(screen.getByRole("button", {name: "Good Stable"}));
+    fireEvent.click(screen.getByRole("button", { name: "Good Stable" }));
     expect(onSelectRating.mock.calls.map(([rating]) => rating)).toEqual([
       3, 1, 0, 2,
     ]);
 
     fireEvent.change(screen.getByLabelText("Interview pattern"), {
-      target: {value: "Sliding window"},
+      target: { value: "Sliding window" },
     });
     expect(onChangeDraft).toHaveBeenCalledWith(
       "interviewPattern",
@@ -1143,10 +1073,10 @@ describe("OverlayPanel", () => {
       })
     );
 
-    const easyButton = screen.getByRole("button", {name: "Easy Fast"});
-    const goodButton = screen.getByRole("button", {name: "Good Stable"});
-    const hardButton = screen.getByRole("button", {name: "Hard Lagging"});
-    const againButton = screen.getByRole("button", {name: "Again Failed"});
+    const easyButton = screen.getByRole("button", { name: "Easy Fast" });
+    const goodButton = screen.getByRole("button", { name: "Good Stable" });
+    const hardButton = screen.getByRole("button", { name: "Hard Lagging" });
+    const againButton = screen.getByRole("button", { name: "Again Failed" });
 
     expect((easyButton as HTMLButtonElement).disabled).toBe(true);
     expect((goodButton as HTMLButtonElement).disabled).toBe(true);
@@ -1177,13 +1107,15 @@ describe("OverlayPanel", () => {
       })
     );
 
-    fireEvent.click(screen.getByRole("button", {name: "Clear Interview pattern"}));
-    fireEvent.click(screen.getByRole("button", {name: "Clear Notes"}));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Clear Interview pattern" })
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Clear Notes" }));
 
     expect(onChangeDraft).toHaveBeenCalledWith("interviewPattern", "");
     expect(onChangeDraft).toHaveBeenCalledWith("notes", "");
     expect(
-      screen.queryByRole("button", {name: "Clear Time complexity"})
+      screen.queryByRole("button", { name: "Clear Time complexity" })
     ).toBeNull();
   });
 
@@ -1202,12 +1134,12 @@ describe("OverlayPanel", () => {
       })
     );
 
-    fireEvent.click(screen.getByRole("button", {name: "Open settings"}));
+    fireEvent.click(screen.getByRole("button", { name: "Open settings" }));
     expect(onOpenSettings).toHaveBeenCalledTimes(1);
     expect(onCollapse).toHaveBeenCalledTimes(0);
     expect(onHide).toHaveBeenCalledTimes(0);
 
-    fireEvent.click(screen.getByRole("button", {name: "Hide overlay"}));
+    fireEvent.click(screen.getByRole("button", { name: "Hide overlay" }));
     expect(onHide).toHaveBeenCalledTimes(1);
     expect(onCollapse).toHaveBeenCalledTimes(0);
 
@@ -1220,7 +1152,7 @@ describe("OverlayPanel", () => {
     fireEvent.click(screen.getByTestId("expanded-overlay-header-row"));
     expect(onCollapse).toHaveBeenCalledTimes(3);
 
-    fireEvent.click(screen.getByRole("button", {name: "Collapse overlay"}));
+    fireEvent.click(screen.getByRole("button", { name: "Collapse overlay" }));
     expect(onCollapse).toHaveBeenCalledTimes(4);
   });
 
@@ -1242,7 +1174,7 @@ describe("OverlayPanel", () => {
 
   it("renders and clears the post-submit next card in the expanded overlay", () => {
     const onOpenProblem = vi.fn();
-    const {rerender} = renderOverlayPanel(
+    const { rerender } = renderOverlayPanel(
       makeExpandedRenderModel({
         postSubmitNext: {
           kind: "course",
@@ -1267,7 +1199,7 @@ describe("OverlayPanel", () => {
 
     expect(screen.getByText("Next In Study Mode")).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", {name: "Open next"}));
+    fireEvent.click(screen.getByRole("button", { name: "Open next" }));
     expect(onOpenProblem).toHaveBeenCalledWith({
       slug: "contains-duplicate",
       courseId: "Blind75",
@@ -1275,16 +1207,16 @@ describe("OverlayPanel", () => {
     });
 
     rerender(
-      <AppProviders>
-        <OverlayPanel renderModel={makeExpandedRenderModel({postSubmitNext: null})}/>
-      </AppProviders>
+      <OverlayPanel
+        renderModel={makeExpandedRenderModel({ postSubmitNext: null })}
+      />
     );
 
     expect(screen.queryByText("Next In Study Mode")).toBeNull();
   });
 
   it("keeps the post-submit section visible while loading or empty", () => {
-    const {rerender} = renderOverlayPanel(
+    const { rerender } = renderOverlayPanel(
       makeExpandedRenderModel({
         postSubmitNext: {
           kind: "loading",
@@ -1298,18 +1230,16 @@ describe("OverlayPanel", () => {
     expect(screen.getByText("Finding next question")).toBeTruthy();
 
     rerender(
-      <AppProviders>
-        <OverlayPanel
-          renderModel={makeExpandedRenderModel({
-            postSubmitNext: {
-              kind: "empty",
-              title: "No next question ready",
-              message:
-                "Review saved. The current study queue does not have another question ready.",
-            },
-          })}
-        />
-      </AppProviders>
+      <OverlayPanel
+        renderModel={makeExpandedRenderModel({
+          postSubmitNext: {
+            kind: "empty",
+            title: "No next question ready",
+            message:
+              "Review saved. The current study queue does not have another question ready.",
+          },
+        })}
+      />
     );
 
     expect(screen.getByText("No next question ready")).toBeTruthy();
@@ -1318,13 +1248,13 @@ describe("OverlayPanel", () => {
   it("renders a compact collapsed summary", () => {
     renderOverlayPanel(makeCollapsedRenderModel());
 
-    expect(screen.getByRole("button", {name: "Expand overlay"})).toBeTruthy();
-    expect(screen.getByRole("button", {name: "Hide overlay"})).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Expand overlay" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Hide overlay" })).toBeTruthy();
     expect(screen.getByText("03:12")).toBeTruthy();
-    expect(screen.getByRole("button", {name: "Start timer"})).toBeTruthy();
-    expect(screen.getByRole("button", {name: "Restart timer"})).toBeTruthy();
-    expect(screen.getByRole("button", {name: "Fail review"})).toBeTruthy();
-    expect(screen.getByRole("button", {name: "Submit"})).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Start timer" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Restart timer" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Fail review" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Submit" })).toBeTruthy();
     expect(screen.queryByText("Counting Bits")).toBeNull();
     expect(screen.queryByText("First solve")).toBeNull();
     expect(screen.queryByText("No submissions yet")).toBeNull();
@@ -1339,7 +1269,7 @@ describe("OverlayPanel", () => {
     const onHide = vi.fn();
     const onToggleCollapse = vi.fn();
 
-    const {rerender} = renderOverlayPanel(
+    const { rerender } = renderOverlayPanel(
       makeCollapsedRenderModel({
         actions: {
           onHide,
@@ -1355,73 +1285,69 @@ describe("OverlayPanel", () => {
       })
     );
 
-    fireEvent.click(screen.getByRole("button", {name: "Start timer"}));
+    fireEvent.click(screen.getByRole("button", { name: "Start timer" }));
     expect(onStartTimer).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByRole("button", {name: "Restart timer"}));
+    fireEvent.click(screen.getByRole("button", { name: "Restart timer" }));
     expect(onResetTimer).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByRole("button", {name: "Fail review"}));
+    fireEvent.click(screen.getByRole("button", { name: "Fail review" }));
     expect(onFailReview).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByRole("button", {name: "Hide overlay"}));
+    fireEvent.click(screen.getByRole("button", { name: "Hide overlay" }));
     expect(onHide).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByRole("button", {name: "Submit"}));
+    fireEvent.click(screen.getByRole("button", { name: "Submit" }));
     expect(onCompactSubmit).toHaveBeenCalledTimes(1);
 
     rerender(
-      <AppProviders>
-        <OverlayPanel
-          renderModel={makeCollapsedRenderModel({
-            actions: {
-              onHide,
-              onExpand: onToggleCollapse,
-              onFail: onFailReview,
-              onSubmit: onCompactSubmit,
-            },
-            timer: {
-              isRunning: true,
-              onPause: onPauseTimer,
-              onReset: onResetTimer,
-              onStart: onStartTimer,
-              startLabel: "Pause timer",
-            },
-          })}
-        />
-      </AppProviders>
+      <OverlayPanel
+        renderModel={makeCollapsedRenderModel({
+          actions: {
+            onHide,
+            onExpand: onToggleCollapse,
+            onFail: onFailReview,
+            onSubmit: onCompactSubmit,
+          },
+          timer: {
+            isRunning: true,
+            onPause: onPauseTimer,
+            onReset: onResetTimer,
+            onStart: onStartTimer,
+            startLabel: "Pause timer",
+          },
+        })}
+      />
     );
 
-    fireEvent.click(screen.getByRole("button", {name: "Pause timer"}));
+    fireEvent.click(screen.getByRole("button", { name: "Pause timer" }));
     expect(onPauseTimer).toHaveBeenCalledTimes(1);
 
     rerender(
-      <AppProviders>
-        <OverlayPanel
-          renderModel={makeCollapsedRenderModel({
-            actions: {
-              canFail: false,
-              canSubmit: false,
-              onHide,
-              onExpand: onToggleCollapse,
-              onFail: onFailReview,
-              onSubmit: onCompactSubmit,
-            },
-            timer: {
-              canReset: false,
-              canStart: true,
-              onPause: onPauseTimer,
-              onReset: onResetTimer,
-              onStart: onStartTimer,
-              startLabel: "Start a new session",
-            },
-          })}
-        />
-      </AppProviders>
+      <OverlayPanel
+        renderModel={makeCollapsedRenderModel({
+          actions: {
+            canFail: false,
+            canSubmit: false,
+            onHide,
+            onExpand: onToggleCollapse,
+            onFail: onFailReview,
+            onSubmit: onCompactSubmit,
+          },
+          timer: {
+            canReset: false,
+            canStart: true,
+            onPause: onPauseTimer,
+            onReset: onResetTimer,
+            onStart: onStartTimer,
+            startLabel: "Start a new session",
+          },
+        })}
+      />
     );
 
     fireEvent.click(
-      screen.getByRole("button", {name: "Start a new session"})
+      screen.getByRole("button", { name: "Start a new session" })
     );
     expect(onStartTimer).toHaveBeenCalledTimes(2);
     const disabledTimerResetButton = screen.getByRole("button", {
@@ -1429,11 +1355,11 @@ describe("OverlayPanel", () => {
     });
     expect((disabledTimerResetButton as HTMLButtonElement).disabled).toBe(true);
     expect(
-      (screen.getByRole("button", {name: "Submit"}) as HTMLButtonElement)
+      (screen.getByRole("button", { name: "Submit" }) as HTMLButtonElement)
         .disabled
     ).toBe(true);
     expect(
-      (screen.getByRole("button", {name: "Fail review"}) as HTMLButtonElement)
+      (screen.getByRole("button", { name: "Fail review" }) as HTMLButtonElement)
         .disabled
     ).toBe(true);
   });
@@ -1441,56 +1367,59 @@ describe("OverlayPanel", () => {
   it("renders a docked overlay trigger", () => {
     const onRestore = vi.fn();
 
-    renderOverlayPanel(makeDockedRenderModel({onRestore}));
+    renderOverlayPanel(makeDockedRenderModel({ onRestore }));
 
-    fireEvent.click(screen.getByRole("button", {name: "Show overlay"}));
+    fireEvent.click(screen.getByRole("button", { name: "Show overlay" }));
     expect(onRestore).toHaveBeenCalledTimes(1);
   });
 
   it("keeps tiny dock pointer movement as a restore click", () => {
     const onRestore = vi.fn();
 
-    renderOverlayPanel(makeDockedRenderModel({onRestore}));
+    renderOverlayPanel(makeDockedRenderModel({ onRestore }));
 
-    const dockTrigger = screen.getByRole("button", {name: "Show overlay"});
-    firePointerEvent(dockTrigger, "pointerdown", {clientY: 100});
-    firePointerEvent(dockTrigger, "pointermove", {clientY: 103});
-    firePointerEvent(dockTrigger, "pointerup", {clientY: 103});
+    const dockTrigger = screen.getByRole("button", { name: "Show overlay" });
+    firePointerEvent(dockTrigger, "pointerdown", { clientY: 100 });
+    firePointerEvent(dockTrigger, "pointermove", { clientY: 103 });
+    firePointerEvent(dockTrigger, "pointerup", { clientY: 103 });
     fireEvent.click(dockTrigger);
 
     expect(onRestore).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId("docked-overlay-panel").style.transform)
-      .toBe("translateY(0px)");
+    expect(screen.getByTestId("docked-overlay-panel").style.transform).toBe(
+      "translateY(0px)"
+    );
   });
 
   it("moves the dock vertically without restoring the overlay", () => {
     const onRestore = vi.fn();
 
-    renderOverlayPanel(makeDockedRenderModel({onRestore}));
+    renderOverlayPanel(makeDockedRenderModel({ onRestore }));
 
-    const dockTrigger = screen.getByRole("button", {name: "Show overlay"});
-    firePointerEvent(dockTrigger, "pointerdown", {clientY: 100});
-    firePointerEvent(dockTrigger, "pointermove", {clientY: 80});
-    firePointerEvent(dockTrigger, "pointerup", {clientY: 80});
+    const dockTrigger = screen.getByRole("button", { name: "Show overlay" });
+    firePointerEvent(dockTrigger, "pointerdown", { clientY: 100 });
+    firePointerEvent(dockTrigger, "pointermove", { clientY: 80 });
+    firePointerEvent(dockTrigger, "pointerup", { clientY: 80 });
     fireEvent.click(dockTrigger);
 
     expect(onRestore).toHaveBeenCalledTimes(0);
-    expect(screen.getByTestId("docked-overlay-panel").style.transform)
-      .toBe("translateY(-20px)");
+    expect(screen.getByTestId("docked-overlay-panel").style.transform).toBe(
+      "translateY(-20px)"
+    );
   });
 
   it("ignores horizontal dock movement", () => {
     const onRestore = vi.fn();
 
-    renderOverlayPanel(makeDockedRenderModel({onRestore}));
+    renderOverlayPanel(makeDockedRenderModel({ onRestore }));
 
-    const dockTrigger = screen.getByRole("button", {name: "Show overlay"});
-    firePointerEvent(dockTrigger, "pointerdown", {clientX: 40, clientY: 100});
-    firePointerEvent(dockTrigger, "pointermove", {clientX: 4, clientY: 100});
-    firePointerEvent(dockTrigger, "pointerup", {clientX: 4, clientY: 100});
+    const dockTrigger = screen.getByRole("button", { name: "Show overlay" });
+    firePointerEvent(dockTrigger, "pointerdown", { clientX: 40, clientY: 100 });
+    firePointerEvent(dockTrigger, "pointermove", { clientX: 4, clientY: 100 });
+    firePointerEvent(dockTrigger, "pointerup", { clientX: 4, clientY: 100 });
 
-    expect(screen.getByTestId("docked-overlay-panel").style.transform)
-      .toBe("translateY(0px)");
+    expect(screen.getByTestId("docked-overlay-panel").style.transform).toBe(
+      "translateY(0px)"
+    );
   });
 
   it("shows expanded submission controls for override and restart", () => {
@@ -1534,15 +1463,15 @@ describe("OverlayPanel", () => {
       ).disabled
     ).toBe(true);
     expect(
-      (screen.getByRole("button", {name: "Submit"}) as HTMLButtonElement)
+      (screen.getByRole("button", { name: "Submit" }) as HTMLButtonElement)
         .disabled
     ).toBe(true);
     expect(
-      (screen.getByRole("button", {name: "Update"}) as HTMLButtonElement)
+      (screen.getByRole("button", { name: "Update" }) as HTMLButtonElement)
         .disabled
     ).toBe(false);
     expect(
-      (screen.getByRole("button", {name: "Restart"}) as HTMLButtonElement)
+      (screen.getByRole("button", { name: "Restart" }) as HTMLButtonElement)
         .disabled
     ).toBe(false);
     expect(screen.getByDisplayValue("Binary search on answer")).toBeTruthy();

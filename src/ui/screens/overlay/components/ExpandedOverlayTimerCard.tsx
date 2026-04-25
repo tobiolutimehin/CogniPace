@@ -3,16 +3,14 @@ import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
-import {InsetSurface, NumericDisplay} from "../../../components";
-import {ExpandedOverlayViewModel} from "../overlayPanel.types";
+import { InsetSurface, NumericDisplay } from "../../../components";
+import { ExpandedOverlayViewModel } from "../overlayPanel.types";
 
-export function ExpandedOverlayTimerCard(
-  props: {
-    timer: ExpandedOverlayViewModel["timer"];
-  }
-) {
+export function ExpandedOverlayTimerCard(props: {
+  timer: ExpandedOverlayViewModel["timer"];
+}) {
   return (
-    <InsetSurface sx={{px: 1.5, py: 1.55}} tone="accent">
+    <InsetSurface sx={{ px: 1.5, py: 1.55 }} tone="accent">
       <Stack spacing={1.4}>
         <Stack
           alignItems="flex-start"
@@ -28,7 +26,7 @@ export function ExpandedOverlayTimerCard(
           >
             {props.timer.display}
           </NumericDisplay>
-          <Stack alignItems="flex-end" spacing={0.25} sx={{pt: 0.25}}>
+          <Stack alignItems="flex-end" spacing={0.25} sx={{ pt: 0.25 }}>
             <Typography color="text.secondary" variant="caption">
               Target time
             </Typography>
@@ -57,7 +55,7 @@ export function ExpandedOverlayTimerCard(
             disabled={!props.timer.canReset}
             onClick={props.timer.onReset}
             size="small"
-            startIcon={<RestartAltRounded fontSize="small"/>}
+            startIcon={<RestartAltRounded fontSize="small" />}
             variant="outlined"
           >
             Reset timer

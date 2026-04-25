@@ -1,10 +1,10 @@
 /** Reusable course progress summary card shared across popup and dashboard surfaces. */
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import {ReactNode} from "react";
+import { ReactNode } from "react";
 
-import {ActiveCourseView, CourseCardView} from "../../../domain/views";
-import {ProgressTrack, SurfaceCard, ToneChip} from "../../components";
+import { ActiveCourseView, CourseCardView } from "../../../domain/views";
+import { ProgressTrack, SurfaceCard, ToneChip } from "../../components";
 
 export interface CourseProgressCardProps {
   action?: ReactNode;
@@ -42,7 +42,7 @@ export function CourseProgressCard(props: CourseProgressCardProps) {
       action={
         action ??
         (showProgressChip ? (
-          <ToneChip label={`${course.completionPercent}%`} tone="accent"/>
+          <ToneChip label={`${course.completionPercent}%`} tone="accent" />
         ) : undefined)
       }
       label={label}
@@ -52,9 +52,10 @@ export function CourseProgressCard(props: CourseProgressCardProps) {
         <Typography color="text.secondary" variant="body2">
           {course.description}
         </Typography>
-        <ProgressTrack value={course.completionPercent}/>
+        <ProgressTrack value={course.completionPercent} />
         <Typography color="text.secondary" variant="body2">
-          {course.completedQuestions}/{course.totalQuestions} questions traversed
+          {course.completedQuestions}/{course.totalQuestions} questions
+          traversed
         </Typography>
         {children}
       </Stack>

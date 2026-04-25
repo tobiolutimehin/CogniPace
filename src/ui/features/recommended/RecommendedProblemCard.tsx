@@ -1,12 +1,16 @@
 /** Reusable recommendation card shared by popup and dashboard surfaces. */
-import Button, {ButtonProps} from "@mui/material/Button";
+import Button, { ButtonProps } from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import {ReactNode} from "react";
+import { ReactNode } from "react";
 
-import {RecommendedProblemView} from "../../../domain/views";
-import {SurfaceCard, ToneChip} from "../../components";
-import {difficultyTone, formatDisplayDate, recommendedTone,} from "../../presentation/studyState";
+import { RecommendedProblemView } from "../../../domain/views";
+import { SurfaceCard, ToneChip } from "../../components";
+import {
+  difficultyTone,
+  formatDisplayDate,
+  recommendedTone,
+} from "../../presentation/studyState";
 
 export interface RecommendedProblemCardProps {
   buttonFullWidth?: boolean;
@@ -73,7 +77,7 @@ export function RecommendedProblemCard(props: RecommendedProblemCardProps) {
             tone={recommendedTone(recommended.reason)}
           />
           {recommended.alsoCourseNext ? (
-            <ToneChip label="Also next in course" tone="success"/>
+            <ToneChip label="Also next in course" tone="success" />
           ) : null}
         </Stack>
         {showNextReviewDate ? (
@@ -86,7 +90,7 @@ export function RecommendedProblemCard(props: RecommendedProblemCardProps) {
         <Button
           fullWidth={buttonFullWidth}
           onClick={() => {
-            void onOpenProblem({slug: recommended.slug});
+            void onOpenProblem({ slug: recommended.slug });
           }}
           size={compact ? "small" : "medium"}
           variant={buttonVariant}

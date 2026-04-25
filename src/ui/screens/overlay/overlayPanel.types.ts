@@ -1,5 +1,8 @@
-import {Difficulty, Rating} from "../../../domain/types";
-import {CourseQuestionView, RecommendedProblemView} from "../../../domain/views";
+import { Difficulty, Rating } from "../../../domain/types";
+import {
+  CourseQuestionView,
+  RecommendedProblemView,
+} from "../../../domain/views";
 
 export interface OverlayDraftLogFields {
   interviewPattern: string;
@@ -25,13 +28,13 @@ export interface OverlayHeaderStatusCard {
 
 export type OverlayHeaderStatus =
   | {
-  cards: OverlayHeaderStatusCard[];
-  kind: "empty";
-}
+      cards: OverlayHeaderStatusCard[];
+      kind: "empty";
+    }
   | {
-  cards: OverlayHeaderStatusCard[];
-  kind: "history";
-};
+      cards: OverlayHeaderStatusCard[];
+      kind: "history";
+    };
 
 export type OverlayDraftChangeHandler = (
   field: keyof OverlayDraftLogFields,
@@ -105,32 +108,32 @@ export interface ExpandedOverlayActionsViewModel {
 
 export type OverlayPostSubmitNextViewModel =
   | {
-  kind: "loading";
-  message: string;
-  title: string;
-}
+      kind: "loading";
+      message: string;
+      title: string;
+    }
   | {
-  kind: "empty";
-  message: string;
-  title: string;
-}
+      kind: "empty";
+      message: string;
+      title: string;
+    }
   | {
-  activeCourseId?: string;
-  kind: "course";
-  onOpenProblem: (target: {
-    slug: string;
-    courseId?: string;
-    chapterId?: string;
-  }) => Promise<void> | void;
-  view: CourseQuestionView;
-}
+      activeCourseId?: string;
+      kind: "course";
+      onOpenProblem: (target: {
+        slug: string;
+        courseId?: string;
+        chapterId?: string;
+      }) => Promise<void> | void;
+      view: CourseQuestionView;
+    }
   | {
-  kind: "recommended";
-  onOpenProblem: (
-    target: Pick<RecommendedProblemView, "slug">
-  ) => Promise<void> | void;
-  recommended: RecommendedProblemView;
-};
+      kind: "recommended";
+      onOpenProblem: (
+        target: Pick<RecommendedProblemView, "slug">
+      ) => Promise<void> | void;
+      recommended: RecommendedProblemView;
+    };
 
 export interface CollapsedOverlayViewModel {
   actions: CollapsedOverlayActionsViewModel;
@@ -160,14 +163,14 @@ export interface ExpandedOverlayViewModel {
 
 export type OverlayRenderModel =
   | {
-  model: CollapsedOverlayViewModel;
-  variant: "collapsed";
-}
+      model: CollapsedOverlayViewModel;
+      variant: "collapsed";
+    }
   | {
-  model: DockedOverlayViewModel;
-  variant: "docked";
-}
+      model: DockedOverlayViewModel;
+      variant: "docked";
+    }
   | {
-  model: ExpandedOverlayViewModel;
-  variant: "expanded";
-};
+      model: ExpandedOverlayViewModel;
+      variant: "expanded";
+    };

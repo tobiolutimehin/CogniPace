@@ -1,12 +1,12 @@
 /** Reusable “next in course” card shared by popup and dashboard surfaces. */
-import Button, {ButtonProps} from "@mui/material/Button";
+import Button, { ButtonProps } from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
-import {getStudyPhaseLabel} from "../../../domain/fsrs/studyState";
-import {CourseQuestionView} from "../../../domain/views";
-import {SurfaceCard, ToneChip} from "../../components";
-import {difficultyTone, labelForStatus,} from "../../presentation/studyState";
+import { getStudyPhaseLabel } from "../../../domain/fsrs/studyState";
+import { CourseQuestionView } from "../../../domain/views";
+import { SurfaceCard, ToneChip } from "../../components";
+import { difficultyTone, labelForStatus } from "../../presentation/studyState";
 
 export interface CourseNextCardProps {
   actionLabel?: string;
@@ -34,13 +34,15 @@ export function CourseNextCard(props: CourseNextCardProps) {
     onOpenProblem,
     view,
   } = props;
-  const phaseLabel = view.reviewPhase ? getStudyPhaseLabel(view.reviewPhase) : null;
+  const phaseLabel = view.reviewPhase
+    ? getStudyPhaseLabel(view.reviewPhase)
+    : null;
 
   return (
     <SurfaceCard compact={compact} label={label} title={view.title}>
       <Stack spacing={compact ? 1.15 : 1.5}>
         <Stack direction="row" flexWrap="wrap" gap={1}>
-          <ToneChip label={view.chapterTitle}/>
+          <ToneChip label={view.chapterTitle} />
           <ToneChip
             label={view.difficulty}
             tone={difficultyTone(view.difficulty)}

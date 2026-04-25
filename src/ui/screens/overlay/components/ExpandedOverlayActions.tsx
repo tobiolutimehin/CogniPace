@@ -1,8 +1,11 @@
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 
-import {FieldAssistRow} from "../../../components";
-import {ExpandedOverlayActionsViewModel, OverlayAssistViewModel} from "../overlayPanel.types";
+import { FieldAssistRow } from "../../../components";
+import {
+  ExpandedOverlayActionsViewModel,
+  OverlayAssistViewModel,
+} from "../overlayPanel.types";
 
 const actionButtonSx = {
   flex: 1,
@@ -13,12 +16,10 @@ const actionButtonSx = {
   whiteSpace: "nowrap",
 };
 
-export function ExpandedOverlayActions(
-  props: {
-    actions: ExpandedOverlayActionsViewModel;
-    assist: OverlayAssistViewModel;
-  }
-) {
+export function ExpandedOverlayActions(props: {
+  actions: ExpandedOverlayActionsViewModel;
+  assist: OverlayAssistViewModel;
+}) {
   return (
     <Stack spacing={1.05}>
       <Stack
@@ -29,7 +30,7 @@ export function ExpandedOverlayActions(
         role="group"
         aria-describedby={props.assist.id}
         aria-label="Review actions"
-        sx={{width: "100%"}}
+        sx={{ width: "100%" }}
       >
         <Button
           disabled={!props.actions.canRestart}

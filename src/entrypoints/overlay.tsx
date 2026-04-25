@@ -1,11 +1,11 @@
 /** Overlay entrypoint that mounts the React overlay into a shadow-root host on LeetCode pages. */
 import createCache from "@emotion/cache";
-import {CacheProvider} from "@emotion/react";
-import {createElement} from "react";
-import {createRoot, Root} from "react-dom/client";
+import { CacheProvider } from "@emotion/react";
+import { createElement } from "react";
+import { createRoot, Root } from "react-dom/client";
 
-import {AppProviders} from "../ui/providers";
-import {OverlayRoot} from "../ui/screens/overlay/OverlayRoot";
+import { AppProviders } from "../ui/providers";
+import { OverlayRoot } from "../ui/screens/overlay/OverlayRoot";
 
 const OVERLAY_ID = "lcsr-overlay-root";
 
@@ -20,12 +20,17 @@ let overlayMount: OverlayMount | null = null;
 function createOverlayMount(): OverlayMount {
   const existingHost = document.getElementById(OVERLAY_ID);
   if (existingHost?.shadowRoot) {
-    const mountNode = existingHost.shadowRoot.querySelector("[data-overlay-mount]");
+    const mountNode = existingHost.shadowRoot.querySelector(
+      "[data-overlay-mount]"
+    );
     const styleContainer = existingHost.shadowRoot.querySelector(
       "[data-overlay-styles]"
     );
 
-    if (mountNode instanceof HTMLDivElement && styleContainer instanceof HTMLElement) {
+    if (
+      mountNode instanceof HTMLDivElement &&
+      styleContainer instanceof HTMLElement
+    ) {
       return {
         cache: createCache({
           key: "lcsr-overlay",
@@ -45,7 +50,7 @@ function createOverlayMount(): OverlayMount {
   host.style.zIndex = "2147483647";
   document.body.appendChild(host);
 
-  const shadowRoot = host.attachShadow({mode: "open"});
+  const shadowRoot = host.attachShadow({ mode: "open" });
   const styleContainer = document.createElement("div");
   styleContainer.dataset.overlayStyles = "true";
   const mountNode = document.createElement("div");
@@ -75,10 +80,10 @@ const mount = ensureOverlayMount();
 mount.root.render(
   createElement(
     CacheProvider,
-    {value: mount.cache},
+    { value: mount.cache },
     createElement(
       AppProviders,
-      {portalContainer: mount.portalContainer},
+      { portalContainer: mount.portalContainer },
       createElement(OverlayRoot, {
         documentRef: document,
         windowRef: window,

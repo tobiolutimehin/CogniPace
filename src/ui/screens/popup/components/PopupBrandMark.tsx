@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
-import {alpha} from "@mui/material/styles";
+import { alpha } from "@mui/material/styles";
 
-import {kineticTokens} from "../../../theme";
+import { kineticTokens } from "../../../theme";
 
 export function PopupBrandMark() {
   return (
@@ -23,9 +23,10 @@ export function PopupBrandMark() {
         <Box
           key={index}
           sx={{
-            backgroundColor: index === 3
-              ? alpha(kineticTokens.accent, 0.88)
-              : kineticTokens.accent,
+            backgroundColor:
+              index === 3
+                ? alpha(kineticTokens.accent, 0.88)
+                : kineticTokens.accent,
             borderRadius: 0.15,
             boxShadow: `0 0 0 1px ${alpha(kineticTokens.accentSoft, 0.08)}`,
             height: 10,

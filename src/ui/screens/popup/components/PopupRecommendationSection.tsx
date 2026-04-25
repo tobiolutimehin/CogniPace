@@ -1,11 +1,17 @@
 import ShuffleRounded from "@mui/icons-material/ShuffleRounded";
 import Stack from "@mui/material/Stack";
 
-import {RecommendedProblemView} from "../../../../domain/views";
-import {FieldAssistRow, InlineStatusRegion, SurfaceIconButton, SurfaceTooltip, ToneChip} from "../../../components";
-import {RecommendedProblemCard} from "../../../features/recommended/RecommendedProblemCard";
-import {difficultyTone} from "../../../presentation/studyState";
-import {UiStatus} from "../../../state/useAppShellQuery";
+import { RecommendedProblemView } from "../../../../domain/views";
+import {
+  FieldAssistRow,
+  InlineStatusRegion,
+  SurfaceIconButton,
+  SurfaceTooltip,
+  ToneChip,
+} from "../../../components";
+import { RecommendedProblemCard } from "../../../features/recommended/RecommendedProblemCard";
+import { difficultyTone } from "../../../presentation/studyState";
+import { UiStatus } from "../../../state/useAppShellQuery";
 
 function RecommendationHeaderAction(props: {
   canShuffle: boolean;
@@ -23,9 +29,9 @@ function RecommendationHeaderAction(props: {
           <SurfaceIconButton
             aria-label="Shuffle recommendation"
             onClick={props.onShuffle}
-            sx={{ml: 0.75}}
+            sx={{ ml: 0.75 }}
           >
-            <ShuffleRounded aria-hidden="true" fontSize="small"/>
+            <ShuffleRounded aria-hidden="true" fontSize="small" />
           </SurfaceIconButton>
         </SurfaceTooltip>
       ) : null}
@@ -49,7 +55,7 @@ export function RecommendationEmpty(props: {
               aria-label="Shuffle recommendation"
               onClick={props.onShuffle}
             >
-              <ShuffleRounded aria-hidden="true" fontSize="small"/>
+              <ShuffleRounded aria-hidden="true" fontSize="small" />
             </SurfaceIconButton>
           </SurfaceTooltip>
         ) : undefined

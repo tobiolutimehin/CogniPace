@@ -1,6 +1,6 @@
-import {defaultReviewMode} from "../../../../domain/fsrs/reviewPolicy";
-import {getStudyStateSummary} from "../../../../domain/fsrs/studyState";
-import {ReviewMode, StudyState} from "../../../../domain/types";
+import { defaultReviewMode } from "../../../../domain/fsrs/reviewPolicy";
+import { getStudyStateSummary } from "../../../../domain/fsrs/studyState";
+import { ReviewMode, StudyState } from "../../../../domain/types";
 import {
   OverlayHeaderStatus,
   OverlayHeaderStatusCard,

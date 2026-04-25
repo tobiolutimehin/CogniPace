@@ -1,23 +1,24 @@
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
-import {useEffect, useRef} from "react";
+import { useEffect, useRef } from "react";
 
-import {ExpandedOverlayViewModel} from "../overlayPanel.types";
+import { ExpandedOverlayViewModel } from "../overlayPanel.types";
 
-import {AssessmentRail} from "./AssessmentRail";
-import {ExpandedOverlayActions} from "./ExpandedOverlayActions";
-import {ExpandedOverlayHeader, ExpandedOverlayStatus} from "./ExpandedOverlayHeader";
-import {ExpandedOverlayTimerCard} from "./ExpandedOverlayTimerCard";
-import {OverlayFeedbackSurface} from "./OverlayFeedbackSurface";
-import {OverlayLogFields} from "./OverlayLogFields";
-import {OverlayPostSubmitNextCard} from "./OverlayPostSubmitNextCard";
+import { AssessmentRail } from "./AssessmentRail";
+import { ExpandedOverlayActions } from "./ExpandedOverlayActions";
+import {
+  ExpandedOverlayHeader,
+  ExpandedOverlayStatus,
+} from "./ExpandedOverlayHeader";
+import { ExpandedOverlayTimerCard } from "./ExpandedOverlayTimerCard";
+import { OverlayFeedbackSurface } from "./OverlayFeedbackSurface";
+import { OverlayLogFields } from "./OverlayLogFields";
+import { OverlayPostSubmitNextCard } from "./OverlayPostSubmitNextCard";
 
-export function ExpandedOverlayPanel(
-  props: {
-    model: ExpandedOverlayViewModel;
-  }
-) {
+export function ExpandedOverlayPanel(props: {
+  model: ExpandedOverlayViewModel;
+}) {
   const surfaceRef = useRef<HTMLDivElement | null>(null);
 
   const onClickAwayRef = useRef(props.model.onClickAway);
@@ -35,9 +36,8 @@ export function ExpandedOverlayPanel(
     const ownerDocument = surface.ownerDocument;
     const handlePointerDown = (event: PointerEvent) => {
       const eventTarget = event.target;
-      const path = typeof event.composedPath === "function"
-        ? event.composedPath()
-        : [];
+      const path =
+        typeof event.composedPath === "function" ? event.composedPath() : [];
       const clickedInsideOverlay =
         path.includes(surface) ||
         (eventTarget instanceof Node && surface.contains(eventTarget));
@@ -67,7 +67,7 @@ export function ExpandedOverlayPanel(
         width: 392,
       }}
     >
-      <ExpandedOverlayHeader header={props.model.header}/>
+      <ExpandedOverlayHeader header={props.model.header} />
 
       <Box
         sx={{
@@ -79,21 +79,21 @@ export function ExpandedOverlayPanel(
         }}
       >
         <Stack spacing={2}>
-          <ExpandedOverlayStatus header={props.model.header}/>
+          <ExpandedOverlayStatus header={props.model.header} />
           {props.model.feedback ? (
-            <OverlayFeedbackSurface feedback={props.model.feedback}/>
+            <OverlayFeedbackSurface feedback={props.model.feedback} />
           ) : null}
-          <ExpandedOverlayTimerCard timer={props.model.timer}/>
+          <ExpandedOverlayTimerCard timer={props.model.timer} />
           <AssessmentRail
             assessment={props.model.assessment}
             assist={props.model.assessmentAssist}
           />
-          <OverlayLogFields log={props.model.log}/>
+          <OverlayLogFields log={props.model.log} />
           <ExpandedOverlayActions
             actions={props.model.actions}
             assist={props.model.actionAssist}
           />
-          <OverlayPostSubmitNextCard nextTarget={props.model.postSubmitNext}/>
+          <OverlayPostSubmitNextCard nextTarget={props.model.postSubmitNext} />
         </Stack>
       </Box>
     </Paper>
