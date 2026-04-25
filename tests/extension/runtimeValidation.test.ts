@@ -108,42 +108,30 @@ describe("runtime validation", () => {
     );
   });
 
-  it("uses canonical safe-open targets", () => {
-    assert.equal(
-      canonicalProblemUrlForOpen(" Two-Sum "),
-      "https://leetcode.com/problems/two-sum/"
-    );
-    assert.equal(
-      validateExtensionPagePath("dashboard.html?view=settings"),
-      "dashboard.html?view=settings"
-    );
-    assert.equal(validateExtensionPagePath("database.html"), "database.html");
-    assert.throws(
-      () => validateExtensionPagePath("https://evil.example.com"),
-      /invalid extension path/i
-    );
-    assert.throws(
-      () => validateExtensionPagePath("dashboard.html?view=hax"),
-      /invalid dashboard view/i
-    );
-    assert.throws(
-      () => validateExtensionPagePath("dashboard.html?foo=bar"),
-      /invalid dashboard path/i
-    );
-    assert.throws(
-      () =>
-        validateExtensionPagePath(
-          "dashboard.html?view=settings&view=analytics"
-        ),
-      /invalid dashboard path/i
-    );
-    assert.throws(
-      () => validateExtensionPagePath("../dashboard.html"),
-      /invalid extension path/i
-    );
-    assert.throws(
-      () => validateExtensionPagePath("settings.html"),
-      /unknown extension path/i
-    );
+  describe("safe-open targets", () => {
+    it.each([
+      { input: "dashboard.html?view=settings", expected: "dashboard.html?view=settings" },
+      { input: "database.html", expected: "database.html" },
+    ])("accepts valid path $input", ({ input, expected }) => {
+      assert.equal(validateExtensionPagePath(input), expected);
+    });
+
+    it.each([
+      { input: "https://evil.example.com", error: /invalid extension path/i },
+      { input: "dashboard.html?view=hax", error: /invalid dashboard view/i },
+      { input: "dashboard.html?foo=bar", error: /invalid dashboard path/i },
+      { input: "dashboard.html?view=settings&view=analytics", error: /invalid dashboard path/i },
+      { input: "../dashboard.html", error: /invalid extension path/i },
+      { input: "settings.html", error: /unknown extension path/i },
+    ])("rejects invalid path $input", ({ input, error }) => {
+      assert.throws(() => validateExtensionPagePath(input), error);
+    });
+
+    it("canonicalizes problem slugs", () => {
+      assert.equal(
+        canonicalProblemUrlForOpen(" Two-Sum "),
+        "https://leetcode.com/problems/two-sum/"
+      );
+    });
   });
 });

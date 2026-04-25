@@ -1,9 +1,8 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { AppProviders } from "../../../src/ui/providers";
 import { DashboardApp } from "../../../src/ui/screens/dashboard/DashboardApp";
 import { makePayload } from "../support/appShellFixtures";
+import { render, screen, waitFor } from "../support/render";
 import { sendMessageMock } from "../support/setup";
 
 function renderDashboardWithPayload(payload = makePayload()) {
@@ -14,11 +13,7 @@ function renderDashboardWithPayload(payload = makePayload()) {
     return { ok: true, data: {} };
   });
 
-  render(
-    <AppProviders>
-      <DashboardApp />
-    </AppProviders>
-  );
+  return render(<DashboardApp />);
 }
 
 describe("dashboard navigation", () => {
@@ -26,9 +21,9 @@ describe("dashboard navigation", () => {
     const payload = makePayload();
     const pushStateSpy = vi.spyOn(window.history, "pushState");
 
-    renderDashboardWithPayload(payload);
+    const { user } = renderDashboardWithPayload(payload);
 
-    fireEvent.click(await screen.findByRole("button", { name: "Courses" }));
+    await user.click(await screen.findByRole("button", { name: "Courses" }));
 
     await waitFor(() => {
       expect(pushStateSpy).toHaveBeenCalled();
@@ -40,14 +35,20 @@ describe("dashboard navigation", () => {
 
   it("syncs the active screen from popstate events", async () => {
     const payload = makePayload();
+    
+    // Set initial state
     window.history.pushState({}, "", "/dashboard.html?view=dashboard");
 
     renderDashboardWithPayload(payload);
 
-    await screen.findByRole("heading", { name: "Dashboard" });
+    // Confirm initial render
+    expect(await screen.findByRole("heading", { name: "Dashboard" })).toBeInTheDocument();
+
+    // Trigger popstate navigation to library
     window.history.pushState({}, "", "/dashboard.html?view=library");
     window.dispatchEvent(new PopStateEvent("popstate"));
 
-    expect(await screen.findByText("All Tracked Problems")).toBeTruthy();
+    // Verify screen update
+    expect(await screen.findByText("All Tracked Problems")).toBeInTheDocument();
   });
 });

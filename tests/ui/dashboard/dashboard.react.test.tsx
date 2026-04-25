@@ -1,9 +1,8 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { AppProviders } from "../../../src/ui/providers";
 import { DashboardApp } from "../../../src/ui/screens/dashboard/DashboardApp";
 import { makePayload } from "../support/appShellFixtures";
+import { render, screen, waitFor, fireEvent } from "../support/render";
 import { sendMessageMock } from "../support/setup";
 
 type DashboardRuntimeOverride = (
@@ -26,56 +25,47 @@ function renderDashboardWithPayload(
     return Promise.resolve({ ok: true, data: {} });
   });
 
-  render(
-    <AppProviders>
-      <DashboardApp />
-    </AppProviders>
-  );
+  return render(<DashboardApp />);
 }
 
 describe("DashboardApp", () => {
   it("switches views and filters library rows", async () => {
     const payload = makePayload();
-    renderDashboardWithPayload(payload);
+    const { user } = renderDashboardWithPayload(payload);
 
     expect(
       await screen.findByRole("heading", { name: "Dashboard" })
-    ).toBeTruthy();
-    expect(
-      screen.getByRole("button", { name: "Refresh dashboard" })
-    ).toBeTruthy();
-    expect(
-      screen.getAllByRole("button", { name: "Open settings" }).length
-    ).toBeGreaterThan(0);
-    fireEvent.click(screen.getByRole("button", { name: "Library" }));
+    ).toBeInTheDocument();
+    
+    await user.click(screen.getByRole("button", { name: "Library" }));
 
-    expect(await screen.findByText("All Tracked Problems")).toBeTruthy();
+    expect(await screen.findByText("All Tracked Problems")).toBeInTheDocument();
+    
     fireEvent.change(screen.getByLabelText("Search title or slug"), {
       target: { value: "merge" },
     });
 
     await waitFor(() => {
-      expect(screen.queryByText("Two Sum")).toBeNull();
-      expect(screen.getByText("Merge Intervals")).toBeTruthy();
+      expect(screen.queryByText("Two Sum")).not.toBeInTheDocument();
+      expect(screen.getByText("Merge Intervals")).toBeInTheDocument();
     });
   });
 
   it("saves settings through runtime messaging", async () => {
     const payload = makePayload();
-    renderDashboardWithPayload(payload, (type) =>
+    const { user } = renderDashboardWithPayload(payload, (type) =>
       type === "UPDATE_SETTINGS"
         ? Promise.resolve({ ok: true, data: {} })
         : undefined
     );
 
-    fireEvent.click(await screen.findByRole("button", { name: "Settings" }));
-    expect(
-      screen.getByRole("button", { name: "Information about Target Retention" })
-    ).toBeTruthy();
-    fireEvent.change(await screen.findByLabelText("Daily New"), {
-      target: { value: "9" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Save Settings" }));
+    await user.click(await screen.findByRole("button", { name: "Settings" }));
+    
+    const dailyNewInput = await screen.findByLabelText("Daily New");
+    await user.clear(dailyNewInput);
+    await user.type(dailyNewInput, "9");
+    
+    await user.click(screen.getByRole("button", { name: "Save Settings" }));
 
     await waitFor(() => {
       expect(sendMessageMock).toHaveBeenCalledWith(

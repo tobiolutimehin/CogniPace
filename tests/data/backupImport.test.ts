@@ -3,8 +3,10 @@ import assert from "node:assert/strict";
 import { describe, it } from "vitest";
 
 import { sanitizeImportPayload } from "../../src/data/importexport/backup";
-import { CURRENT_STORAGE_SCHEMA_VERSION } from "../../src/data/importexport/constants";
-import { createDefaultStudyState } from "../../src/domain/common/constants";
+import {
+  createDefaultStudyState,
+  CURRENT_STORAGE_SCHEMA_VERSION,
+} from "../../src/domain/common/constants";
 import { Problem } from "../../src/domain/types";
 import { makeProblem } from "../support/domainFixtures";
 
@@ -46,41 +48,31 @@ describe("backup import sanitization", () => {
     assert.deepEqual(Object.keys(sanitized.studyStatesBySlug), ["two-sum"]);
   });
 
-  it("accepts older versioned backups", () => {
-    const sanitized = sanitizeImportPayload({
-      version: CURRENT_STORAGE_SCHEMA_VERSION - 1,
-      problems: [],
-      studyStatesBySlug: {},
+  describe("version handling", () => {
+    it.each([
+      { version: CURRENT_STORAGE_SCHEMA_VERSION - 1, expected: CURRENT_STORAGE_SCHEMA_VERSION, name: "accepts older versioned backups" },
+      { version: CURRENT_STORAGE_SCHEMA_VERSION, expected: CURRENT_STORAGE_SCHEMA_VERSION, name: "accepts current version" },
+      { version: undefined, expected: undefined, name: "accepts versionless imports" },
+    ])("$name", ({ version, expected }) => {
+      const sanitized = sanitizeImportPayload({
+        version,
+        problems: [],
+        studyStatesBySlug: {},
+      });
+      assert.equal(sanitized.version, expected);
     });
 
-    assert.equal(sanitized.version, CURRENT_STORAGE_SCHEMA_VERSION);
-  });
-
-  it("rejects future import versions", () => {
-    assert.throws(
-      () =>
-        sanitizeImportPayload({
-          version: CURRENT_STORAGE_SCHEMA_VERSION + 1,
-          problems: [],
-          studyStatesBySlug: {},
-        }),
-      /unsupported backup version/i
-    );
-  });
-
-  it("accepts current and versionless imports", () => {
-    const current = sanitizeImportPayload({
-      version: CURRENT_STORAGE_SCHEMA_VERSION,
-      problems: [],
-      studyStatesBySlug: {},
+    it("rejects future import versions", () => {
+      assert.throws(
+        () =>
+          sanitizeImportPayload({
+            version: CURRENT_STORAGE_SCHEMA_VERSION + 1,
+            problems: [],
+            studyStatesBySlug: {},
+          }),
+        /unsupported backup version/i
+      );
     });
-    const legacy = sanitizeImportPayload({
-      problems: [],
-      studyStatesBySlug: {},
-    });
-
-    assert.equal(current.version, CURRENT_STORAGE_SCHEMA_VERSION);
-    assert.equal(legacy.version, undefined);
   });
 
   it("drops malformed course structures", () => {
