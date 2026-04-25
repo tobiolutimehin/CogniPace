@@ -259,6 +259,17 @@ function makePayload() {
   return payload;
 }
 
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((resolvePromise, rejectPromise) => {
+    resolve = resolvePromise;
+    reject = rejectPromise;
+  });
+
+  return {promise, reject, resolve};
+}
+
 describe("PopupApp", () => {
   it("renders the compact header and opens the recommended problem", async () => {
     const payload = makePayload();
@@ -384,33 +395,21 @@ describe("PopupApp", () => {
     });
   });
 
-  it("sets study mode explicitly and skips redundant writes", async () => {
+  it("sets study mode immediately and persists it", async () => {
     const payload = makePayload();
-    const updateResponse = new Promise<{
+    const updateResponse = deferred<{
       ok: boolean;
       data: { settings: typeof payload.settings };
-    }>((resolve) => {
-      setTimeout(() => {
-        resolve({
-          ok: true,
-          data: {
-            settings: {
-              ...payload.settings,
-              studyMode: "freestyle",
-            },
-          },
-        });
-      }, 0);
-    });
+    }>();
 
-    sendMessageMock.mockImplementation(async (type: string) => {
+    sendMessageMock.mockImplementation((type: string) => {
       if (type === "GET_APP_SHELL_DATA") {
-        return {ok: true, data: payload};
+        return Promise.resolve({ok: true, data: payload});
       }
       if (type === "UPDATE_SETTINGS") {
-        return updateResponse;
+        return updateResponse.promise;
       }
-      return {ok: true, data: {}};
+      return Promise.resolve({ok: true, data: {}});
     });
 
     render(
@@ -424,42 +423,43 @@ describe("PopupApp", () => {
       screen.getByRole("button", {name: "Start freestyle mode"})
     );
 
+    expect(await screen.findByText("You are in free style mode")).toBeTruthy();
     await waitFor(() => {
       expect(sendMessageMock).toHaveBeenCalledWith(
         "UPDATE_SETTINGS",
         expect.objectContaining({studyMode: "freestyle"})
       );
     });
-  });
 
-  it("keeps the course panel in freestyle mode and shows a return action", async () => {
-    const payload = makePayload();
-    payload.settings.studyMode = "freestyle";
-    const updateResponse = new Promise<{
-      ok: boolean;
-      data: { settings: typeof payload.settings };
-    }>((resolve) => {
-      setTimeout(() => {
-        resolve({
-          ok: true,
-          data: {
-            settings: {
-              ...payload.settings,
-              studyMode: "studyPlan",
-            },
-          },
-        });
-      }, 0);
+    updateResponse.resolve({
+      ok: true,
+      data: {
+        settings: {
+          ...payload.settings,
+          studyMode: "freestyle",
+        },
+      },
     });
 
-    sendMessageMock.mockImplementation(async (type: string) => {
+    expect(await screen.findByText(/Freestyle active\./)).toBeTruthy();
+  });
+
+  it("keeps the course panel in freestyle mode and optimistically returns to study mode", async () => {
+    const payload = makePayload();
+    payload.settings.studyMode = "freestyle";
+    const updateResponse = deferred<{
+      ok: boolean;
+      data: { settings: typeof payload.settings };
+    }>();
+
+    sendMessageMock.mockImplementation((type: string) => {
       if (type === "GET_APP_SHELL_DATA") {
-        return {ok: true, data: payload};
+        return Promise.resolve({ok: true, data: payload});
       }
       if (type === "UPDATE_SETTINGS") {
-        return updateResponse;
+        return updateResponse.promise;
       }
-      return {ok: true, data: {}};
+      return Promise.resolve({ok: true, data: {}});
     });
 
     render(
@@ -478,47 +478,50 @@ describe("PopupApp", () => {
 
     fireEvent.click(screen.getByRole("button", {name: "Start study mode"}));
 
+    expect(await screen.findByText("Blind 75")).toBeTruthy();
+    expect(screen.getByRole("button", {name: "Continue path"})).toBeTruthy();
+
     await waitFor(() => {
       expect(sendMessageMock).toHaveBeenCalledWith(
         "UPDATE_SETTINGS",
         expect.objectContaining({studyMode: "studyPlan"})
       );
     });
-  });
 
-  it("waits for a successful response before changing mode and disables the button in flight", async () => {
-    const payload = makePayload();
-    const updateResponse = new Promise<{
-      ok: boolean;
-      data: { settings: typeof payload.settings };
-    }>((resolve) => {
-      setTimeout(() => {
-        resolve({
-          ok: true,
-          data: {
-            settings: {
-              ...payload.settings,
-              studyMode: "freestyle",
-            },
-          },
-        });
-      }, 0);
+    updateResponse.resolve({
+      ok: true,
+      data: {
+        settings: {
+          ...payload.settings,
+          studyMode: "studyPlan",
+        },
+      },
     });
 
+    expect(await screen.findByText(/Study mode active\./)).toBeTruthy();
+  });
+
+  it("disables mode actions in flight and skips duplicate writes", async () => {
+    const payload = makePayload();
+    const updateResponse = deferred<{
+      ok: boolean;
+      data: { settings: typeof payload.settings };
+    }>();
+
     sendMessageMock.mockImplementation(
-      async (
+      (
         type: string,
         request?: { studyMode?: "freestyle" | "studyPlan" }
       ) => {
         if (type === "GET_APP_SHELL_DATA") {
-          return {ok: true, data: payload};
+          return Promise.resolve({ok: true, data: payload});
         }
 
         if (type === "UPDATE_SETTINGS" && request?.studyMode === "freestyle") {
-          return updateResponse;
+          return updateResponse.promise;
         }
 
-        return {ok: true, data: {}};
+        return Promise.resolve({ok: true, data: {}});
       }
     );
 
@@ -535,6 +538,75 @@ describe("PopupApp", () => {
     });
     fireEvent.click(modeButton);
 
+    expect(await screen.findByText("You are in free style mode")).toBeTruthy();
+    expect(
+      (
+        screen.getByRole("button", {
+          name: "Start study mode",
+        }) as HTMLButtonElement
+      ).disabled
+    ).toBe(true);
+
+    fireEvent.click(
+      screen.getByRole("button", {name: "Start study mode"})
+    );
+
+    let updateCalls = sendMessageMock.mock.calls.filter(
+      ([type]) => type === "UPDATE_SETTINGS"
+    );
+    expect(updateCalls).toHaveLength(1);
+
+    updateResponse.resolve({
+      ok: true,
+      data: {
+        settings: {
+          ...payload.settings,
+          studyMode: "freestyle",
+        },
+      },
+    });
+
+    await waitFor(() => {
+      updateCalls = sendMessageMock.mock.calls.filter(
+        ([type]) => type === "UPDATE_SETTINGS"
+      );
+      expect(updateCalls).toHaveLength(1);
+    });
+  });
+
+  it("rolls back mode changes and shows inline errors when persistence fails", async () => {
+    const payload = makePayload();
+    const updateResponse = deferred<{ ok: boolean; error: string }>();
+
+    sendMessageMock.mockImplementation((type: string) => {
+      if (type === "GET_APP_SHELL_DATA") {
+        return Promise.resolve({ok: true, data: payload});
+      }
+      if (type === "UPDATE_SETTINGS") {
+        return updateResponse.promise;
+      }
+      return Promise.resolve({ok: true, data: {}});
+    });
+
+    render(
+      <AppProviders>
+        <PopupApp/>
+      </AppProviders>
+    );
+
+    expect(await screen.findByText("Blind 75")).toBeTruthy();
+    fireEvent.click(
+      screen.getByRole("button", {name: "Start freestyle mode"})
+    );
+
+    expect(await screen.findByText("You are in free style mode")).toBeTruthy();
+
+    updateResponse.resolve({
+      ok: false,
+      error: "Storage unavailable.",
+    });
+
+    expect(await screen.findByText("Storage unavailable.")).toBeTruthy();
     expect(screen.getByText("Blind 75")).toBeTruthy();
     expect(screen.queryByText("You are in free style mode")).toBeNull();
     expect(
@@ -543,23 +615,41 @@ describe("PopupApp", () => {
           name: "Start freestyle mode",
         }) as HTMLButtonElement
       ).disabled
-    ).toBe(true);
+    ).toBe(false);
+  });
 
+  it("rolls back mode changes when runtime messaging rejects", async () => {
+    const payload = makePayload();
+    const updateResponse = deferred<never>();
+
+    sendMessageMock.mockImplementation((type: string) => {
+      if (type === "GET_APP_SHELL_DATA") {
+        return Promise.resolve({ok: true, data: payload});
+      }
+      if (type === "UPDATE_SETTINGS") {
+        return updateResponse.promise;
+      }
+      return Promise.resolve({ok: true, data: {}});
+    });
+
+    render(
+      <AppProviders>
+        <PopupApp/>
+      </AppProviders>
+    );
+
+    expect(await screen.findByText("Blind 75")).toBeTruthy();
     fireEvent.click(
       screen.getByRole("button", {name: "Start freestyle mode"})
     );
 
-    let updateCalls = sendMessageMock.mock.calls.filter(
-      ([type]) => type === "UPDATE_SETTINGS"
-    );
-    expect(updateCalls).toHaveLength(0);
+    expect(await screen.findByText("You are in free style mode")).toBeTruthy();
 
-    await waitFor(() => {
-      updateCalls = sendMessageMock.mock.calls.filter(
-        ([type]) => type === "UPDATE_SETTINGS"
-      );
-      expect(updateCalls).toHaveLength(1);
-    });
+    updateResponse.reject(new Error("Background unavailable."));
+
+    expect(await screen.findByText("Background unavailable.")).toBeTruthy();
+    expect(screen.getByText("Blind 75")).toBeTruthy();
+    expect(screen.queryByText("You are in free style mode")).toBeNull();
   });
 
   it("renders a compact empty state when no recommendation exists", async () => {

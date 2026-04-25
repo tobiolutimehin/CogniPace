@@ -37,6 +37,9 @@ Give the user the fastest possible answer to what to do next.
 - Uses a compact course-panel action to open the dashboard on the courses view
 - Keeps the course panel visible in both `studyPlan` and `freestyle`
 - Uses explicit course-panel actions to start `studyPlan` or `freestyle` rather than a blind mode toggle
+- Applies the selected popup mode immediately as pending local feedback, persists it through settings, and rolls back
+  with
+  inline error feedback if persistence fails
 - Keeps recommendation, course help text, and status feedback inside reserved inline slots so popup actions do not cause
   jumpy reflow
 - Keeps one stable course card shell across `studyPlan`, `freestyle`, `no active course`, and `complete` states
