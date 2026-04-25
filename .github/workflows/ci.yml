@@ -69,8 +69,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run tests
-        run: npm run test
+      - name: Run tests with coverage
+        run: npm run test -- --coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
   build:
     name: Build
@@ -90,3 +96,17 @@ jobs:
 
       - name: Run build
         run: npm run build
+
+  # concluding job to provide a single required status check
+  check:
+    name: CI Check
+    if: always()
+    needs: [lint, typecheck, test, build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify job results
+        run: |
+          if [[ "${{ needs.lint.result }}" != "success" ]]; then exit 1; fi
+          if [[ "${{ needs.typecheck.result }}" != "success" ]]; then exit 1; fi
+          if [[ "${{ needs.test.result }}" != "success" ]]; then exit 1; fi
+          if [[ "${{ needs.build.result }}" != "success" ]]; then exit 1; fi
