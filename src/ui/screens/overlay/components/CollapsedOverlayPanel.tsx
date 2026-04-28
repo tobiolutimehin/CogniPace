@@ -72,7 +72,14 @@ export function CollapsedOverlayPanel(
               {props.model.timer.display}
             </NumericDisplay>
             <SurfaceTooltip title={props.model.timer.startLabel}>
-              <span>
+              <span
+                aria-label={
+                  !props.model.timer.canStart
+                    ? `${props.model.timer.startLabel} (disabled)`
+                    : undefined
+                }
+                tabIndex={!props.model.timer.canStart ? 0 : undefined}
+              >
                 <SurfaceIconButton
                   aria-label={props.model.timer.startLabel}
                   disabled={!props.model.timer.canStart}
@@ -99,7 +106,14 @@ export function CollapsedOverlayPanel(
               </span>
             </SurfaceTooltip>
             <SurfaceTooltip title="Restart timer">
-              <span>
+              <span
+                aria-label={
+                  !props.model.timer.canReset
+                    ? "Restart timer (disabled)"
+                    : undefined
+                }
+                tabIndex={!props.model.timer.canReset ? 0 : undefined}
+              >
                 <SurfaceIconButton
                   aria-label="Restart timer"
                   disabled={!props.model.timer.canReset}
@@ -120,7 +134,14 @@ export function CollapsedOverlayPanel(
               Submit
             </Button>
             <SurfaceTooltip title="Fail review">
-              <span>
+              <span
+                aria-label={
+                  !props.model.actions.canFail
+                    ? "Fail review (disabled)"
+                    : undefined
+                }
+                tabIndex={!props.model.actions.canFail ? 0 : undefined}
+              >
                 <SurfaceIconButton
                   aria-label="Fail review"
                   disabled={!props.model.actions.canFail}
