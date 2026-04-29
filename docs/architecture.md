@@ -183,8 +183,10 @@ The intended runtime path for React surfaces is:
 
 1. A screen, controller, or shared UI hook calls a repository in `src/data/repositories/*`.
 2. The repository talks to either:
-  - a runtime client in `src/extension/runtime/client.ts`, or
-  - a datasource under `src/data/datasources/chrome/*`.
+
+- a runtime client in `src/extension/runtime/client.ts`, or
+- a datasource under `src/data/datasources/chrome/*`.
+
 3. The background bootstrap validates and routes runtime messages through `src/extension/background/router.ts`.
 4. Background handlers compose repositories and pure domain logic.
 5. The repository returns a typed payload back to the UI layer.
@@ -244,6 +246,9 @@ Important persisted areas:
 - `courseOrder`
 - `courseProgressById`
 - `settings`
+  Includes current settings such as `dailyQuestionGoal`, `targetRetention`, `reviewOrder`, `studyMode`,
+  `difficultyGoalMs`, notification preferences, question filters, and legacy-readable fields used by existing course
+  and source-set flows.
 
 Export payload remains:
 
@@ -255,13 +260,16 @@ Export payload remains:
 - `courseOrder`
 - `courseProgressById`
 
-Overlay-specific runtime contracts now include:
+Review and history runtime contracts now include:
 
 - `SAVE_REVIEW_RESULT`
 - `SAVE_OVERLAY_LOG_DRAFT`
   appends a new FSRS review event and stores the current structured log fields
 - `OVERRIDE_LAST_REVIEW_RESULT`
   replaces the latest attempt entry and rebuilds the FSRS card from review history
+- `RESET_STUDY_HISTORY`
+  clears review history, FSRS cards, solve-time/rating state, suspended flags, and course progress derived from study
+  history while preserving settings, courses, source data, and the problem library
 
 ## Constraints
 
